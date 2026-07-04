@@ -1,0 +1,68 @@
+# Eles Votam Por Você — ambiente local completo (Postgres + ingestão)
+#
+#   docker compose up -d db                 # sobe o banco (schema carrega sozinho)
+#   docker compose run --rm ingest --start 2025-12-01 --end 2025-12-18 --plen-only
+#   docker compose run --rm ingest --start 2025-12-17 --end 2025-12-17 --dry-run
+#
+# Variáveis: copie .env.example para .env e ajuste se quiser.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evpv}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-evpv}
+      POSTGRES_DB: ${POSTGRES_DB:-evpv}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # schema.sql roda automaticamente na PRIMEIRA vez que o volume é criado:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-evpv} -d ${POSTGRES_DB:-evpv}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ingest:
+    build: ./ingest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-evpv}:${POSTGRES_PASSWORD:-evpv}@db:5432/${POSTGRES_DB:-evpv}
+    depends_on:
+      db:
+        condition: service_healthy
+    # 'tools' evita que este serviço suba junto com `docker compose up`.
+    # Rode sob demanda com `docker compose run --rm ingest <args>`.
+    profiles: ["tools"]
+    # Args padrão (usados se você não passar nenhum). O ENTRYPOINT já é o script.
+    command: ["--start", "2025-12-01", "--end", "2025-12-18", "--plen-only"]
+
+  ingest-senado:
+    build: ./ingest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-evpv}:${POSTGRES_PASSWORD:-evpv}@db:5432/${POSTGRES_DB:-evpv}
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["tools"]
+    entrypoint: ["python", "ingest_senado.py"]
+    # Rode com: docker compose run --rm ingest-senado --start 2024-01-01 --end 2024-12-31
+    command: ["--start", "2024-01-01", "--end", "2024-12-31"]
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-evpv}:${POSTGRES_PASSWORD:-evpv}@db:5432/${POSTGRES_DB:-evpv}
+      # API_KEYS: "chave1,chave2"   # descomente para exigir X-API-Key
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Sobe com `docker compose up -d db api`. Docs em http://localhost:8000/docs
+
+volumes:
+  pgdata:
