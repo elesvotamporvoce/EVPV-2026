@@ -1,0 +1,47 @@
+name: Backfill em massa (Camara)
+
+# Carga historica pelos ARQUIVOS ANUAIS da Camara (rapido e confiavel):
+# schema -> bulk -> filiacoes -> scores. Roda sob demanda.
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Anos separados por espaco (ex.: 2023 2024 2025 2026)"
+        required: false
+        default: "2023 2024 2025 2026"
+
+concurrency:
+  group: ingest-congresso
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      - name: Garantir schema (idempotente)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/apply_sql.py db/schema.sql db/views_agreement.sql
+
+      - name: Backfill em massa + filiacoes + scores
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          IN_YEARS: ${{ github.event.inputs.years }}
+        run: |
+          set -euo pipefail
+          YEARS="${IN_YEARS:-2023 2024 2025 2026}"
+          echo "== Backfill Camara (arquivos anuais): $YEARS =="
+          python ingest/ingest_camara_bulk.py --years $YEARS
+          echo "== Derivar filiacoes =="
+          python scripts/apply_sql.py db/derive_memberships.sql
+          echo "== Recalcular scores =="
+          python scoring/score.py
