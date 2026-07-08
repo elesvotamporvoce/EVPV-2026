@@ -3,20 +3,15 @@
 Ingestão em MASSA — Câmara dos Deputados (arquivos anuais)
 Projeto: Eles Votam Por Você
 
-Em vez de milhares de chamadas por votação (frágeis, dão timeout), baixa os
-arquivos anuais oficiais — ~3 downloads por ano — e ingere as votações NOMINAIS
-(as que têm voto individual registrado). Muito mais rápido e confiável.
+Baixa os arquivos anuais oficiais (~3 por ano) e ingere as votações NOMINAIS.
+Muito mais rápido/confiável que a API por votação.
 
-Arquivos usados (por ano):
-  votacoes-{ano}.json            -> metadados da votação
-  votacoesVotos-{ano}.json       -> voto de cada deputado
-  votacoesOrientacoes-{ano}.json -> orientação de cada partido/bloco
+Performance: cacheia pessoas/partidos e insere votos/orientações/placares em
+LOTE (execute_values), evitando dezenas de milhares de idas à rede.
 
 Uso:
   export DATABASE_URL="postgresql://..."
   python ingest/ingest_camara_bulk.py --years 2023 2024 2025 2026
-
-Dependências: requests; psycopg2.
 """
 
 import argparse
@@ -40,13 +35,12 @@ session.headers.update({"User-Agent": "ElesVotamPorVoce/0.1 (bulk)"})
 
 
 # ---------------------------------------------------------------------------
-#  Download dos arquivos anuais (grandes) — com retry
+#  Download dos arquivos anuais — com retry
 # ---------------------------------------------------------------------------
 def download_dados(nome, ano, retries=5):
     url = f"{BASE}/{nome}/json/{nome}-{ano}.json"
     for attempt in range(retries):
         try:
-            # (connect=30, read=180): pega travamento sem falso-positivo em download lento
             r = session.get(url, timeout=(30, 180))
             if r.status_code == 404:
                 print(f"  (sem arquivo {nome}-{ano})", file=sys.stderr)
@@ -69,7 +63,6 @@ def voto_value(v):
 
 
 def dep(v, sub):
-    """Campo do deputado: aceita 'deputado_<sub>' (bulk) e 'deputado_'.<sub> (api)."""
     flat = v.get(f"deputado_{sub}")
     if flat is not None:
         return flat
@@ -90,8 +83,6 @@ def norm_person(v):
 
 
 def tally_by_party(votos):
-    # inner defaultdict(int) aceita QUALQUER opção (sim/nao/.../artigo17/outro)
-    # sem KeyError.
     t = defaultdict(lambda: defaultdict(int))
     for p in votos:
         if p["party_sigla"]:
@@ -108,36 +99,43 @@ def tally_by_party(votos):
 
 
 # ---------------------------------------------------------------------------
-#  Persistência (Postgres)
+#  Persistência (Postgres) — com cache e inserção em lote
 # ---------------------------------------------------------------------------
 class DB:
     def __init__(self, dsn):
         import psycopg2
         self.conn = psycopg2.connect(dsn)
         self.conn.autocommit = False
+        self.party_cache = {}    # sigla -> id
+        self.person_cache = {}   # external_id -> id
 
     def close(self):
         self.conn.close()
 
-    def party(self, cur, sigla):
-        if not sigla:
-            return None
-        cur.execute("""INSERT INTO party (sigla) VALUES (%s)
-                       ON CONFLICT (sigla) DO UPDATE SET sigla=EXCLUDED.sigla
-                       RETURNING id""", (sigla,))
-        return cur.fetchone()[0]
+    # --- referência: carrega partidos e pessoas de uma vez, popula cache ---
+    def load_parties(self, cur, siglas):
+        from psycopg2.extras import execute_values
+        if siglas:
+            execute_values(cur,
+                "INSERT INTO party (sigla) VALUES %s ON CONFLICT (sigla) DO NOTHING",
+                [(s,) for s in siglas])
+        cur.execute("SELECT sigla, id FROM party")
+        self.party_cache = {s: i for s, i in cur.fetchall()}
 
-    def person(self, cur, p):
-        cur.execute("""INSERT INTO person (house, external_id, name, uf, photo_url, email)
-                       VALUES ('camara', %s,%s,%s,%s,%s)
-                       ON CONFLICT (house, external_id) DO UPDATE
-                         SET name=EXCLUDED.name, uf=EXCLUDED.uf,
-                             photo_url=EXCLUDED.photo_url,
-                             email=COALESCE(EXCLUDED.email, person.email)
-                       RETURNING id""",
-                    (p["person_external_id"], p["name"], p["uf"],
-                     p["photo_url"], p["email"]))
-        return cur.fetchone()[0]
+    def load_persons(self, cur, persons):
+        from psycopg2.extras import execute_values
+        if persons:
+            execute_values(cur,
+                """INSERT INTO person (house, external_id, name, uf, photo_url, email)
+                   VALUES %s
+                   ON CONFLICT (house, external_id) DO UPDATE
+                     SET name=EXCLUDED.name, uf=EXCLUDED.uf,
+                         photo_url=EXCLUDED.photo_url,
+                         email=COALESCE(EXCLUDED.email, person.email)""",
+                [('camara', p["person_external_id"], p["name"], p["uf"],
+                  p["photo_url"], p["email"]) for p in persons.values()])
+        cur.execute("SELECT external_id, id FROM person WHERE house='camara'")
+        self.person_cache = {e: i for e, i in cur.fetchall()}
 
     def division(self, cur, vot):
         cur.execute("""INSERT INTO division
@@ -147,44 +145,48 @@ class DB:
                        ON CONFLICT (house, external_id) DO UPDATE
                          SET occurred_at=EXCLUDED.occurred_at, body=EXCLUDED.body,
                              description=EXCLUDED.description,
-                             result_approved=EXCLUDED.result_approved,
-                             is_nominal=TRUE
+                             result_approved=EXCLUDED.result_approved, is_nominal=TRUE
                        RETURNING id""",
                     (vot["id"], vot.get("dataHoraRegistro") or vot.get("data"),
                      vot.get("siglaOrgao"), vot.get("descricao"),
                      (bool(vot["aprovacao"]) if vot.get("aprovacao") is not None else None)))
         return cur.fetchone()[0]
 
-    def vote(self, cur, div_id, person_id, party_id, opt, reg):
-        cur.execute("""INSERT INTO vote (division_id, person_id, party_id, option, registered_at)
-                       VALUES (%s,%s,%s,%s,%s)
-                       ON CONFLICT (division_id, person_id) DO UPDATE
-                         SET party_id=EXCLUDED.party_id, option=EXCLUDED.option,
-                             registered_at=EXCLUDED.registered_at""",
-                    (div_id, person_id, party_id, opt, reg))
+    def votes_bulk(self, cur, rows):
+        if not rows:
+            return
+        from psycopg2.extras import execute_values
+        execute_values(cur,
+            """INSERT INTO vote (division_id, person_id, party_id, option, registered_at)
+               VALUES %s
+               ON CONFLICT (division_id, person_id) DO UPDATE
+                 SET party_id=EXCLUDED.party_id, option=EXCLUDED.option,
+                     registered_at=EXCLUDED.registered_at""", rows)
 
-    def orientation(self, cur, div_id, party_id, bloc, orient):
-        cur.execute("""INSERT INTO party_orientation
-                         (division_id, party_id, bloc_name, leadership_type, orientation)
-                       VALUES (%s,%s,%s,%s,%s)
-                       ON CONFLICT (division_id, party_id, bloc_name) DO UPDATE
-                         SET orientation=EXCLUDED.orientation,
-                             leadership_type=EXCLUDED.leadership_type""",
-                    (div_id, party_id, bloc, 'B' if bloc else 'P', orient))
+    def orientations_replace(self, cur, division_id, rows):
+        from psycopg2.extras import execute_values
+        cur.execute("DELETE FROM party_orientation WHERE division_id=%s", (division_id,))
+        if rows:
+            execute_values(cur,
+                """INSERT INTO party_orientation
+                     (division_id, party_id, bloc_name, leadership_type, orientation)
+                   VALUES %s""", rows)
 
-    def tally(self, cur, div_id, party_id, c):
-        cur.execute("""INSERT INTO party_vote_tally
-                         (division_id, party_id, sim_count, nao_count, abstencao_count,
-                          obstrucao_count, ausente_count, majority_option)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                       ON CONFLICT (division_id, party_id) DO UPDATE
-                         SET sim_count=EXCLUDED.sim_count, nao_count=EXCLUDED.nao_count,
-                             abstencao_count=EXCLUDED.abstencao_count,
-                             obstrucao_count=EXCLUDED.obstrucao_count,
-                             ausente_count=EXCLUDED.ausente_count,
-                             majority_option=EXCLUDED.majority_option""",
-                    (div_id, party_id, c["sim"], c["nao"], c["abstencao"],
-                     c["obstrucao"], c["ausente"], c["majority_option"]))
+    def tally_bulk(self, cur, rows):
+        if not rows:
+            return
+        from psycopg2.extras import execute_values
+        execute_values(cur,
+            """INSERT INTO party_vote_tally
+                 (division_id, party_id, sim_count, nao_count, abstencao_count,
+                  obstrucao_count, ausente_count, majority_option)
+               VALUES %s
+               ON CONFLICT (division_id, party_id) DO UPDATE
+                 SET sim_count=EXCLUDED.sim_count, nao_count=EXCLUDED.nao_count,
+                     abstencao_count=EXCLUDED.abstencao_count,
+                     obstrucao_count=EXCLUDED.obstrucao_count,
+                     ausente_count=EXCLUDED.ausente_count,
+                     majority_option=EXCLUDED.majority_option""", rows)
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +198,6 @@ def process_year(ano, db):
     orient_raw = download_dados("votacoesOrientacoes", ano)
     votacoes = download_dados("votacoes", ano)
 
-    # agrupa por id de votação
     votos_by = defaultdict(list)
     for v in votos_raw:
         vid = v.get("idVotacao") or v.get("id")
@@ -206,32 +207,64 @@ def process_year(ano, db):
         orient_by[o.get("idVotacao")].append(o)
     meta_by = {vt["id"]: vt for vt in votacoes}
 
-    print(f"Ano {ano}: {len(votos_by)} votações nominais "
-          f"(de {len(votacoes)} no arquivo).", flush=True)
+    total = len(votos_by)
+    print(f"Ano {ano}: {total} votações nominais (de {len(votacoes)} no arquivo).", flush=True)
+
+    # referência: pessoas + partidos (de votos e de orientações) numa tacada
+    persons, parties = {}, set()
+    for votos in votos_by.values():
+        for p in votos:
+            if p["person_external_id"] and p["person_external_id"] != "None":
+                persons[p["person_external_id"]] = p
+            if p["party_sigla"]:
+                parties.add(p["party_sigla"])
+    for o in orient_raw:
+        sig = o.get("siglaBancada")
+        if sig and sig not in BLOCS:
+            parties.add(sig)
 
     cur = db.conn.cursor()
+    db.load_parties(cur, parties)
+    db.load_persons(cur, persons)
+    db.conn.commit()
+    print(f"Ano {ano}: {len(persons)} pessoas, {len(parties)} partidos em cache.", flush=True)
+
     n = skipped = 0
     for vid, votos in votos_by.items():
-        vot = meta_by.get(vid)
-        if not vot:
-            vot = {"id": vid}          # sem metadados: grava o mínimo
+        vot = meta_by.get(vid) or {"id": vid}
         try:
             div_id = db.division(cur, vot)
+
+            vote_rows = []
             for p in votos:
-                pid = db.person(cur, p)
-                party_id = db.party(cur, p["party_sigla"])
-                db.vote(cur, div_id, pid, party_id, p["option"], p["registered_at"])
+                pid = db.person_cache.get(p["person_external_id"])
+                if not pid:
+                    continue
+                vote_rows.append((div_id, pid, db.party_cache.get(p["party_sigla"]),
+                                  p["option"], p["registered_at"]))
+            db.votes_bulk(cur, vote_rows)
+
+            orient_rows = []
             for o in orient_by.get(vid, []):
                 sig = o.get("siglaBancada")
                 is_bloc = sig in BLOCS
-                party_id = None if is_bloc else db.party(cur, sig)
-                bloc = sig if is_bloc else None
-                db.orientation(cur, div_id, party_id, bloc,
-                               ORIENT_MAP.get(o.get("orientacao"), "outro"))
-            for sig, c in tally_by_party(votos).items():
-                db.tally(cur, div_id, db.party(cur, sig), c)
+                orient_rows.append((div_id,
+                                    None if is_bloc else db.party_cache.get(sig),
+                                    sig if is_bloc else None,
+                                    'B' if is_bloc else 'P',
+                                    ORIENT_MAP.get(o.get("orientacao"), "outro")))
+            db.orientations_replace(cur, div_id, orient_rows)
+
+            tally_rows = [(div_id, db.party_cache.get(sig), c["sim"], c["nao"],
+                           c["abstencao"], c["obstrucao"], c["ausente"], c["majority_option"])
+                          for sig, c in tally_by_party(votos).items()
+                          if db.party_cache.get(sig)]
+            db.tally_bulk(cur, tally_rows)
+
             db.conn.commit()
             n += 1
+            if n % 100 == 0:
+                print(f"Ano {ano}: {n}/{total} processadas...", flush=True)
         except Exception as e:            # noqa: BLE001
             db.conn.rollback()
             skipped += 1
@@ -243,8 +276,7 @@ def process_year(ano, db):
 
 def main():
     ap = argparse.ArgumentParser(description="Ingestão em massa da Câmara (arquivos anuais)")
-    ap.add_argument("--years", nargs="+", type=int, required=True,
-                    help="anos, ex.: --years 2023 2024 2025 2026")
+    ap.add_argument("--years", nargs="+", type=int, required=True)
     args = ap.parse_args()
 
     dsn = os.environ.get("DATABASE_URL")
@@ -256,7 +288,7 @@ def main():
         for ano in args.years:
             try:
                 total += process_year(ano, db)
-            except Exception as e:        # noqa: BLE001 — um ano ruim não derruba os outros
+            except Exception as e:        # noqa: BLE001
                 print(f"[ano {ano} falhou] {e}", file=sys.stderr)
     finally:
         db.close()
