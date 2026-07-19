@@ -1,0 +1,25 @@
+name: Integridade dos dados
+
+# Bateria READ-ONLY de checagens. Falha (vermelho) se houver problema GRAVE que
+# possa corromper um score publicado. Rode depois de ingestao/backfill, ou
+# quando quiser conferir a saude do banco.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 14 * * *"   # todo dia 14:30 UTC (~11:30 Brasilia), apos a carga diaria
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+      - name: Rodar checagens de integridade
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/check_integrity.py
