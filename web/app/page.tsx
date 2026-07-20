@@ -40,8 +40,9 @@ export default async function Home() {
             Como seu deputado e senador votam de verdade?
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/85">
-            Esqueça o que dizem na campanha. O que importa é o voto — e aqui você
-            acompanha, tema a tema, como cada parlamentar vota no Congresso.
+            Esqueça o que dizem na campanha. O que importa é o voto, que vira lei
+            e afeta todos nós. Aqui você acompanha, tema a tema, como cada
+            parlamentar vota no Congresso.
           </p>
           <div className="mt-6">
             <HomeSearch />
