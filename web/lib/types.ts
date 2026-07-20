@@ -80,3 +80,11 @@ export type DivisionVote = {
   house: House;
   party_sigla: string | null;
 };
+
+export type Participation = {
+  person_id: number;
+  house: House;
+  first_vote: string | null;
+  n_votes: number;
+  eligible: number;
+};

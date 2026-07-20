@@ -15,6 +15,11 @@ export const HOUSE_LABEL: Record<string, string> = {
   senado: "Senado",
 };
 
+export const CARGO_LABEL: Record<string, string> = {
+  camara: "Deputado Federal",
+  senado: "Senador",
+};
+
 export const VOTE_LABEL: Record<string, string> = {
   sim: "Sim",
   nao: "Não",

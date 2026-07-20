@@ -2,16 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
-import { HOUSE_LABEL, VOTE_LABEL, fmtDate, pct } from "@/lib/format";
-import type { PersonDir, PersonStats, ScoreNamed, PersonVote } from "@/lib/types";
+import { CARGO_LABEL, HOUSE_LABEL, VOTE_LABEL, fmtDate } from "@/lib/format";
+import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
 export const revalidate = 3600;
 
 async function getPerson(id: number) {
-  const [{ data: dir }, { data: stats }, { data: scores }, { data: votes }] =
+  const [{ data: dir }, { data: part }, { data: scores }, { data: votes }] =
     await Promise.all([
       supabase.from("person_directory").select("*").eq("id", id).maybeSingle(),
-      supabase.from("person_stats").select("*").eq("person_id", id).maybeSingle(),
+      supabase
+        .from("person_participation")
+        .select("*")
+        .eq("person_id", id)
+        .maybeSingle(),
       supabase
         .from("score_named")
         .select("*")
@@ -26,7 +30,7 @@ async function getPerson(id: number) {
     ]);
   return {
     dir: dir as PersonDir | null,
-    stats: stats as PersonStats | null,
+    part: part as Participation | null,
     scores: (scores ?? []) as ScoreNamed[],
     votes: (votes ?? []) as PersonVote[],
   };
@@ -54,8 +58,17 @@ export default async function PersonPage({
   const { id: idParam } = await params;
   const id = Number(idParam);
   if (!Number.isFinite(id)) notFound();
-  const { dir, stats, scores, votes } = await getPerson(id);
+  const { dir, part, scores, votes } = await getPerson(id);
   if (!dir) notFound();
+
+  const anoInicio = part?.first_vote
+    ? new Date(part.first_vote).getFullYear()
+    : null;
+  const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
+  const partPct =
+    part && part.eligible
+      ? Math.round((100 * part.n_votes) / part.eligible)
+      : null;
 
   return (
     <div className="space-y-8">
@@ -79,49 +92,46 @@ export default async function PersonPage({
           <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
           <p className="text-slate-500">
             {dir.party_sigla ?? "sem partido"}
-            {dir.uf ? ` · ${dir.uf}` : ""} · {HOUSE_LABEL[dir.house]}
+            {dir.uf ? ` · ${dir.uf}` : ""} · {CARGO_LABEL[dir.house]}
           </p>
-          {stats && (
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
-              <span>
-                <strong className="text-slate-800">
-                  {stats.n_votes.toLocaleString("pt-BR")}
-                </strong>{" "}
-                votações
+          {anoInicio && (
+            <p className="text-sm text-slate-500">
+              No cargo desde {anoInicio} ({anos} {anos === 1 ? "ano" : "anos"})
+            </p>
+          )}
+          {partPct !== null && (
+            <p className="mt-2.5 text-sm text-slate-600">
+              Participou de{" "}
+              <span className="group relative inline-block cursor-default border-b border-dashed border-slate-400">
+                <strong className="text-slate-800">{partPct}%</strong> das votações
+                <span className="pointer-events-none absolute -top-8 left-0 z-10 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  {part!.n_votes.toLocaleString("pt-BR")} de{" "}
+                  {part!.eligible.toLocaleString("pt-BR")} votações
+                </span>
               </span>
-              <span>
-                Presença:{" "}
-                <strong className="text-slate-800">
-                  {pct(stats.n_attended, stats.n_votes)}
-                </strong>
-              </span>
-              <span>
-                {stats.n_sim.toLocaleString("pt-BR")} sim ·{" "}
-                {stats.n_nao.toLocaleString("pt-BR")} não
-              </span>
-            </div>
+            </p>
           )}
         </div>
       </div>
 
-      {/* Concordância por tema */}
+      {/* Temas */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-800">
-          Posição por tema
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold text-slate-800">Temas</h2>
         {scores.length === 0 ? (
           <p className="text-sm text-slate-500">
             Ainda não há temas com votos suficientes para este parlamentar.
           </p>
         ) : (
-          <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+          <div className="space-y-3">
             {scores.map((s) => (
               <Link
                 key={s.policy_id}
                 href={`/politicas/${s.policy_id}`}
-                className="flex items-center justify-between gap-4 p-4 hover:bg-slate-50"
+                className="block rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-light hover:shadow-sm"
               >
-                <span className="font-medium text-slate-700">{s.policy_name}</span>
+                <p className="mb-3.5 text-lg font-semibold text-slate-800">
+                  {s.policy_name}
+                </p>
                 <PositionBar
                   score={s.category === "not_enough" ? null : s.score}
                   category={s.category}
