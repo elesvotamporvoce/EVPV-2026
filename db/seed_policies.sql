@@ -176,4 +176,63 @@ JOIN (VALUES
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
+-- ---------------------------------------------------------------------------
+--  Anistia e redução de penas do 8 de Janeiro (política de um projeto só)
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Anistia e redução de penas do 8 de Janeiro';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Anistia e redução de penas do 8 de Janeiro',
+    'Posição sobre o PL 2162/2023 ("PL da Dosimetria"): concede anistia a participantes das manifestações de motivação política de 2022-2023 e reduz as penas dos condenados pelos atos de 8 de janeiro. Vetado pelo presidente; o veto foi derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('2358548-89','for','strong'),  -- aprovação do substitutivo (291x148)
+  ('2358548-81','for','normal'),  -- texto mantido (destaque)
+  ('2358548-86','for','normal')   -- texto mantido (destaque)
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  Endurecimento das penas
+--  (excluído de propósito: PL 6240/2013, desaparecimento forçado — criminalização
+--   puxada por direitos humanos, eixo diferente; PL 4333/2025, ementa processual vaga)
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Endurecimento das penas';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Endurecimento das penas',
+    'Penas mais duras e cumprimento mais rigoroso: aumento das penas para porte ilegal de arma de uso proibido (PL 4149/2004), para furto e roubo (PL 3780/2023) e para lesão corporal (PL 6749/2016), além da exigência de 80% de cumprimento da pena para progressão de regime (PL 1112/2023). Score alto = apoia o endurecimento penal.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('264726-144','for','strong'),   -- PL 4149/2004 porte de arma proibida
+  ('2376169-101','for','normal'),  -- PL 3780/2023 furto e roubo
+  ('2121642-105','for','normal'),  -- PL 6749/2016 lesão corporal
+  ('2351284-38','for','normal')    -- PL 1112/2023 progressão 80%
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  Financiamento à cultura
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Financiamento à cultura';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Financiamento à cultura',
+    'Fomento público à cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025, R$ 15 bilhões para o setor) e regulamentar o streaming (PL 8889/2017) com contribuição para o audiovisual nacional. Score alto = apoia o financiamento à cultura.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('2483495-52','for','strong'),   -- PL 363/2025 Aldir Blanc permanente
+  ('2157806-137','for','normal')   -- PL 8889/2017 lei do streaming (CAvD)
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
 COMMIT;
