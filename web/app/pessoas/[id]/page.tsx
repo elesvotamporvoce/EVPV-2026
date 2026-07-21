@@ -116,12 +116,12 @@ export default async function PersonPage({
         </div>
       </div>
 
-      {/* Temas */}
+      {/* Políticas */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-800">Temas</h2>
+        <h2 className="mb-3 text-lg font-semibold text-slate-800">Políticas</h2>
         {scores.length === 0 ? (
           <p className="text-sm text-slate-500">
-            Ainda não há temas com votos suficientes para este parlamentar.
+            Ainda não há políticas com votos suficientes para este parlamentar.
           </p>
         ) : (
           <div className="space-y-3">

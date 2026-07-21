@@ -41,7 +41,7 @@ export default async function Home() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/85">
             Esqueça o que dizem na campanha. O que importa é o voto, que vira lei
-            e afeta todos nós. Aqui você acompanha, tema a tema, como cada
+            e afeta todos nós. Aqui você acompanha, política por política, como cada
             parlamentar vota no Congresso.
           </p>
           <div className="mt-6">
@@ -57,7 +57,7 @@ export default async function Home() {
       <section>
         <div className="mb-4 flex items-end justify-between">
           <h2 className="text-xl font-semibold text-slate-800">
-            Temas acompanhados
+            Políticas acompanhadas
           </h2>
           <Link href="/politicas" className="text-sm text-brand hover:underline">
             Ver todos
@@ -80,7 +80,7 @@ export default async function Home() {
           ))}
         </div>
         {policies.length === 0 && (
-          <p className="text-sm text-slate-500">Nenhum tema publicado ainda.</p>
+          <p className="text-sm text-slate-500">Nenhuma política publicada ainda.</p>
         )}
       </section>
 
@@ -95,16 +95,16 @@ export default async function Home() {
             </p>
           </div>
           <div>
-            <p className="font-medium text-slate-800">2. Agrupamos por tema</p>
+            <p className="font-medium text-slate-800">2. Agrupamos em políticas</p>
             <p className="mt-1">
-              Votações relacionadas viram um tema (ex.: meio ambiente), com uma
+              Votações relacionadas viram uma política (ex.: ação climática), com uma
               direção clara.
             </p>
           </div>
           <div>
             <p className="font-medium text-slate-800">3. Calculamos a média</p>
             <p className="mt-1">
-              Para cada parlamentar, o quanto ele apoia ou rejeita cada tema.{" "}
+              Para cada parlamentar, o quanto ele apoia ou rejeita cada política.{" "}
               <Link href="/metodologia" className="text-brand hover:underline">
                 Ver metodologia
               </Link>

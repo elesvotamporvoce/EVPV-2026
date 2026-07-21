@@ -36,7 +36,7 @@ export default function PositionBar({
               className="pointer-events-none absolute -top-8 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
               style={{ left: `${pos}%` }}
             >
-              {Math.round(score as number)}% de apoio ao tema
+              {Math.round(score as number)}% de apoio à política
             </span>
           </div>
           <div className="mt-1.5 flex justify-between text-[11px] font-medium">

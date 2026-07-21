@@ -8,7 +8,7 @@ export default function SobrePage() {
       <p className="text-slate-600">
         <strong>Eles Votam por Você</strong> é um projeto independente de
         transparência política. Reunimos as votações nominais do Congresso
-        Nacional em um só lugar, organizadas por tema, para que qualquer pessoa
+        Nacional em um só lugar, organizadas por política, para que qualquer pessoa
         possa acompanhar como seus representantes votam.
       </p>
 

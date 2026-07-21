@@ -70,7 +70,7 @@ export default async function PartyPage({
       {agr.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold text-slate-800">
-            Posição do partido por tema
+            Posição do partido por política
           </h2>
           <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
             {agr.map((a) => (

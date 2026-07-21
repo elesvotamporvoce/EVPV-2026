@@ -67,7 +67,7 @@ export async function generateMetadata({
     .select("name")
     .eq("id", Number(id))
     .maybeSingle();
-  return { title: data?.name ?? "Tema" };
+  return { title: data?.name ?? "Política" };
 }
 
 export default async function PolicyPage({
@@ -84,7 +84,7 @@ export default async function PolicyPage({
   return (
     <div className="space-y-8">
       <Link href="/politicas" className="text-sm text-brand hover:underline">
-        ← Todos os temas
+        ← Todas as políticas
       </Link>
 
       <div>
@@ -136,7 +136,7 @@ export default async function PolicyPage({
         <RankList title="Mais contra" rows={bottom} />
       </section>
 
-      {/* Votações que compõem o tema */}
+      {/* Votações que compõem a política */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">
           Votações consideradas ({divs.length})

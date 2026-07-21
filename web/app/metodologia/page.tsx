@@ -8,17 +8,17 @@ export default function MetodologiaPage() {
       <p className="text-slate-600">
         O objetivo é mostrar, com transparência, como cada parlamentar vota. Todo
         o cálculo parte de votações nominais reais da Câmara dos Deputados e do
-        Senado Federal. Abaixo, como transformamos votos em uma posição por tema.
+        Senado Federal. Abaixo, como transformamos votos em uma posição por política.
       </p>
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
-          1. O que é um &quot;tema&quot;
+          1. O que é uma &quot;política&quot;
         </h2>
         <p className="text-slate-600">
-          Um tema reúne votações relacionadas a um assunto (por exemplo, proteção
+          Uma política reúne votações relacionadas a um assunto (por exemplo, proteção
           ao meio ambiente). Para cada votação incluída, definimos qual voto
-          representa apoio ao tema — em umas, votar <strong>Sim</strong> é a favor;
+          representa apoio à política — em umas, votar <strong>Sim</strong> é a favor;
           em outras (como flexibilizar uma regra), votar <strong>Não</strong> é
           que representa apoio. Essa direção é definida no momento da curadoria e
           fica registrada.
@@ -41,7 +41,7 @@ export default function MetodologiaPage() {
         <p className="text-slate-600">
           Ausências contam pouco, para não punir quem faltou pontualmente: uma
           falta pesa bem menos que um voto e recebe crédito parcial. Parlamentares
-          com pouquíssimas votações registradas em um tema aparecem como{" "}
+          com pouquíssimas votações registradas em uma política aparecem como{" "}
           <em>&quot;sem votos suficientes&quot;</em>, sem uma posição atribuída.
         </p>
       </section>
@@ -50,10 +50,10 @@ export default function MetodologiaPage() {
         <h2 className="text-lg font-semibold text-slate-800">4. A posição final</h2>
         <p className="text-slate-600">
           O resultado é um número de 0% a 100% que mede o{" "}
-          <strong>apoio ao tema</strong>: 0 significa votar sempre contra a
-          direção do tema; 100, sempre a favor. Atenção: não é a fração de vezes
+          <strong>apoio à política</strong>: 0 significa votar sempre contra a
+          direção da política; 100, sempre a favor. Atenção: não é a fração de vezes
           em que a pessoa votou &quot;sim&quot;, e sim o quanto ela apoia a posição
-          descrita no tema. Traduzimos esse número em faixas para facilitar a
+          descrita na política. Traduzimos esse número em faixas para facilitar a
           leitura:
         </p>
         <ul className="list-disc space-y-1 pl-6 text-slate-600">
@@ -70,7 +70,7 @@ export default function MetodologiaPage() {
         <p className="text-slate-600">
           Uma votação nem sempre reflete a posição completa de alguém — há acordos,
           textos combinados e votos táticos. Por isso, mostramos sempre as votações
-          que compõem cada tema, para você conferir o contexto. Esta é uma
+          que compõem cada política, para você conferir o contexto. Esta é uma
           ferramenta de transparência, não um julgamento.
         </p>
       </section>

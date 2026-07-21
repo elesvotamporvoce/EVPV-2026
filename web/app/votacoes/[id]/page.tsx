@@ -56,7 +56,7 @@ export default async function DivisionPage({
   return (
     <div className="space-y-8">
       <Link href="/politicas" className="text-sm text-brand hover:underline">
-        &larr; Temas
+        &larr; Políticas
       </Link>
 
       <div>

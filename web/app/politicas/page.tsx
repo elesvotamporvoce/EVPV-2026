@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import type { Policy } from "@/lib/types";
 
 export const revalidate = 3600;
-export const metadata = { title: "Temas" };
+export const metadata = { title: "Políticas" };
 
 async function getPolicies(): Promise<Policy[]> {
   try {
@@ -23,10 +23,11 @@ export default async function PoliticasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Temas</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Políticas</h1>
         <p className="text-sm text-slate-500">
-          Conjuntos de votações relacionadas, com uma direção clara. A posição de
-          cada parlamentar é a média de como votou nessas votações.
+          Uma política é um conjunto de votações que, juntas, indicam uma posição
+          sobre um assunto. A posição de cada parlamentar é a média de como
+          votou nessas votações.
         </p>
       </div>
 
@@ -53,7 +54,7 @@ export default async function PoliticasPage() {
       </div>
 
       {policies.length === 0 && (
-        <p className="text-slate-500">Nenhum tema publicado ainda.</p>
+        <p className="text-slate-500">Nenhuma política publicada ainda.</p>
       )}
     </div>
   );

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s · Eles Votam por Você",
   },
   description:
-    "Descubra como cada deputado e senador vota no Congresso Nacional, tema a tema. Dados públicos da Câmara e do Senado.",
+    "Descubra como cada deputado e senador vota no Congresso Nacional, política por política. Dados públicos da Câmara e do Senado.",
 };
 
 export default function RootLayout({
