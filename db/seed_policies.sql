@@ -118,4 +118,62 @@ JOIN (VALUES
 ) AS v(house, ext, stance, strength) ON TRUE
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
+-- ---------------------------------------------------------------------------
+--  Direitos dos povos indígenas (provisória — por ora, o Marco Temporal)
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Direitos dos povos indígenas';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Direitos dos povos indígenas',
+    'Defesa dos direitos territoriais dos povos indígenas: CONTRA o Marco Temporal (PL 490/2007, que restringe a demarcação de terras às ocupadas em 5/10/1988). Score alto = defende os direitos indígenas. Política provisória: por ora reflete as votações do Marco Temporal e crescerá com novas votações.',
+    true) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('345311-270','against','strong'),
+  ('345311-279','against','normal')
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  Igualdade racial
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Igualdade racial';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Igualdade racial',
+    'Promoção da igualdade racial: cota de 30% em concursos públicos para pretos, pardos, indígenas e quilombolas; equiparação da injúria racial ao crime de racismo; feriado nacional da Consciência Negra; "Lista Suja" do racismo no futebol; e CONTRA a anistia aos partidos que descumpriram as cotas de financiamento de candidaturas negras (PEC 9/2023). Score alto = apoia a igualdade racial.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('2439779-55','for','strong'),
+  ('1301128-43','for','strong'),
+  ('2299903-53','for','normal'),
+  ('2487399-57','for','normal'),
+  ('2352476-149','against','normal')
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  Direitos dos trabalhadores
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Direitos dos trabalhadores';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Direitos dos trabalhadores',
+    'Defesa e ampliação dos direitos trabalhistas: A FAVOR do fim da escala 6x1 com jornada máxima de 40h (PEC 221/2019) e CONTRA a redução de FGTS e INSS em contratos de jovens (Contrato Verde e Amarelo, MPV 905/2019, e sua retomada no PL 5496/2013). Score alto = defende os direitos dos trabalhadores.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('2233802-424','for','strong'),
+  ('575585-92','against','strong'),
+  ('2229308-65','against','strong')
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
 COMMIT;

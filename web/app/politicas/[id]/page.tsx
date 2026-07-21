@@ -16,7 +16,20 @@ type Div = {
   occurred_at: string | null;
   house: "camara" | "senado";
   result_approved: boolean | null;
+  prop_sigla: string | null;
+  prop_numero: string | null;
+  prop_ano: string | null;
+  prop_ementa: string | null;
+  prop_external_id: string | null;
 };
+
+function officialUrl(d: Div): string | null {
+  if (!d.prop_external_id) return null;
+  const ext = d.prop_external_id;
+  return d.house === "camara"
+    ? `https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=${ext}`
+    : `https://www25.senado.leg.br/web/atividade/materias/-/materia/${ext}`;
+}
 
 async function getPolicy(id: number) {
   const [{ data: pol }, { data: parties }, { data: top }, { data: bottom }, { data: divs }] =
@@ -143,21 +156,46 @@ export default async function PolicyPage({
         </h2>
         <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
           {divs.map((d) => (
-            <Link
+            <div
               key={d.division_id}
-              href={`/votacoes/${d.division_id}`}
-              className="flex items-start justify-between gap-4 p-4 hover:bg-slate-50"
+              className="flex items-start justify-between gap-4 p-4"
             >
-              <div className="min-w-0">
-                <p className="truncate text-sm text-slate-700">
+              <div className="min-w-0 flex-1">
+                {d.prop_sigla && (
+                  <p className="text-sm font-semibold text-brand">
+                    {d.prop_sigla} {d.prop_numero}/{d.prop_ano}
+                  </p>
+                )}
+                {d.prop_ementa && (
+                  <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">
+                    {d.prop_ementa}
+                  </p>
+                )}
+                <Link
+                  href={`/votacoes/${d.division_id}`}
+                  className="mt-1 block truncate text-xs text-slate-500 hover:text-brand hover:underline"
+                >
                   {d.description ?? `Votação #${d.division_id}`}
-                </p>
-                <p className="text-xs text-slate-400">
+                </Link>
+                <p className="mt-1 text-xs text-slate-400">
                   {fmtDate(d.occurred_at)} · {HOUSE_LABEL[d.house]}
+                  {officialUrl(d) && (
+                    <>
+                      {" · "}
+                      <a
+                        href={officialUrl(d)!}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brand hover:underline"
+                      >
+                        Ler o projeto na íntegra ↗
+                      </a>
+                    </>
+                  )}
                 </p>
               </div>
               <StanceChip stance={d.stance} strength={d.strength} />
-            </Link>
+            </div>
           ))}
         </div>
       </section>
