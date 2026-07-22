@@ -296,24 +296,6 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  PL Antifacção (versão aprovada pela Câmara) — política de um projeto só
--- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'PL Antifacção (versão aprovada pela Câmara)';
-WITH p AS (
-  INSERT INTO policy (name, description, provisional) VALUES (
-    'PL Antifacção (versão aprovada pela Câmara)',
-    'Posição sobre o texto do PL Antifacção (PL 5582/2025) aprovado pela Câmara na versão do relator Guilherme Derrite: aumenta penas para organização criminosa e milícia, permite perdimento antecipado de bens e gravação de visitas a presos de facções. A base do governo votou contra, alegando que a versão enfraquece a Polícia Federal e o sufocamento financeiro das facções. Score alto = a favor do texto aprovado.',
-    false) RETURNING id
-)
-INSERT INTO policy_division (policy_id, division_id, stance, strength)
-SELECT p.id, d.id, v.stance, v.strength FROM p
-JOIN (VALUES
-  ('2579832-62','for','strong'),   -- aprovação do substitutivo (370x110)
-  ('2579832-96','for','normal')    -- texto mantido (298x109)
-) AS v(ext, stance, strength) ON TRUE
-JOIN division d ON d.house='camara' AND d.external_id = v.ext;
-
--- ---------------------------------------------------------------------------
 --  Legalização dos jogos de azar (PL 442/1991)
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Legalização dos jogos de azar';

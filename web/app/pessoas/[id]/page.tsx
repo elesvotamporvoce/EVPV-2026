@@ -65,10 +65,6 @@ export default async function PersonPage({
     ? new Date(part.first_vote).getFullYear()
     : null;
   const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
-  const partPct =
-    part && part.eligible
-      ? Math.round((100 * part.n_votes) / part.eligible)
-      : null;
 
   return (
     <div className="space-y-8">
@@ -98,18 +94,6 @@ export default async function PersonPage({
           {anoInicio && (
             <p className="text-sm text-slate-500">
               No cargo desde {anoInicio} ({anos} {anos === 1 ? "ano" : "anos"})
-            </p>
-          )}
-          {partPct !== null && (
-            <p className="text-sm text-slate-600">
-              Participou de{" "}
-              <span className="group relative inline-block cursor-default border-b border-dashed border-slate-400">
-                <strong className="text-slate-800">{partPct}%</strong> das votações
-                <span className="pointer-events-none absolute -top-8 left-0 z-10 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  {part!.n_votes.toLocaleString("pt-BR")} de{" "}
-                  {part!.eligible.toLocaleString("pt-BR")} votações
-                </span>
-              </span>
             </p>
           )}
           </div>
