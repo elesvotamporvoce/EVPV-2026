@@ -2,7 +2,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import HomeSearch from "@/components/HomeSearch";
 import BigNumbers from "@/components/BigNumbers";
-import { FEATURED_POLICIES, featuredRank, scoreColor } from "@/lib/format";
+import { CARGO_LABEL, FEATURED_POLICIES, MANDATE_CLASS, MANDATE_LABEL, featuredRank, scoreColor } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -89,12 +89,43 @@ async function getData() {
         },
       ].filter((r) => r.person);
     }
-    return { policies: pols, trends, recordistas, people: people ?? 0, divisions: divisions ?? 0 };
+    // Mais procurados (curadoria na tabela home_featured; futuramente analytics)
+    type FeaturedCard = { person: PersonDir; presPct: number | null; nVotes: number | null };
+    let procurados: FeaturedCard[] = [];
+    const { data: hfRows } = await supabase
+      .from("home_featured")
+      .select("person_id, rank")
+      .order("rank");
+    const hf = (hfRows ?? []) as { person_id: number; rank: number }[];
+    if (hf.length) {
+      const fIds = hf.map((h) => h.person_id);
+      const { data: fPpl } = await supabase
+        .from("person_directory")
+        .select("*")
+        .in("id", fIds);
+      const fById = new Map(((fPpl ?? []) as PersonDir[]).map((x) => [x.id, x]));
+      const fPart = new Map(
+        rows.filter((r) => fIds.includes(r.person_id)).map((r) => [r.person_id, r])
+      );
+      procurados = hf.flatMap((h) => {
+        const person = fById.get(h.person_id);
+        if (!person) return [];
+        const pr = fPart.get(h.person_id);
+        return [{
+          person,
+          presPct: pr && pr.eligible > 0 ? Math.round((100 * pr.n_votes) / pr.eligible) : null,
+          nVotes: pr ? pr.n_votes : null,
+        }];
+      });
+    }
+
+    return { policies: pols, trends, recordistas, procurados, people: people ?? 0, divisions: divisions ?? 0 };
   } catch {
     return {
       policies: [] as Policy[],
       trends: [] as Trend[],
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
+      procurados: [] as { person: PersonDir; presPct: number | null; nVotes: number | null }[],
       people: 0,
       divisions: 0,
     };
@@ -102,7 +133,7 @@ async function getData() {
 }
 
 export default async function Home() {
-  const { policies, trends, recordistas, people, divisions } = await getData();
+  const { policies, trends, recordistas, procurados, people, divisions } = await getData();
 
   return (
     <div className="space-y-12">
@@ -128,6 +159,57 @@ export default async function Home() {
           />
         </div>
       </section>
+
+      {procurados.length > 0 && (
+        <section>
+          <h2 className="text-xl font-semibold text-slate-800">Mais procurados</h2>
+          <p className="mb-4 text-sm text-slate-500">
+            os parlamentares em evidência no Congresso
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {procurados.map(({ person, presPct, nVotes }) => (
+              <Link
+                key={person.id}
+                href={`/pessoas/${person.id}`}
+                className="rounded-xl border border-slate-200 bg-white p-5 text-center hover:border-brand-light hover:shadow-sm"
+              >
+                <span className="mx-auto block h-20 w-20 overflow-hidden rounded-full bg-slate-100">
+                  {person.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={person.photo_url}
+                      alt={person.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : null}
+                </span>
+                <p className="mt-3 text-lg font-semibold text-slate-800">
+                  {person.name}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {person.party_sigla ?? "sem partido"}
+                  {person.uf ? ` · ${person.uf}` : ""} · {CARGO_LABEL[person.house]}
+                </p>
+                {person.mandate_status && (
+                  <p
+                    className={`mt-1 text-sm font-semibold ${
+                      MANDATE_CLASS[person.mandate_status] ?? "text-slate-500"
+                    }`}
+                  >
+                    Mandato: {MANDATE_LABEL[person.mandate_status] ?? person.mandate_status}
+                  </p>
+                )}
+                {presPct !== null && (
+                  <p className="mt-2 text-xs text-slate-400">
+                    {presPct}% de presença · {nVotes?.toLocaleString("pt-BR")} votos registrados
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {trends.length > 0 && (
         <section>
