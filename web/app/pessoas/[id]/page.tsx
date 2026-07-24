@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
-import { CARGO_LABEL, HOUSE_LABEL, VOTE_LABEL, fmtDate } from "@/lib/format";
+import { CARGO_LABEL, HOUSE_LABEL, VOTE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
 import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -117,10 +117,19 @@ export default async function PersonPage({
               >
                 <p className="mb-3.5 text-lg font-semibold text-slate-800">
                   {s.policy_name}
+                  {s.category !== "not_enough" && (
+                    <>
+                      {" "}-{" "}
+                      <span style={{ color: scoreColor(s.score) }}>
+                        {categoryLabel(s.category)}
+                      </span>
+                    </>
+                  )}
                 </p>
                 <PositionBar
                   score={s.category === "not_enough" ? null : s.score}
                   category={s.category}
+                  showLabel={false}
                 />
               </Link>
             ))}

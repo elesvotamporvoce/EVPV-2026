@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import ScoreBadge from "@/components/ScoreBadge";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
-import { HOUSE_LABEL, VOTE_LABEL, categoryLabel, fmtDate } from "@/lib/format";
+import { HOUSE_LABEL, VOTE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -132,6 +132,46 @@ export default async function PolicyPage({
         ← Todas as políticas
       </Link>
 
+      {/* Como este parlamentar vota nesta política */}
+      {person && (
+        <section className="rounded-xl border-2 border-brand-light bg-white p-5">
+          <div className="mb-4 flex items-center gap-4">
+            <span className="h-[88px] w-[88px] shrink-0 overflow-hidden rounded-full bg-slate-100">
+              {person.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={person.photo_url}
+                  alt={person.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
+            </span>
+            <p className="text-lg font-semibold leading-snug text-slate-800">
+              {personScore && personScore.category !== "not_enough" ? (
+                <>
+                  {person.name} votou{" "}
+                  <span className="font-bold" style={{ color: scoreColor(personScore.score) }}>
+                    {categoryLabel(personScore.category).toLowerCase()}
+                  </span>{" "}
+                  para {pol.name}
+                </>
+              ) : (
+                <>
+                  {person.name} não tem votos suficientes em {pol.name}
+                </>
+              )}
+            </p>
+          </div>
+          {personScore && (
+            <PositionBar
+              score={personScore.category === "not_enough" ? null : personScore.score}
+              category={personScore.category}
+              showLabel={false}
+            />
+          )}
+        </section>
+      )}
+
       {/* Cabeçalho fixo, em caixa (igual ao do parlamentar) */}
       <div className="sticky top-4 z-20 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-800">{pol.name}</h1>
@@ -141,48 +181,6 @@ export default async function PolicyPage({
           </p>
         )}
       </div>
-
-      {/* Como este parlamentar vota nesta política */}
-      {person && (
-        <section className="rounded-xl border-2 border-brand-light bg-white p-5">
-          <div className="mb-3 flex items-center gap-3">
-            <span className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100">
-              {person.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={person.photo_url} alt={person.name} className="h-full w-full object-cover" />
-              ) : null}
-            </span>
-            <p className="text-lg font-semibold text-slate-800">
-              {personScore && personScore.category !== "not_enough" ? (
-                <>
-                  {person.name} vota{" "}
-                  <span className="text-brand">
-                    &quot;{categoryLabel(personScore.category).toLowerCase()}&quot;
-                  </span>{" "}
-                  para &quot;{pol.name}&quot;
-                </>
-              ) : (
-                <>
-                  {person.name} em &quot;{pol.name}&quot;
-                </>
-              )}
-            </p>
-          </div>
-          {personScore ? (
-            <PositionBar
-              score={personScore.category === "not_enough" ? null : personScore.score}
-              category={personScore.category}
-            />
-          ) : (
-            <p className="text-sm text-slate-500">
-              Sem votos suficientes nesta política.
-            </p>
-          )}
-          <p className="mt-3 text-xs text-slate-400">
-            Abaixo, em cada votação considerada, você vê o voto de {firstName}.
-          </p>
-        </section>
-      )}
 
       {/* Mais a favor / mais contra */}
       <section className="grid gap-6 lg:grid-cols-2">
