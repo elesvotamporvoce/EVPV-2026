@@ -11,6 +11,8 @@ export default function PositionBar({
 }) {
   const enough = category !== "not_enough" && score !== null;
   const pos = enough ? Math.max(0, Math.min(100, score as number)) : 50;
+  // recuo nas pontas: em 0% ou 100% a seta entra um pouco para nao colar na borda
+  const dispPos = Math.max(3, Math.min(97, pos));
   const color = enough ? scoreColor(score) : "#94a3b8";
   return (
     <div className="group relative w-full">
@@ -25,7 +27,7 @@ export default function PositionBar({
       {enough ? (
         <>
           <div
-            className="relative mt-3 h-[11px] rounded-full"
+            className="relative mt-4 h-[11px] rounded-full"
             style={{
               background:
                 "linear-gradient(to right,#fecaca 0%,#fde68a 50%,#bbf7d0 100%)",
@@ -34,17 +36,22 @@ export default function PositionBar({
             <span className="absolute left-1/2 top-1/2 h-3.5 w-px -translate-y-1/2 bg-slate-300" />
             <span
               aria-hidden
-              className="absolute -top-[11px] -translate-x-1/2"
-              style={{ left: `${pos}%` }}
+              className="absolute -top-4 -translate-x-1/2"
+              style={{ left: `${dispPos}%` }}
             >
               <span
-                className="block h-0 w-0 border-x-[9px] border-t-[11px] border-x-transparent"
+                className="block h-0 w-0 border-x-[10px] border-t-[12px] border-x-transparent"
                 style={{ borderTopColor: color }}
               />
             </span>
             <span
-              className="pointer-events-none absolute -top-10 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
-              style={{ left: `${pos}%` }}
+              aria-hidden
+              className="absolute top-0 h-full w-[2px] -translate-x-1/2"
+              style={{ left: `${dispPos}%`, background: color }}
+            />
+            <span
+              className="pointer-events-none absolute -top-11 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+              style={{ left: `${dispPos}%` }}
             >
               {Math.round(score as number)}% de apoio à política
             </span>
@@ -55,7 +62,7 @@ export default function PositionBar({
           </div>
         </>
       ) : (
-        <div className="mt-3 h-[11px] rounded-full bg-slate-100" />
+        <div className="mt-4 h-[11px] rounded-full bg-slate-100" />
       )}
     </div>
   );

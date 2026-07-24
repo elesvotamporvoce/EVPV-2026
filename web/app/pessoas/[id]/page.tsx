@@ -115,7 +115,7 @@ export default async function PersonPage({
                 href={`/politicas/${s.policy_id}?pessoa=${id}`}
                 className="block rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-light hover:shadow-sm"
               >
-                <p className="mb-3.5 text-lg font-semibold text-slate-800">
+                <p className="mb-3.5 text-center text-[22px] font-semibold leading-snug text-slate-800">
                   {s.policy_name}
                   {s.category !== "not_enough" && (
                     <>

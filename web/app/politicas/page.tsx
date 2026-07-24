@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { featuredRank } from "@/lib/format";
 import type { Policy } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -11,7 +12,10 @@ async function getPolicies(): Promise<Policy[]> {
       .from("policy")
       .select("id, name, description, provisional")
       .order("name");
-    return (data ?? []) as Policy[];
+    const pols = (data ?? []) as Policy[];
+    return pols.sort(
+      (a, b) => featuredRank(a.name) - featuredRank(b.name) || a.name.localeCompare(b.name)
+    );
   } catch {
     return [];
   }
@@ -40,6 +44,11 @@ export default async function PoliticasPage() {
           >
             <div className="flex items-center gap-2">
               <p className="font-semibold text-slate-800">{pol.name}</p>
+              {featuredRank(pol.name) < 99 && (
+                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                  Destaque
+                </span>
+              )}
               {pol.provisional && (
                 <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
                   provisório

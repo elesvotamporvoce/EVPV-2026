@@ -134,8 +134,11 @@ export default async function PolicyPage({
 
       {/* Como este parlamentar vota nesta política */}
       {person && (
-        <section className="rounded-xl border-2 border-brand-light bg-white p-5">
-          <div className="mb-4 flex items-center gap-4">
+        <section className="sticky top-4 z-20 rounded-xl border-2 border-brand-light bg-white p-5 shadow-sm">
+          <Link
+            href={`/pessoas/${person.id}`}
+            className="mb-4 flex items-center justify-center gap-4 hover:opacity-90"
+          >
             <span className="h-[88px] w-[88px] shrink-0 overflow-hidden rounded-full bg-slate-100">
               {person.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -161,7 +164,7 @@ export default async function PolicyPage({
                 </>
               )}
             </p>
-          </div>
+          </Link>
           {personScore && (
             <PositionBar
               score={personScore.category === "not_enough" ? null : personScore.score}
@@ -173,7 +176,7 @@ export default async function PolicyPage({
       )}
 
       {/* Cabeçalho fixo, em caixa (igual ao do parlamentar) */}
-      <div className="sticky top-4 z-20 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-slate-200 bg-white p-6">
         <h1 className="text-2xl font-bold text-slate-800">{pol.name}</h1>
         {pol.description && (
           <p className="mt-2 max-w-3xl text-lg leading-relaxed text-slate-600">

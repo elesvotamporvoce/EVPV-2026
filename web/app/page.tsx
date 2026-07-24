@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import HomeSearch from "@/components/HomeSearch";
+import { featuredRank } from "@/lib/format";
 import type { Policy } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -19,8 +20,11 @@ async function getData() {
           .select("id", { count: "exact", head: true })
           .eq("is_nominal", true),
       ]);
+    const pols = ((policies ?? []) as Policy[]).sort(
+      (a, b) => featuredRank(a.name) - featuredRank(b.name) || a.name.localeCompare(b.name)
+    );
     return {
-      policies: (policies ?? []) as Policy[],
+      policies: pols,
       people: people ?? 0,
       divisions: divisions ?? 0,
     };
@@ -70,7 +74,14 @@ export default async function Home() {
               href={`/politicas/${pol.id}`}
               className="rounded-lg border border-slate-200 bg-white p-4 hover:border-brand-light hover:shadow-sm"
             >
-              <p className="font-medium text-slate-800">{pol.name}</p>
+              <p className="font-medium text-slate-800">
+                {pol.name}
+                {featuredRank(pol.name) < 99 && (
+                  <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    Destaque
+                  </span>
+                )}
+              </p>
               {pol.description && (
                 <p className="mt-1 line-clamp-3 text-sm text-slate-500">
                   {pol.description}

@@ -64,3 +64,16 @@ export const UFS = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB",
   "PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
 ];
+
+// Políticas em destaque no site (aparecem primeiro, com selo)
+export const FEATURED_POLICIES = [
+  "Proteção das mulheres contra a violência",
+  "Direitos dos trabalhadores",
+  "Ação climática e conservação",
+  "Mais investimento na educação",
+];
+
+export function featuredRank(name: string): number {
+  const i = FEATURED_POLICIES.indexOf(name);
+  return i === -1 ? 99 : i;
+}
