@@ -95,3 +95,15 @@ export function supportTip(score: number | null): string | null {
   const p = Math.round(score);
   return p >= 50 ? `${p}% a favor da política` : `${100 - p}% contra a política`;
 }
+
+export const MANDATE_LABEL: Record<string, string> = {
+  em_exercicio: "Em exercício",
+  licenciado: "Licenciado",
+  fora: "Fora do Congresso",
+};
+
+export const MANDATE_CLASS: Record<string, string> = {
+  em_exercicio: "text-green-700",
+  licenciado: "text-amber-700",
+  fora: "text-slate-500",
+};

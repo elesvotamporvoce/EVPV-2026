@@ -16,6 +16,10 @@ export default function Footer() {
           ·{" "}
           <Link href="/sobre" className="text-brand hover:underline">
             Sobre e fontes
+          </Link>{" "}
+          ·{" "}
+          <Link href="/termos" className="text-brand hover:underline">
+            Termos e privacidade
           </Link>
         </p>
         <p className="mt-3 text-xs text-slate-400">

@@ -7,6 +7,8 @@ export type PersonDir = {
   uf: string | null;
   photo_url: string | null;
   active: boolean | null;
+  mandate_status: string | null;
+  mandate_detail: string | null;
   party_id: number | null;
   party_sigla: string | null;
 };

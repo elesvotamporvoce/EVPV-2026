@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
-import { CARGO_LABEL, HOUSE_LABEL, VOTE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor } from "@/lib/format";
+import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, VOTE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor } from "@/lib/format";
 import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -106,11 +106,14 @@ export default async function PersonPage({
               No cargo desde {anoInicio} ({anos} {anos === 1 ? "ano" : "anos"})
             </p>
           )}
-          {presPct !== null && presPct < 50 && (
-            <p className="mt-1 text-sm font-semibold text-red-700">
-              {presPct < 10
-                ? "Faltou a quase todas as votações do mandato"
-                : `Faltou à maioria das votações do mandato (${100 - presPct}% de ausência)`}
+          {dir.mandate_status && (
+            <p className="text-sm">
+              <span className={`font-semibold ${MANDATE_CLASS[dir.mandate_status] ?? "text-slate-500"}`}>
+                Mandato: {MANDATE_LABEL[dir.mandate_status] ?? dir.mandate_status}
+              </span>
+              {dir.mandate_detail && (
+                <span className="text-slate-500"> · {dir.mandate_detail}</span>
+              )}
             </p>
           )}
           </div>

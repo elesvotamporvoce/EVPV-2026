@@ -109,12 +109,12 @@ export default async function Home() {
       <section className="home-hero relative left-1/2 -mt-8 w-screen -translate-x-1/2 bg-brand-ink text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center">
           <h1 className="mx-auto max-w-3xl text-4xl font-bold sm:text-5xl">
-            Como seu deputado e senador votam de verdade?
+            Seu deputado e senador votam como você votaria?
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            Esqueça o que dizem na campanha. O que importa é o voto, que vira lei
-            e afeta todos nós. Aqui você acompanha, política por política, como
-            cada parlamentar vota no Congresso.
+            Promessa não vira lei. Voto sim. E cada voto mexe com seu salário,
+            sua saúde e seus direitos. Veja como cada um vota e tire suas próprias
+            conclusões.
           </p>
           <div className="mt-7">
             <HomeSearch />
