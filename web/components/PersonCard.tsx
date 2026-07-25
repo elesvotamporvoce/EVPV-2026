@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HOUSE_LABEL } from "@/lib/format";
+import { HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL } from "@/lib/format";
 import type { PersonDir } from "@/lib/types";
 
 export default function PersonCard({ p }: { p: PersonDir }) {
@@ -29,6 +29,15 @@ export default function PersonCard({ p }: { p: PersonDir }) {
           {p.party_sigla ?? "sem partido"}
           {p.uf ? ` · ${p.uf}` : ""} · {HOUSE_LABEL[p.house]}
         </p>
+        {p.mandate_status && (
+          <p
+            className={`truncate text-xs font-semibold ${
+              MANDATE_CLASS[p.mandate_status] ?? "text-slate-500"
+            }`}
+          >
+            Mandato: {MANDATE_LABEL[p.mandate_status] ?? p.mandate_status}
+          </p>
+        )}
       </div>
     </Link>
   );

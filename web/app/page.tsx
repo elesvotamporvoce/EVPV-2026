@@ -90,7 +90,7 @@ async function getData() {
       ].filter((r) => r.person);
     }
     // Mais procurados (curadoria na tabela home_featured; futuramente analytics)
-    type FeaturedCard = { person: PersonDir; presPct: number | null; nVotes: number | null };
+    type FeaturedCard = { person: PersonDir; nVotes: number | null; eligible: number | null };
     let procurados: FeaturedCard[] = [];
     const { data: hfRows } = await supabase
       .from("home_featured")
@@ -113,8 +113,8 @@ async function getData() {
         const pr = fPart.get(h.person_id);
         return [{
           person,
-          presPct: pr && pr.eligible > 0 ? Math.round((100 * pr.n_votes) / pr.eligible) : null,
           nVotes: pr ? pr.n_votes : null,
+          eligible: pr ? pr.eligible : null,
         }];
       });
     }
@@ -125,7 +125,7 @@ async function getData() {
       policies: [] as Policy[],
       trends: [] as Trend[],
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
-      procurados: [] as { person: PersonDir; presPct: number | null; nVotes: number | null }[],
+      procurados: [] as { person: PersonDir; nVotes: number | null; eligible: number | null }[],
       people: 0,
       divisions: 0,
     };
@@ -162,12 +162,11 @@ export default async function Home() {
 
       {procurados.length > 0 && (
         <section>
-          <h2 className="text-xl font-semibold text-slate-800">Mais procurados</h2>
-          <p className="mb-4 text-sm text-slate-500">
-            os parlamentares em evidência no Congresso
-          </p>
+          <h2 className="mb-4 text-xl font-semibold text-slate-800">
+            Políticos mais procurados
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {procurados.map(({ person, presPct, nVotes }) => (
+            {procurados.map(({ person, nVotes, eligible }) => (
               <Link
                 key={person.id}
                 href={`/pessoas/${person.id}`}
@@ -200,9 +199,10 @@ export default async function Home() {
                     Mandato: {MANDATE_LABEL[person.mandate_status] ?? person.mandate_status}
                   </p>
                 )}
-                {presPct !== null && (
-                  <p className="mt-2 text-xs text-slate-400">
-                    {presPct}% de presença · {nVotes?.toLocaleString("pt-BR")} votos registrados
+                {nVotes !== null && eligible !== null && eligible > 0 && (
+                  <p className="mt-3 text-xs text-slate-400">
+                    Votou em {nVotes.toLocaleString("pt-BR")} de{" "}
+                    {eligible.toLocaleString("pt-BR")} sessões
                   </p>
                 )}
               </Link>

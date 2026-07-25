@@ -209,13 +209,21 @@ class DB:
         ext = p["person_external_id"]
         if ext in self.person_cache:
             return self.person_cache[ext]
+        # Foto oficial do Senado, derivada do código do parlamentar.
+        # Padrão estável: .../fotos-oficiais/senador{codigo}.jpg
+        photo = (
+            "https://www.senado.leg.br/senadores/img/fotos-oficiais/"
+            f"senador{ext}.jpg"
+        )
         cur.execute(
-            """INSERT INTO person (house, external_id, name, uf)
-               VALUES ('senado', %s, %s, %s)
+            """INSERT INTO person (house, external_id, name, uf, photo_url)
+               VALUES ('senado', %s, %s, %s, %s)
                ON CONFLICT (house, external_id) DO UPDATE
-                 SET name = EXCLUDED.name, uf = EXCLUDED.uf
+                 SET name = EXCLUDED.name,
+                     uf = EXCLUDED.uf,
+                     photo_url = COALESCE(person.photo_url, EXCLUDED.photo_url)
                RETURNING id""",
-            (p["person_external_id"], p["name"], p["uf"]),
+            (p["person_external_id"], p["name"], p["uf"], photo),
         )
         pid = cur.fetchone()[0]
         self.person_cache[ext] = pid

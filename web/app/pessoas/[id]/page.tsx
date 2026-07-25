@@ -191,6 +191,55 @@ export default async function PersonPage({
           )}
         </div>
       </section>
+
+      {/* Presença nas votações (não exibimos para quem já deixou o cargo,
+          pois a contagem de sessões elegíveis passaria a incluir votações
+          posteriores à saída) */}
+      {part &&
+        part.eligible > 0 &&
+        dir.mandate_status !== "fora" &&
+        (() => {
+          const faltas = Math.max(0, part.eligible - part.n_votes);
+          const ausPct = Math.round((100 * faltas) / part.eligible);
+          const muito = ausPct > 50;
+          return (
+            <section>
+              <div
+                className={`rounded-lg border p-5 ${
+                  muito
+                    ? "border-amber-300 bg-amber-50"
+                    : "border-slate-200 bg-white"
+                }`}
+              >
+                <h2 className="text-lg font-semibold text-slate-800">
+                  Presença nas votações
+                </h2>
+                <p className="mt-1.5 text-slate-700">
+                  Faltou em{" "}
+                  <span className={muito ? "font-bold text-amber-700" : "font-semibold"}>
+                    {faltas.toLocaleString("pt-BR")} de{" "}
+                    {part.eligible.toLocaleString("pt-BR")} sessões
+                  </span>{" "}
+                  ({ausPct}% de ausência).
+                </p>
+                {muito && (
+                  <p className="mt-1.5 text-sm text-amber-800">
+                    Faltou à maioria das votações do mandato. O papel de quem foi
+                    eleito é votar.
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-slate-400">
+                  Considera as votações nominais da casa desde o primeiro voto
+                  registrado. Veja o critério em{" "}
+                  <Link href="/como-funciona" className="text-brand hover:underline">
+                    Como funciona
+                  </Link>
+                  .
+                </p>
+              </div>
+            </section>
+          );
+        })()}
     </div>
   );
 }
