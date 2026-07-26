@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
-import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, VOTE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor } from "@/lib/format";
+import VoteChip from "@/components/VoteChip";
+import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor } from "@/lib/format";
 import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -26,7 +27,7 @@ async function getPerson(id: number) {
         .select("*")
         .eq("person_id", id)
         .order("occurred_at", { ascending: false })
-        .limit(20),
+        .limit(5),
     ]);
   return {
     dir: dir as PersonDir | null,
@@ -75,6 +76,61 @@ export default async function PersonPage({
     ? new Date(part.first_vote).getFullYear()
     : null;
   const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
+  const anoFim = part?.last_vote ? new Date(part.last_vote).getFullYear() : null;
+
+  // Resumo por política quando não há votos suficientes (evita "punir" sem contexto)
+  const notEnoughIds = scores
+    .filter((s) => s.category === "not_enough")
+    .map((s) => s.policy_id);
+  const breakdown = new Map<number, string>();
+  if (notEnoughIds.length) {
+    const { data: pdd } = await supabase
+      .from("policy_division_detail")
+      .select("policy_id, division_id, stance")
+      .in("policy_id", notEnoughIds);
+    const pddRows = (pdd ?? []) as { policy_id: number; division_id: number; stance: string }[];
+    const divIds = [...new Set(pddRows.map((r) => r.division_id))];
+    let pvRows: { division_id: number; option: string }[] = [];
+    if (divIds.length) {
+      const { data: pv } = await supabase
+        .from("person_vote")
+        .select("division_id, option")
+        .eq("person_id", id)
+        .in("division_id", divIds);
+      pvRows = (pv ?? []) as { division_id: number; option: string }[];
+    }
+    const voteBy = new Map(pvRows.map((v) => [v.division_id, v.option]));
+    for (const polId of notEnoughIds) {
+      let aFavor = 0;
+      let contra = 0;
+      let ausente = 0;
+      let outros = 0;
+      for (const r of pddRows.filter((x) => x.policy_id === polId)) {
+        const opt = voteBy.get(r.division_id);
+        if (!opt || opt === "ausente") ausente += 1;
+        else if (opt === "sim") {
+          if (r.stance === "for") aFavor += 1;
+          else contra += 1;
+        } else if (opt === "nao") {
+          if (r.stance === "for") contra += 1;
+          else aFavor += 1;
+        } else outros += 1;
+      }
+      const vt = (n: number) => (n === 1 ? "1 votação" : `${n} votações`);
+      const parts: string[] = [];
+      if (aFavor) parts.push(`votou a favor da política em ${vt(aFavor)}`);
+      if (contra) parts.push(`votou contra em ${vt(contra)}`);
+      if (outros) parts.push(`registrou abstenção ou outro voto em ${vt(outros)}`);
+      if (ausente) parts.push(`esteve ausente em ${vt(ausente)}`);
+      if (parts.length) {
+        const txt =
+          parts.length > 1
+            ? parts.slice(0, -1).join(", ") + " e " + parts[parts.length - 1]
+            : parts[0];
+        breakdown.set(polId, txt.charAt(0).toUpperCase() + txt.slice(1) + ".");
+      }
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -103,7 +159,9 @@ export default async function PersonPage({
           </p>
           {anoInicio && (
             <p className="text-sm text-slate-500">
-              No cargo desde {anoInicio} ({anos} {anos === 1 ? "ano" : "anos"})
+              {dir.mandate_status === "fora" && anoFim
+                ? `No cargo de ${anoInicio} até ${anoFim}`
+                : `No cargo desde ${anoInicio} (${anos} ${anos === 1 ? "ano" : "anos"})`}
             </p>
           )}
           {dir.mandate_status && (
@@ -152,6 +210,12 @@ export default async function PersonPage({
                     </>
                   )}
                 </p>
+                {s.category === "not_enough" && breakdown.get(s.policy_id) && (
+                  <p className="-mt-2 mb-3 text-center text-sm leading-relaxed text-slate-500">
+                    {breakdown.get(s.policy_id)} Poucas votações para atribuir
+                    uma posição.
+                  </p>
+                )}
                 <PositionBar
                   score={s.category === "not_enough" ? null : s.score}
                   category={s.category}
@@ -163,10 +227,58 @@ export default async function PersonPage({
         )}
       </section>
 
+      {/* Presença nas votações */}
+      {part &&
+        part.eligible >= 10 &&
+        (() => {
+          const faltas = Math.max(0, part.eligible - part.n_votes);
+          const ausPct = Math.round((100 * faltas) / part.eligible);
+          const muito = ausPct > 50;
+          const saiu = dir.mandate_status === "fora";
+          return (
+            <section>
+              <div
+                className={`rounded-lg border p-5 ${
+                  muito
+                    ? "border-amber-300 bg-amber-50"
+                    : "border-slate-200 bg-white"
+                }`}
+              >
+                <h2 className="text-lg font-semibold text-slate-800">
+                  Presença nas votações
+                </h2>
+                <p className="mt-1.5 text-slate-700">
+                  Faltou em{" "}
+                  <span className={muito ? "font-bold text-amber-700" : "font-semibold"}>
+                    {faltas.toLocaleString("pt-BR")} de{" "}
+                    {part.eligible.toLocaleString("pt-BR")} sessões
+                  </span>{" "}
+                  ({ausPct}% de ausência
+                  {saiu ? ", no período em que exerceu o mandato" : ""}).
+                </p>
+                {muito && (
+                  <p className="mt-1.5 text-sm text-amber-800">
+                    Faltou à maioria das votações. O papel de quem foi eleito é
+                    votar.
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-slate-400">
+                  Considera as votações nominais da casa durante o mandato; votos
+                  secretos contam como participação. Critério completo em{" "}
+                  <Link href="/como-funciona" className="text-brand hover:underline">
+                    Como funciona
+                  </Link>
+                  .
+                </p>
+              </div>
+            </section>
+          );
+        })()}
+
       {/* Votos recentes */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">
-          Votos recentes
+          Votos mais recentes
         </h2>
         <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
           {votes.map((v) => (
@@ -192,67 +304,6 @@ export default async function PersonPage({
         </div>
       </section>
 
-      {/* Presença nas votações (não exibimos para quem já deixou o cargo,
-          pois a contagem de sessões elegíveis passaria a incluir votações
-          posteriores à saída) */}
-      {part &&
-        part.eligible > 0 &&
-        dir.mandate_status !== "fora" &&
-        (() => {
-          const faltas = Math.max(0, part.eligible - part.n_votes);
-          const ausPct = Math.round((100 * faltas) / part.eligible);
-          const muito = ausPct > 50;
-          return (
-            <section>
-              <div
-                className={`rounded-lg border p-5 ${
-                  muito
-                    ? "border-amber-300 bg-amber-50"
-                    : "border-slate-200 bg-white"
-                }`}
-              >
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Presença nas votações
-                </h2>
-                <p className="mt-1.5 text-slate-700">
-                  Faltou em{" "}
-                  <span className={muito ? "font-bold text-amber-700" : "font-semibold"}>
-                    {faltas.toLocaleString("pt-BR")} de{" "}
-                    {part.eligible.toLocaleString("pt-BR")} sessões
-                  </span>{" "}
-                  ({ausPct}% de ausência).
-                </p>
-                {muito && (
-                  <p className="mt-1.5 text-sm text-amber-800">
-                    Faltou à maioria das votações do mandato. O papel de quem foi
-                    eleito é votar.
-                  </p>
-                )}
-                <p className="mt-2 text-xs text-slate-400">
-                  Considera as votações nominais da casa desde o primeiro voto
-                  registrado. Veja o critério em{" "}
-                  <Link href="/como-funciona" className="text-brand hover:underline">
-                    Como funciona
-                  </Link>
-                  .
-                </p>
-              </div>
-            </section>
-          );
-        })()}
     </div>
-  );
-}
-
-function VoteChip({ option }: { option: string }) {
-  const map: Record<string, string> = {
-    sim: "bg-green-100 text-green-800",
-    nao: "bg-red-100 text-red-800",
-  };
-  const cls = map[option] ?? "bg-slate-100 text-slate-600";
-  return (
-    <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${cls}`}>
-      {VOTE_LABEL[option] ?? option}
-    </span>
   );
 }

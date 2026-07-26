@@ -90,4 +90,5 @@ export type Participation = {
   first_vote: string | null;
   n_votes: number;
   eligible: number;
+  last_vote: string | null;
 };

@@ -27,7 +27,7 @@ export const VOTE_LABEL: Record<string, string> = {
   obstrucao: "Obstrução",
   artigo17: "Art. 17",
   ausente: "Ausente",
-  outro: "Outro",
+  outro: "Outro registro",
 };
 
 // Cor conforme a concordância (verde = a favor, vermelho = contra).

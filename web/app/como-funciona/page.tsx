@@ -89,12 +89,16 @@ export default function ComoFuncionaPage() {
         <p className="text-slate-600">
           Faltas pesam pouco no score, para não punir ausências pontuais. Quem
           tem pouquíssimos votos numa política aparece como &quot;sem votos
-          suficientes&quot;, sem posição atribuída. No fim do perfil mostramos a
-          presença: quantas das votações nominais da casa, desde o primeiro voto
-          registrado do parlamentar, ele efetivamente participou. Quando a
-          ausência passa de 50%, o dado ganha destaque, porque o papel de quem
-          foi eleito é votar. Não contabilizamos ausência de quem já deixou o
-          cargo, para não misturar sessões posteriores à saída. O registro
+          suficientes&quot;, com um resumo do que aconteceu em cada votação. No
+          perfil mostramos a presença: de quantas votações nominais da casa o
+          parlamentar participou durante o mandato. Para quem estreou junto com
+          a legislatura, contamos desde o primeiro dia dela; para quem chegou
+          depois, desde o primeiro registro; para quem já deixou o cargo, a
+          contagem para no último registro. Votações secretas do Senado (como
+          sabatinas de autoridades) contam como participação e aparecem como
+          &quot;outro registro&quot;: o painel informa que o parlamentar votou,
+          sem revelar o voto. Quando a ausência passa de 50%, o dado ganha
+          destaque, porque o papel de quem foi eleito é votar. O registro
           oficial não distingue falta por doença, missão oficial ou escolha,
           então tratamos todas da mesma forma.
         </p>

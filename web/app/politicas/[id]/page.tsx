@@ -4,7 +4,8 @@ import { supabase } from "@/lib/supabase";
 import ScoreBadge from "@/components/ScoreBadge";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
-import { HOUSE_LABEL, VOTE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
+import VoteChip from "@/components/VoteChip";
+import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -257,8 +258,8 @@ export default async function PolicyPage({
               <div className="flex shrink-0 flex-col items-end gap-1.5">
                 <StanceChip stance={d.stance} strength={d.strength} />
                 {person && (
-                  <PersonVoteChip
-                    firstName={firstName!}
+                  <VoteChip
+                    prefix={firstName!}
                     option={personVotes[d.division_id] ?? "ausente"}
                   />
                 )}
@@ -338,19 +339,6 @@ function StanceChip({ stance, strength }: { stance: string; strength: string }) 
     >
       {forStance ? "Sim = a favor" : "Sim = contra"}
       {strength === "strong" ? " ★" : ""}
-    </span>
-  );
-}
-
-function PersonVoteChip({ firstName, option }: { firstName: string; option: string }) {
-  const map: Record<string, string> = {
-    sim: "bg-green-100 text-green-800",
-    nao: "bg-red-100 text-red-800",
-  };
-  const cls = map[option] ?? "bg-slate-100 text-slate-600";
-  return (
-    <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${cls}`}>
-      {firstName}: {VOTE_LABEL[option] ?? option}
     </span>
   );
 }

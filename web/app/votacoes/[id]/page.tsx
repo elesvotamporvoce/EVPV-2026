@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { HOUSE_LABEL, VOTE_LABEL, fmtDate } from "@/lib/format";
+import VoteChip from "@/components/VoteChip";
 import type { DivisionVote } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -158,18 +159,5 @@ export default async function DivisionPage({
         </div>
       </section>
     </div>
-  );
-}
-
-function VoteChip({ option }: { option: string }) {
-  const map: Record<string, string> = {
-    sim: "bg-green-100 text-green-800",
-    nao: "bg-red-100 text-red-800",
-  };
-  const cls = map[option] ?? "bg-slate-100 text-slate-600";
-  return (
-    <span className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${cls}`}>
-      {VOTE_LABEL[option] ?? option}
-    </span>
   );
 }
