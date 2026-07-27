@@ -10,7 +10,7 @@ async function getPolicies(): Promise<Policy[]> {
   try {
     const { data } = await supabase
       .from("policy")
-      .select("id, name, description, provisional")
+      .select("id, name, description, impact, provisional")
       .order("name");
     const pols = (data ?? []) as Policy[];
     return pols.sort(
@@ -42,16 +42,20 @@ export default async function PoliticasPage() {
             href={`/politicas/${pol.id}`}
             className="rounded-lg border border-brand-light bg-white p-5 hover:border-brand hover:shadow-sm"
           >
-            <div className="flex items-center gap-2">
-              <p className="font-semibold text-slate-800">{pol.name}</p>
-              {pol.provisional && (
-                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                  provisório
-                </span>
-              )}
+            <div className="rounded-md bg-violet-100 px-3 py-2 text-center">
+              <p className="font-semibold text-slate-800">
+                {pol.name}
+                {pol.provisional && (
+                  <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 align-middle text-xs font-normal text-amber-700">
+                    provisório
+                  </span>
+                )}
+              </p>
             </div>
-            {pol.description && (
-              <p className="mt-2 text-base leading-relaxed text-slate-600">{pol.description}</p>
+            {(pol.impact ?? pol.description) && (
+              <p className="mt-3 text-base leading-relaxed text-slate-600">
+                {pol.impact ?? pol.description}
+              </p>
             )}
           </Link>
         ))}

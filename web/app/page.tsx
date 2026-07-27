@@ -239,7 +239,7 @@ export default async function Home() {
                 href={`/politicas/${policy.id}`}
                 className="rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-light hover:shadow-sm"
               >
-                <p className="mb-4 font-semibold leading-snug text-slate-800">
+                <p className="mb-4 text-center font-semibold leading-snug text-slate-800">
                   {policy.name}
                 </p>
                 {rows.map((r) => (

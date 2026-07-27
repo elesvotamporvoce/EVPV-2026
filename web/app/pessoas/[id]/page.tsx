@@ -62,7 +62,30 @@ export default async function PersonPage({
   const { dir, part, scores, votes } = await getPerson(id);
   if (!dir) notFound();
 
-  const sortedScores = [...scores].sort(
+  // Senadores: como ha poucos temas com voto aberto no Senado, mostramos
+  // TODAS as politicas; as sem dados ganham aviso + referencia do partido
+  let allScores = scores;
+  if (dir.house === "senado") {
+    const { data: allPols } = await supabase
+      .from("policy")
+      .select("id, name")
+      .order("name");
+    const have = new Set(scores.map((s) => s.policy_id));
+    const extras = ((allPols ?? []) as { id: number; name: string }[])
+      .filter((p) => !have.has(p.id))
+      .map(
+        (p) =>
+          ({
+            policy_id: p.id,
+            policy_name: p.name,
+            category: "not_enough",
+            score: 0,
+          }) as unknown as ScoreNamed
+      );
+    allScores = [...scores, ...extras];
+  }
+
+  const sortedScores = [...allScores].sort(
     (a, b) =>
       featuredRank(a.policy_name) - featuredRank(b.policy_name) ||
       b.score - a.score
@@ -94,16 +117,18 @@ export default async function PersonPage({
   }
 
   // Resumo por política quando não há votos suficientes (evita "punir" sem contexto)
-  const notEnoughIds = scores
+  const notEnoughIds = allScores
     .filter((s) => s.category === "not_enough")
     .map((s) => s.policy_id);
   const breakdown = new Map<number, string>();
   if (notEnoughIds.length) {
     const { data: pdd } = await supabase
       .from("policy_division_detail")
-      .select("policy_id, division_id, stance")
+      .select("policy_id, division_id, stance, house")
       .in("policy_id", notEnoughIds);
-    const pddRows = (pdd ?? []) as { policy_id: number; division_id: number; stance: string }[];
+    const pddRows = (
+      (pdd ?? []) as { policy_id: number; division_id: number; stance: string; house: string }[]
+    ).filter((r) => r.house === dir.house);
     const divIds = [...new Set(pddRows.map((r) => r.division_id))];
     let pvRows: { division_id: number; option: string }[] = [];
     if (divIds.length) {

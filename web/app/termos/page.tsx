@@ -50,18 +50,6 @@ export default function TermosPage() {
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
-          Onde o site é hospedado
-        </h2>
-        <p className="text-slate-600">
-          Parte da infraestrutura do site fica fora do Brasil, em provedores
-          internacionais de nuvem. Isso não muda nossas obrigações: a LGPD se
-          aplica a serviços oferecidos a pessoas no Brasil independentemente de
-          onde os servidores estão, e este projeto a segue.
-        </p>
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-slate-800">
           Limites e responsabilidade
         </h2>
         <p className="text-slate-600">
