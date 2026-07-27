@@ -26,7 +26,7 @@ export default function SearchFilters({ parties }: { parties: string[] }) {
       <div className="sm:col-span-2">
         <NameSuggest
           initial={sp.get("q") ?? ""}
-          placeholder="Buscar por nome…"
+          placeholder="Comece a escrever o nome aqui…"
           inputClass="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
           onSearch={(q) => apply({ q })}
         />
@@ -58,7 +58,7 @@ export default function SearchFilters({ parties }: { parties: string[] }) {
       <select
         defaultValue={sp.get("party") ?? ""}
         onChange={(e) => apply({ party: e.target.value })}
-        className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand sm:col-span-4"
+        className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand sm:col-span-2"
       >
         <option value="">Todos os partidos</option>
         {parties.map((s) => (
@@ -66,6 +66,17 @@ export default function SearchFilters({ parties }: { parties: string[] }) {
             {s}
           </option>
         ))}
+      </select>
+
+      <select
+        defaultValue={sp.get("mandato") ?? ""}
+        onChange={(e) => apply({ mandato: e.target.value })}
+        className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand sm:col-span-2"
+      >
+        <option value="">Todos os mandatos</option>
+        <option value="em_exercicio">No cargo</option>
+        <option value="licenciado">De licença</option>
+        <option value="fora">Não está mais no Congresso</option>
       </select>
     </div>
   );

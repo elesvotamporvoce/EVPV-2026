@@ -20,9 +20,18 @@ import sys
 import time
 import urllib.request
 
+from datetime import datetime, timezone
+
 CAMARA = "https://dadosabertos.camara.leg.br/api/v2"
 SENADO = "https://legis.senado.leg.br/dadosabertos"
 HEADERS = {"Accept": "application/json", "User-Agent": "elesvotamporvoce.org (contato@elesvotamporvoce.org)"}
+LEG_ATUAL = datetime(2023, 2, 1, tzinfo=timezone.utc)
+
+# Correcoes manuais/editoriais que a API nao captura. Sempre vencem.
+# chave: (house, external_id) -> mandate_status
+MANUAL_STATUS = {
+    ("senado", "4605"): "fora",  # Flavio Dino: renunciou p/ assumir vaga no STF
+}
 
 
 def get_json(url, retries=3):
@@ -114,7 +123,9 @@ def main():
             status, ativo = "licenciado", True
         else:
             status, ativo = "fora", False
-        updates.append((status, sit or None, ativo, "camara", e))
+        # Detalhe tecnico ("Vacancia" etc.) nao vai para o site; o campo
+        # mandate_detail fica reservado para notas editoriais curadas.
+        updates.append((status, None, ativo, "camara", e))
         if i % 50 == 0:
             print(f"  {i}/{len(fora_cam)}", flush=True)
         time.sleep(0.25)
@@ -123,13 +134,39 @@ def main():
     sen_atual = senado_lista("atual")
     sen_afast = senado_lista("afastados")
     print(f"Senado em exercicio: {len(sen_atual)}, afastados: {len(sen_afast)}", flush=True)
+    # A lista de "afastados" do Senado mistura licencas reais com quem ja saiu
+    # de vez (renuncia, fim de mandato, obito). Regra: afastado sem nenhum
+    # registro na legislatura atual = fora.
+    cur.execute(
+        """SELECT p.external_id, max(d.occurred_at)
+           FROM person p
+           JOIN vote v ON v.person_id = p.id
+           JOIN division d ON d.id = v.division_id
+           WHERE p.house = 'senado'
+           GROUP BY 1"""
+    )
+    ultimo_reg = dict(cur.fetchall())
     for e in senado_db:
         if e in sen_atual:
             updates.append(("em_exercicio", None, True, "senado", e))
         elif e in sen_afast:
-            updates.append(("licenciado", "Afastado (fonte: Senado)", True, "senado", e))
+            reg = ultimo_reg.get(e)
+            if reg is not None and reg < LEG_ATUAL:
+                updates.append(("fora", None, False, "senado", e))
+            else:
+                updates.append(("licenciado", None, True, "senado", e))
         else:
             updates.append(("fora", None, False, "senado", e))
+
+    # Overrides manuais vencem qualquer fonte automatica
+    fixed = []
+    for status, detail, ativo, house, e in updates:
+        manual = MANUAL_STATUS.get((house, e))
+        if manual is not None:
+            status = manual
+            ativo = manual in ("em_exercicio", "licenciado")
+        fixed.append((status, detail, ativo, house, e))
+    updates = fixed
 
     # ---- grava -------------------------------------------------------------
     cur.executemany(

@@ -28,6 +28,7 @@ export default async function PessoasPage({
     house?: string;
     uf?: string;
     party?: string;
+    mandato?: string;
     page?: string;
   }>;
 }) {
@@ -45,8 +46,17 @@ export default async function PessoasPage({
   if (sp.house) query = query.eq("house", sp.house);
   if (sp.uf) query = query.eq("uf", sp.uf);
   if (sp.party) query = query.eq("party_sigla", sp.party);
+  if (sp.mandato) query = query.eq("mandate_status", sp.mandato);
 
-  const [{ data, count }, parties] = await Promise.all([query, getParties()]);
+  const emExQuery = supabase
+    .from("person_directory")
+    .select("id", { count: "exact", head: true })
+    .eq("mandate_status", "em_exercicio");
+  const [{ data, count }, parties, { count: emEx }] = await Promise.all([
+    query,
+    getParties(),
+    emExQuery,
+  ]);
   const people = (data ?? []) as PersonDir[];
   const total = count ?? 0;
   const pages = Math.ceil(total / PAGE_SIZE);
@@ -57,16 +67,20 @@ export default async function PessoasPage({
     if (sp.house) params.set("house", sp.house);
     if (sp.uf) params.set("uf", sp.uf);
     if (sp.party) params.set("party", sp.party);
+    if (sp.mandato) params.set("mandato", sp.mandato);
     params.set("page", String(p));
     return `/pessoas?${params.toString()}`;
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Parlamentares</h1>
+      <div className="space-y-2 pb-1">
+        <h1 className="text-2xl font-bold text-brand">Parlamentares</h1>
         <p className="text-sm text-slate-500">
           {total.toLocaleString("pt-BR")} deputados e senadores
+          {(emEx ?? 0) >= 400
+            ? `, ${(emEx ?? 0).toLocaleString("pt-BR")} no cargo`
+            : ""}
         </p>
       </div>
 

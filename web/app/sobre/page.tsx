@@ -3,7 +3,7 @@ export const metadata = { title: "Sobre" };
 export default function SobrePage() {
   return (
     <article className="max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">Sobre e fontes</h1>
+      <h1 className="text-2xl font-bold text-brand">Sobre e fontes</h1>
 
       <p className="text-slate-600">
         <strong>Eles Votam por Você</strong> é um projeto independente de

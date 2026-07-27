@@ -27,7 +27,7 @@ export default async function PoliticasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Políticas</h1>
+        <h1 className="text-2xl font-bold text-brand">Políticas</h1>
         <p className="text-sm text-slate-500">
           Uma política é um conjunto de votações que, juntas, indicam uma posição
           sobre um assunto. A posição de cada parlamentar é a média de como

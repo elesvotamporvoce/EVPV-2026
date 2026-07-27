@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
 import VoteChip from "@/components/VoteChip";
-import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor } from "@/lib/format";
+import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor, supportTip } from "@/lib/format";
 import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -153,8 +153,10 @@ export default async function PersonPage({
         ← Todos os parlamentares
       </Link>
 
-      {/* Cabeçalho */}
-      <div className="sticky top-4 z-20 flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
+      {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
+          nas bordas da caixa durante o scroll) */}
+      <div className="sticky top-0 z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
+      <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100">
           {dir.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -192,17 +194,19 @@ export default async function PersonPage({
           </div>
         </div>
       </div>
+      </div>
 
       {/* Políticas */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Políticas</h2>
         {dir.house === "senado" && (
-          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+          <div className="mb-4 rounded-lg border border-brand-light bg-violet-50 p-4 text-sm leading-relaxed text-slate-700">
             Quase metade das votações do Senado é secreta (sabatinas de
             autoridades, por exemplo): o painel registra que o senador votou,
-            mas não revela o voto. Essas sessões não podem entrar nas políticas.
-            Por isso, senadores costumam ter menos políticas com posição do que
-            deputados.
+            mas <strong>não revela o voto</strong>. Sem o voto de cada senador,
+            não há como saber a posição individual e incluir essas sessões nas
+            políticas. Por isso, senadores costumam ter menos políticas com
+            posição do que deputados.
           </div>
         )}
         {sortedScores.length === 0 ? (
@@ -245,8 +249,7 @@ export default async function PersonPage({
                   partyAvg.has(s.policy_id) && (
                     <p className="mb-3 text-center text-sm text-slate-500">
                       Como referência, a média do {dir.party_sigla} é{" "}
-                      {Math.round(partyAvg.get(s.policy_id)!)}% a favor da
-                      política.
+                      {supportTip(partyAvg.get(s.policy_id)!)}.
                     </p>
                   )}
                 <PositionBar
@@ -263,6 +266,7 @@ export default async function PersonPage({
       {/* Presença nas votações */}
       {part &&
         part.eligible >= 10 &&
+        part.n_votes > 0 &&
         (() => {
           const faltas = Math.max(0, part.eligible - part.n_votes);
           const ausPct = Math.round((100 * faltas) / part.eligible);

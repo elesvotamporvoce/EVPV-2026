@@ -3,7 +3,7 @@ export const metadata = { title: "Termos e privacidade" };
 export default function TermosPage() {
   return (
     <article className="max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">
+      <h1 className="text-2xl font-bold text-brand">
         Termos de uso e privacidade
       </h1>
       <p className="text-sm text-slate-400">Última atualização: julho de 2026</p>

@@ -145,7 +145,8 @@ export default async function PolicyPage({
 
       {/* Como este parlamentar vota nesta política */}
       {person && (
-        <section className="sticky top-4 z-20 rounded-xl border-2 border-brand-light bg-white p-5 shadow-sm">
+        <section className="sticky top-0 z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
+        <div className="rounded-xl border-2 border-brand-light bg-white p-5 shadow-sm">
           <Link
             href={`/pessoas/${person.id}`}
             className="mb-4 flex items-center justify-center gap-4 hover:opacity-90"
@@ -183,6 +184,7 @@ export default async function PolicyPage({
               showLabel={false}
             />
           )}
+        </div>
         </section>
       )}
 

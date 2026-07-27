@@ -6,7 +6,7 @@ export default function ComoFuncionaPage() {
   return (
     <article className="max-w-3xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Como funciona</h1>
+        <h1 className="text-2xl font-bold text-brand">Como funciona</h1>
         <p className="mt-2 text-lg text-slate-600">
           O método do site e o jargão do Congresso explicados em linguagem simples.
         </p>

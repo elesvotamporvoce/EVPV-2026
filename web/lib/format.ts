@@ -97,9 +97,9 @@ export function supportTip(score: number | null): string | null {
 }
 
 export const MANDATE_LABEL: Record<string, string> = {
-  em_exercicio: "Em exercício",
-  licenciado: "Licenciado",
-  fora: "Fora do Congresso",
+  em_exercicio: "No cargo",
+  licenciado: "De licença",
+  fora: "Não está mais no Congresso",
 };
 
 export const MANDATE_CLASS: Record<string, string> = {
