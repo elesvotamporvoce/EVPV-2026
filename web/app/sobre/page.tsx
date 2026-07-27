@@ -47,8 +47,16 @@ export default function SobrePage() {
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">Correções</h2>
         <p className="text-slate-600">
-          Encontrou algo errado? A transparência também vale para nós: retornos
-          são bem-vindos para corrigir e melhorar os dados.
+          Encontrou algo errado? A transparência também vale para nós. Escreva
+          para{" "}
+          <a
+            href="mailto:contato@elesvotamporvoce.org"
+            className="text-brand hover:underline"
+          >
+            contato@elesvotamporvoce.org
+          </a>{" "}
+          e faremos o possível para analisar e corrigi-lo o mais rápido
+          possível.
         </p>
       </section>
     </article>

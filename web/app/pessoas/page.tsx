@@ -52,6 +52,10 @@ export default async function PessoasPage({
     .from("person_directory")
     .select("id", { count: "exact", head: true })
     .eq("mandate_status", "em_exercicio");
+  // Destaques curados (tabela search_featured), so na visao padrao sem filtros
+  const showFeatured =
+    !sp.q && !sp.house && !sp.uf && !sp.party && !sp.mandato && page === 1;
+
   const [{ data, count }, parties, { count: emEx }] = await Promise.all([
     query,
     getParties(),
@@ -59,6 +63,23 @@ export default async function PessoasPage({
   ]);
   const people = (data ?? []) as PersonDir[];
   const total = count ?? 0;
+
+  let destaque: PersonDir[] = [];
+  if (showFeatured) {
+    const { data: sf } = await supabase
+      .from("search_featured")
+      .select("person_id, rank")
+      .order("rank");
+    const ids = ((sf ?? []) as { person_id: number }[]).map((r) => r.person_id);
+    if (ids.length) {
+      const { data: dp } = await supabase
+        .from("person_directory")
+        .select("*")
+        .in("id", ids);
+      const by = new Map(((dp ?? []) as PersonDir[]).map((p) => [p.id, p]));
+      destaque = ids.map((i) => by.get(i)).filter(Boolean) as PersonDir[];
+    }
+  }
   const pages = Math.ceil(total / PAGE_SIZE);
 
   const qs = (p: number) => {
@@ -85,6 +106,17 @@ export default async function PessoasPage({
       </div>
 
       <SearchFilters parties={parties} />
+
+      {destaque.length > 0 && (
+        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
+          <p className="mb-3 font-semibold text-slate-800">Mais procurados</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {destaque.map((p) => (
+              <PersonCard key={p.id} p={p} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {people.length === 0 ? (
         <p className="py-12 text-center text-slate-500">

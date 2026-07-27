@@ -66,11 +66,14 @@ export default function ComoFuncionaPage() {
           E as votações secretas do Senado?
         </h2>
         <p className="text-slate-600">
-          Quase metade das votações do Senado é secreta (sabatinas de
-          autoridades, por exemplo): o painel informa que o senador votou, mas
-          não revela o voto. Elas aparecem como &quot;outro registro&quot; e
-          contam como presença, mas não podem entrar nas políticas, porque não
-          há como saber a posição individual.
+          Quase metade das votações do Senado é secreta. O caso mais comum são
+          as sabatinas: antes de um indicado assumir cargos como ministro do
+          STF, chefe da PGR, diretor do Banco Central ou embaixador, o Senado o
+          entrevista e aprova (ou rejeita) o nome em voto secreto. Nesses casos
+          o painel informa que o senador votou, mas não revela o voto. Essas
+          votações aparecem como &quot;outro registro&quot; e contam como
+          presença, mas não podem entrar nas políticas, porque não há como
+          saber a posição individual.
         </p>
       </section>
 

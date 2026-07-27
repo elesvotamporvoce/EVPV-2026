@@ -87,6 +87,7 @@ export default async function PersonPage({
 
   const sortedScores = [...allScores].sort(
     (a, b) =>
+      (a.category === "not_enough" ? 1 : 0) - (b.category === "not_enough" ? 1 : 0) ||
       featuredRank(a.policy_name) - featuredRank(b.policy_name) ||
       b.score - a.score
   );
@@ -226,9 +227,10 @@ export default async function PersonPage({
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Políticas</h2>
         {dir.house === "senado" && (
           <div className="mb-4 rounded-lg border border-brand-light bg-violet-50 p-4 text-sm leading-relaxed text-slate-700">
-            Quase metade das votações do Senado é secreta (sabatinas de
-            autoridades, por exemplo): o painel registra que o senador votou,
-            mas <strong>não revela o voto</strong>. Sem o voto de cada senador,
+            Quase metade das votações do Senado é secreta, principalmente as
+            sabatinas: a aprovação ou rejeição, em voto secreto, de indicados a
+            cargos como ministro do STF e embaixador. O painel registra que o
+            senador votou, mas <strong>não revela o voto</strong>. Sem o voto de cada senador,
             não há como saber a posição individual e incluir essas sessões nas
             políticas. Por isso, senadores costumam ter menos políticas com
             posição do que deputados.
@@ -296,7 +298,8 @@ export default async function PersonPage({
           const faltas = Math.max(0, part.eligible - part.n_votes);
           const ausPct = Math.round((100 * faltas) / part.eligible);
           const muito = ausPct > 50;
-          const saiu = dir.mandate_status === "fora";
+          const fora = dir.mandate_status === "fora";
+          const licenca = dir.mandate_status === "licenciado";
           return (
             <section>
               <div
@@ -316,7 +319,12 @@ export default async function PersonPage({
                     {part.eligible.toLocaleString("pt-BR")} sessões
                   </span>{" "}
                   ({ausPct}% de ausência
-                  {saiu ? ", no período em que exerceu o mandato" : ""}).
+                  {fora
+                    ? ", no período em que exerceu o mandato"
+                    : licenca
+                      ? ", contando até sair de licença"
+                      : ""}
+                  ).
                 </p>
                 {muito && (
                   <p className="mt-1.5 text-sm text-amber-800">

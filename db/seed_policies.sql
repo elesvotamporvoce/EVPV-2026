@@ -302,14 +302,15 @@ DELETE FROM policy WHERE name = 'Legalização dos jogos de azar';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Legalização dos jogos de azar',
-    'Posição sobre a legalização de cassinos, bingos e outros jogos de azar (PL 442/1991, o "marco dos jogos", aprovado pela Câmara em 2022 e parado no Senado). Score alto = a favor da legalização.',
+    'Posição sobre a legalização de cassinos, bingos e outros jogos de azar (PL 442/1991, o "marco dos jogos", aprovado pela Câmara em 2022) e sobre a regulamentação das apostas esportivas online, as bets (PL 3626/2023, sancionado como Lei 14.790/2023). Score alto = a favor da legalização e regulamentação.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('15460-165','for','strong'),   -- aprovação do substitutivo (246x202)
-  ('15460-179','for','normal')    -- texto mantido (234x175)
+  ('15460-179','for','normal'),   -- texto mantido (234x175)
+  ('2374400-110','for','strong')  -- Bets: Câmara aprova emendas do Senado ao PL 3626/2023 (virou a Lei 14.790/2023)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
