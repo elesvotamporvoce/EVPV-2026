@@ -27,7 +27,7 @@ async function getPerson(id: number) {
         .select("*")
         .eq("person_id", id)
         .order("occurred_at", { ascending: false })
-        .limit(5),
+        .limit(10),
     ]);
   return {
     dir: dir as PersonDir | null,
@@ -77,6 +77,21 @@ export default async function PersonPage({
     : null;
   const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
   const anoFim = part?.last_vote ? new Date(part.last_vote).getFullYear() : null;
+
+  // Média do partido por política (contexto quando faltam votos individuais)
+  let partyAvg = new Map<number, number>();
+  if (dir.party_id) {
+    const { data: ppa } = await supabase
+      .from("party_policy_agreement")
+      .select("policy_id, avg_score")
+      .eq("party_id", dir.party_id);
+    partyAvg = new Map(
+      ((ppa ?? []) as { policy_id: number; avg_score: number }[]).map((r) => [
+        r.policy_id,
+        r.avg_score,
+      ])
+    );
+  }
 
   // Resumo por política quando não há votos suficientes (evita "punir" sem contexto)
   const notEnoughIds = scores
@@ -181,6 +196,15 @@ export default async function PersonPage({
       {/* Políticas */}
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Políticas</h2>
+        {dir.house === "senado" && (
+          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+            Quase metade das votações do Senado é secreta (sabatinas de
+            autoridades, por exemplo): o painel registra que o senador votou,
+            mas não revela o voto. Essas sessões não podem entrar nas políticas.
+            Por isso, senadores costumam ter menos políticas com posição do que
+            deputados.
+          </div>
+        )}
         {sortedScores.length === 0 ? (
           <p className="text-sm text-slate-500">
             Ainda não há políticas com votos suficientes para este parlamentar.
@@ -211,11 +235,20 @@ export default async function PersonPage({
                   )}
                 </p>
                 {s.category === "not_enough" && breakdown.get(s.policy_id) && (
-                  <p className="-mt-2 mb-3 text-center text-sm leading-relaxed text-slate-500">
+                  <p className="-mt-2 mb-1.5 text-center text-sm leading-relaxed text-slate-500">
                     {breakdown.get(s.policy_id)} Poucas votações para atribuir
                     uma posição.
                   </p>
                 )}
+                {s.category === "not_enough" &&
+                  dir.party_sigla &&
+                  partyAvg.has(s.policy_id) && (
+                    <p className="mb-3 text-center text-sm text-slate-500">
+                      Como referência, a média do {dir.party_sigla} é{" "}
+                      {Math.round(partyAvg.get(s.policy_id)!)}% a favor da
+                      política.
+                    </p>
+                  )}
                 <PositionBar
                   score={s.category === "not_enough" ? null : s.score}
                   category={s.category}

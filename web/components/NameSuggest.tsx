@@ -19,7 +19,8 @@ async function loadDir(): Promise<Sug[]> {
   const { data } = await supabase
     .from("person_directory")
     .select("id,name,party_sigla,uf,photo_url")
-    .order("name");
+    .order("name")
+    .limit(2000);
   cache = (data ?? []) as Sug[];
   return cache;
 }

@@ -10,11 +10,14 @@ export const metadata = { title: "Parlamentares" };
 const PAGE_SIZE = 48;
 
 async function getParties(): Promise<string[]> {
+  // Apenas partidos que têm parlamentar no diretório (evita siglas vazias)
   const { data } = await supabase
-    .from("party")
-    .select("sigla")
-    .order("sigla");
-  return (data ?? []).map((r) => r.sigla).filter(Boolean);
+    .from("person_directory")
+    .select("party_sigla")
+    .not("party_sigla", "is", null)
+    .limit(2000);
+  const siglas = (data ?? []).map((r) => r.party_sigla as string).filter(Boolean);
+  return [...new Set(siglas)].sort();
 }
 
 export default async function PessoasPage({

@@ -133,7 +133,9 @@ def normalize_division(v):
         "body": v.get("casaSessao") or "PLEN",
         "description": v.get("descricaoVotacao") or v.get("ementa"),
         "result_approved": _bool_result(v.get("resultadoVotacao")),
-        "is_secret": bool(v.get("votacaoSecreta")),
+        # A API manda "S"/"N" (string): bool("N") seria True. Compara o texto.
+        "is_secret": str(v.get("votacaoSecreta") or "").strip().upper()
+                     in ("S", "SIM", "TRUE", "1"),
         # proposição / matéria
         "prop_external_id": str(v.get("codigoMateria")) if v.get("codigoMateria") else None,
         "prop_sigla": v.get("sigla"),

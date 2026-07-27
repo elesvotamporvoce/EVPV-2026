@@ -27,6 +27,20 @@ async function getData() {
       (a, b) => featuredRank(a.name) - featuredRank(b.name) || a.name.localeCompare(b.name)
     );
 
+    // Principais politicas: as 4 com mais parlamentares com posicao atribuida
+    const { data: partic } = await supabase
+      .from("policy_participation")
+      .select("policy_id, n_scored");
+    const partBy = new Map(
+      ((partic ?? []) as { policy_id: number; n_scored: number }[]).map((r) => [
+        r.policy_id,
+        r.n_scored,
+      ])
+    );
+    const principais = [...pols]
+      .sort((a, b) => (partBy.get(b.id) ?? 0) - (partBy.get(a.id) ?? 0))
+      .slice(0, 4);
+
     // Assuntos em alta: as 3 primeiras em destaque, com o retrato por partido
     const hot = pols.filter((p) => FEATURED_POLICIES.includes(p.name)).slice(0, 3);
     let trends: Trend[] = [];
@@ -119,10 +133,11 @@ async function getData() {
       });
     }
 
-    return { policies: pols, trends, recordistas, procurados, people: people ?? 0, divisions: divisions ?? 0 };
+    return { policies: pols, principais, trends, recordistas, procurados, people: people ?? 0, divisions: divisions ?? 0 };
   } catch {
     return {
       policies: [] as Policy[],
+      principais: [] as Policy[],
       trends: [] as Trend[],
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
       procurados: [] as { person: PersonDir; nVotes: number | null; eligible: number | null }[],
@@ -133,13 +148,13 @@ async function getData() {
 }
 
 export default async function Home() {
-  const { policies, trends, recordistas, procurados, people, divisions } = await getData();
+  const { policies, principais, trends, recordistas, procurados, people, divisions } = await getData();
 
   return (
     <div className="space-y-12">
       <section className="home-hero relative left-1/2 -mt-8 w-screen -translate-x-1/2 bg-brand-ink text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold sm:text-5xl">
+          <h1 className="mx-auto max-w-3xl text-4xl font-bold text-brand-light sm:text-5xl">
             Seu deputado e senador votam como você votaria?
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/70">
@@ -152,9 +167,9 @@ export default async function Home() {
           </div>
           <BigNumbers
             items={[
-              { value: people, label: "parlamentares" },
-              { value: divisions, label: "votações" },
-              { value: policies.length, label: "políticas" },
+              { value: people, label: "parlamentares analisados" },
+              { value: divisions, label: "sessões de votação" },
+              { value: policies.length, label: "temas políticos" },
             ]}
           />
         </div>
@@ -251,7 +266,7 @@ export default async function Home() {
                     </span>
                   </div>
                 ))}
-                <p className="mt-3 text-xs text-slate-400">
+                <p className="mt-3 text-center text-xs text-slate-400">
                   % de apoio à política, por partido
                 </p>
               </Link>
@@ -313,7 +328,7 @@ export default async function Home() {
           </h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {policies.filter((p) => featuredRank(p.name) < 99).map((pol) => (
+          {principais.map((pol) => (
             <Link
               key={pol.id}
               href={`/politicas/${pol.id}`}
