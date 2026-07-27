@@ -62,7 +62,10 @@ WITH p AS (
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('1548579-144','for','normal'),  -- PL 182/2024 economia verde
+  ('1548579-144','for','normal'),  -- PL 182/2024 economia verde (destaque)
+  ('1548579-194','for','strong'),  -- mercado de carbono: aprovacao final do Substitutivo do Senado (Lei 15.042/2024)
+  ('2238434-80','for','normal'),   -- Combustivel do Futuro (PL 528/2020): aprovacao principal
+  ('604557-191','for','normal'),   -- Lei do Mar (PL 6969/2013): aprovacao do substitutivo
   ('2238434-100','for','normal'),  -- PL 528/2020 biocombustíveis
   ('2438467-47','for','normal'),   -- PL 2215/2024 Dia da Ação Climática
   ('604557-205','for','normal'),   -- PL 6969/2013 Bioma Marinho
@@ -106,9 +109,12 @@ WITH p AS (
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('camara','2194899-125','for','strong'),  -- PEC 24/2019 educação fora do teto
-  ('camara','2541109-45','for','strong'),   -- PLP 163/2025 fora dos limites fiscais
-  ('camara','1198512-279','for','normal'),  -- PEC 15/2015 FUNDEB permanente
+  ('camara','2194899-103','for','strong'),  -- PEC 24/2019: 1º turno do substitutivo (principal)
+  ('camara','2194899-125','for','normal'),  -- PEC 24/2019 educação fora do teto (destaque)
+  ('camara','2541109-38','for','strong'),   -- PLP 163/2025: aprovacao principal na Camara
+  ('camara','2541109-45','for','normal'),   -- PLP 163/2025 fora dos limites fiscais (destaque)
+  ('camara','1198512-250','for','strong'),  -- FUNDEB permanente: 1º turno do substitutivo (principal)
+  ('camara','1198512-279','for','normal'),  -- PEC 15/2015 FUNDEB permanente (destaque)
   ('camara','2208007-48','for','normal'),   -- PEC 96/2019 execução obrigatória
   ('camara','2409076-34','for','normal'),   -- PLP 243/2023 Pé-de-Meia (Câmara)
   ('camara','2465240-36','for','normal'),   -- PL 3118/2024 assistência estudantil
@@ -193,6 +199,7 @@ WITH p AS (
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
+  ('2562149-7','for','normal'),   -- urgencia da anistia (311x163, set/2025)
   ('2358548-89','for','strong'),  -- aprovação do substitutivo (291x148)
   ('2358548-81','for','normal'),  -- texto mantido (destaque)
   ('2358548-86','for','normal')   -- texto mantido (destaque)
