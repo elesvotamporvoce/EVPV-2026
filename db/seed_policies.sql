@@ -56,7 +56,7 @@ DELETE FROM policy WHERE name = 'Ação climática e conservação';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Ação climática e conservação',
-    'Políticas de clima e conservação da natureza: economia de baixo carbono, biocombustíveis, bioma marinho, produção e consumo sustentáveis, educação para desastres climáticos, direito das crianças à Natureza e tratados de conservação. Votar SIM apoia a política.',
+    'Políticas de clima e conservação da natureza: mercado de carbono (Lei 15.042/2024), Combustível do Futuro e biocombustíveis, bioma marinho (Lei do Mar), produção e consumo sustentáveis, educação para desastres climáticos, direito das crianças à Natureza e tratados de conservação. Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -140,6 +140,7 @@ JOIN (VALUES
   ('camara','345311-270','against','strong'),  -- PL 490/2007 Marco Temporal (Câmara)
   ('camara','345311-279','against','normal'),  -- PL 490/2007 destaque
   ('camara','2471177-56','against','normal'),  -- PL 4497/2024 registros s/ demarcação
+  ('camara','2471177-102','against','strong'), -- PL 4497/2024: aprovacao final do Substitutivo do Senado (dez/2025)
   ('senado','6756','against','strong'),        -- PL 2903/2023 Marco Temporal (Senado, 43x21)
   ('senado','7032','against','strong'),        -- PEC 48/2023 1º turno (52x14)
   ('senado','7033','against','normal')         -- PEC 48/2023 2º turno (52x15)
@@ -260,7 +261,8 @@ INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('2386051-93','against','strong'),  -- PL 4357/2023 proibe desapropriar terra produtiva
-  ('2471177-56','against','strong'),  -- PL 4497/2024 "PL da Grilagem" (vetado)
+  ('2471177-56','against','normal'),  -- PL 4497/2024 "PL da Grilagem" (aprovacao na Camara)
+  ('2471177-102','against','strong'), -- PL 4497/2024: aprovacao final do Substitutivo do Senado (dez/2025)
   ('2349493-82','against','normal')   -- PL 709/2023 pune ocupacoes
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
