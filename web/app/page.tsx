@@ -389,7 +389,7 @@ export default async function Home() {
             <p className="font-medium text-slate-800">3. Calculamos a média</p>
             <p className="mt-1">
               Para cada parlamentar, o quanto ele apoia ou rejeita cada política.{" "}
-              <Link href="/como-funciona" className="text-brand hover:underline">
+              <Link href="/sobre" className="text-brand hover:underline">
                 Ver metodologia
               </Link>
               .

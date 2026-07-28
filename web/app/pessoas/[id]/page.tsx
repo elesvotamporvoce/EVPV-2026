@@ -335,7 +335,7 @@ export default async function PersonPage({
                 <p className="mt-2 text-xs text-slate-400">
                   Considera as votações nominais da casa durante o mandato; votos
                   secretos contam como participação. Critério completo em{" "}
-                  <Link href="/como-funciona" className="text-brand hover:underline">
+                  <Link href="/sobre" className="text-brand hover:underline">
                     Como funciona
                   </Link>
                   .

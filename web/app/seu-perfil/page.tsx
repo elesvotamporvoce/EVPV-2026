@@ -21,26 +21,21 @@ async function getPolicies() {
       r.n_scored,
     ])
   );
-  const ordered = ((pols ?? []) as QuizPolicy[]).sort(
+  return ((pols ?? []) as QuizPolicy[]).sort(
     (a, b) => (n.get(b.id) ?? 0) - (n.get(a.id) ?? 0)
   );
-  return { principais: ordered.slice(0, 8), extras: ordered.slice(8) };
 }
 
 export default async function SeuPerfilPage() {
-  const { principais, extras } = await getPolicies();
+  const policies = await getPolicies();
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-brand">Quem vota como você?</h1>
-        <p className="mt-2 text-slate-600">
-          Diga como você votaria em cada tema. No final, comparamos suas
-          respostas com os votos reais no Congresso.
-        </p>
-      </div>
+      <h1 className="text-center text-2xl font-bold text-brand">
+        Quem vota como você?
+      </h1>
 
-      <QuizPerfil principais={principais} extras={extras} />
+      <QuizPerfil policies={policies} />
     </div>
   );
 }

@@ -35,15 +35,9 @@ const OPTIONS = [
   { label: "Sempre a favor", value: 100, color: "#16a34a" },
 ];
 
-export default function QuizPerfil({
-  principais,
-  extras,
-}: {
-  principais: QuizPolicy[];
-  extras: QuizPolicy[];
-}) {
+export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const [started, setStarted] = useState(false);
-  const [list, setList] = useState<QuizPolicy[]>(principais);
+  const [list, setList] = useState<QuizPolicy[]>(policies);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [uf, setUf] = useState("");
@@ -156,7 +150,7 @@ export default function QuizPerfil({
 
   function recomecar() {
     setStarted(false);
-    setList(principais);
+    setList(policies);
     setStep(0);
     setAnswers({});
     setUf("");
@@ -172,10 +166,9 @@ export default function QuizPerfil({
           Responda como você votaria
         </p>
         <p className="mx-auto mt-2 max-w-xl leading-relaxed text-slate-600">
-          São {principais.length} temas que já foram votados no Congresso, com uma
-          explicação curta de cada um. No final, você escolhe seu estado e
-          mostramos quais partidos e parlamentares mais votam como você. Leva
-          cerca de 3 minutos.
+          Diga como você votaria em cada tema. No final, comparamos suas
+          respostas com os votos reais do Congresso e mostramos quais partidos e
+          parlamentares mais votam como você. Leva cerca de 3 minutos.
         </p>
         <button
           type="button"
@@ -271,27 +264,13 @@ export default function QuizPerfil({
             parlamentar nos temas que você respondeu. Não é recomendação de voto:
             um mesmo parlamentar pode concordar com você em um tema e discordar
             em outro. Veja a{" "}
-            <Link href="/como-funciona" className="text-brand hover:underline">
+            <Link href="/sobre" className="text-brand hover:underline">
               metodologia
             </Link>
             .
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
-            {extras.length > 0 && list.length === principais.length && (
-              <button
-                type="button"
-                onClick={() => {
-                  setList([...principais, ...extras]);
-                  setStep(principais.length);
-                  setPeople(null);
-                  setParties(null);
-                }}
-                className="rounded-lg bg-brand px-5 py-2.5 font-semibold text-white hover:bg-brand-dark"
-              >
-                Responder mais {extras.length} temas
-              </button>
-            )}
             <button
               type="button"
               onClick={recomecar}
@@ -356,9 +335,11 @@ export default function QuizPerfil({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-center text-xl font-bold leading-snug text-slate-800">
-          {current.name}
-        </h2>
+        <div className="rounded-md bg-violet-100 px-4 py-3">
+          <h2 className="text-center text-xl font-bold leading-snug text-slate-800">
+            {current.name}
+          </h2>
+        </div>
         {current.impact && (
           <div className="mt-4 rounded-none border-l-4 border-amber-500 bg-amber-100 p-4">
             <p className="text-sm font-semibold text-amber-900">

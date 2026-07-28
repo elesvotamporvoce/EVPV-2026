@@ -58,8 +58,8 @@ export default function TermosPage() {
           sempre os registros oficiais da Câmara e do Senado, que linkamos em
           cada votação. O conteúdo tem caráter informativo e não substitui as
           fontes oficiais. A metodologia completa está na página{" "}
-          <a href="/como-funciona" className="text-brand hover:underline">
-            Como funciona
+          <a href="/sobre" className="text-brand hover:underline">
+            Sobre o site
           </a>
           .
         </p>

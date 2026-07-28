@@ -5,8 +5,7 @@ const links = [
   { href: "/pessoas", label: "Parlamentares" },
   { href: "/politicas", label: "Políticas" },
   { href: "/seu-perfil", label: "Seu perfil" },
-  { href: "/como-funciona", label: "Como funciona" },
-  { href: "/sobre", label: "Sobre" },
+  { href: "/sobre", label: "Sobre o site" },
 ];
 
 export default function Navbar() {

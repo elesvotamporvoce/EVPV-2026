@@ -9,8 +9,9 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: "/metodologia", destination: "/como-funciona", permanent: true },
-      { source: "/faq", destination: "/como-funciona", permanent: true },
+      { source: "/metodologia", destination: "/sobre", permanent: true },
+      { source: "/faq", destination: "/sobre", permanent: true },
+      { source: "/como-funciona", destination: "/sobre", permanent: true },
     ];
   },
 };

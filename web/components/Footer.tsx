@@ -10,12 +10,8 @@ export default function Footer() {
           da Câmara dos Deputados e do Senado Federal, organizados para você.
         </p>
         <p className="mt-3">
-          <Link href="/como-funciona" className="text-brand hover:underline">
-            Como funciona
-          </Link>{" "}
-          ·{" "}
           <Link href="/sobre" className="text-brand hover:underline">
-            Sobre e fontes
+            Sobre o site
           </Link>{" "}
           ·{" "}
           <Link href="/termos" className="text-brand hover:underline">
