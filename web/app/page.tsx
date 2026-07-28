@@ -173,6 +173,17 @@ export default async function Home() {
               { value: policies.length, label: "temas políticos" },
             ]}
           />
+          <div className="mt-9">
+            <Link
+              href="/seu-perfil"
+              className="inline-block rounded-lg bg-brand px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-brand/25 hover:bg-brand-dark"
+            >
+              Quem vota como você?
+            </Link>
+            <p className="mt-2.5 text-sm text-white/60">
+              Responda como você votaria e descubra quem te representa
+            </p>
+          </div>
         </div>
       </section>
 
