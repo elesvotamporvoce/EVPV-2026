@@ -15,7 +15,7 @@ DELETE FROM policy WHERE name = 'Proteção das mulheres contra a violência';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Proteção das mulheres contra a violência',
-    'Proteção das mulheres contra a violência: Lei Maria da Penha, tipificação da violência vicária, monitoramento eletrônico de agressores, atendimento especializado nas delegacias, proibição de armas para agressores, combate à violência política de gênero e o Sistema Nacional de Enfrentamento. Votar SIM apoia a política.',
+    'Reúne as votações sobre proteção de mulheres contra a violência: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -23,7 +23,8 @@ SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('2421056-8','for','normal'),    -- PL 3874/2023 armas p/ agressores
   ('2427395-8','for','normal'),    -- PL 4381/2023 delegacias
-  ('2267839-92','for','normal'),   -- PL 5231/2020 discriminação por agentes
+  -- PL 5231/2020 removido: trata de discriminacao por agentes publicos em geral,
+  -- nao de violencia contra a mulher (e era votacao de comissao com 14 votos).
   ('2449741-72','for','normal'),   -- PL 2942/2024 monitoramento eletrônico
   ('2462009-79','for','strong'),   -- PL 3880/2024 violência vicária (M. Penha)
   ('2626432-8','for','normal'),    -- PL 68/2025 violência política de gênero
@@ -67,7 +68,8 @@ JOIN (VALUES
   ('2238434-80','for','normal'),   -- Combustivel do Futuro (PL 528/2020): aprovacao principal
   ('604557-191','for','normal'),   -- Lei do Mar (PL 6969/2013): aprovacao do substitutivo
   ('2238434-100','for','normal'),  -- PL 528/2020 biocombustíveis
-  ('2438467-47','for','normal'),   -- PL 2215/2024 Dia da Ação Climática
+  -- PL 2215/2024 removido: institui data comemorativa (Dia Nacional para a Acao
+  -- Climatica), sem efeito substantivo sobre a politica climatica.
   ('604557-205','for','normal'),   -- PL 6969/2013 Bioma Marinho
   ('2438687-71','for','normal'),   -- PL 2225/2024 crianças e Natureza
   ('545304-134','for','normal'),   -- PL 3899/2012 Producao/Consumo Sustentáveis
@@ -318,8 +320,11 @@ INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('15460-165','for','strong'),   -- aprovação do substitutivo (246x202)
-  ('15460-179','for','normal'),   -- texto mantido (234x175)
-  ('2374400-110','for','strong')  -- Bets: Câmara aprova emendas do Senado ao PL 3626/2023 (virou a Lei 14.790/2023)
+  ('15460-179','for','normal')    -- texto mantido (234x175)
+  -- NOTA: o PL 3626/2023 (Bets) foi retirado desta politica: regulamentar apostas
+  -- online nao equivale a apoiar a legalizacao de cassinos e bingos, e quem e
+  -- contra o jogo pode votar a favor de regular o que ja existe. Candidato a
+  -- politica propria ("Regulamentacao das apostas esportivas online").
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -359,10 +364,36 @@ UPDATE policy SET impact = CASE name
  WHEN 'Direitos dos trabalhadores' THEN 'Decide a sua jornada (fim da escala 6x1), o seu FGTS e os seus direitos na contratação. Impacto direto no tempo livre e no bolso de quem trabalha com carteira assinada.'
  WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Decide se quem participou da invasão e depredação dos prédios dos Três Poderes cumpre a pena aplicada ou é perdoado. Define o precedente para futuros ataques às instituições.'
  WHEN 'Endurecimento das penas' THEN 'Penas maiores e prisão mais longa para furto, roubo e porte ilegal de arma. Afeta a segurança pública, a superlotação dos presídios e o custo do sistema prisional, pago com o seu imposto.'
- WHEN 'Financiamento à cultura' THEN 'Define se R$ 15 bilhões de dinheiro público financiam shows, cinema, teatro e pontos de cultura na sua cidade, e se o streaming contribui para o audiovisual nacional.'
+ WHEN 'Financiamento à cultura' THEN 'Decide se o setor tem financiamento estável chegando a shows, cinema, teatro e pontos de cultura da sua cidade, e se as plataformas de streaming passam a pagar uma contribuição que financia produções brasileiras. Tem impacto na economia também: emprega técnicos, músicos e produtores, e movimenta o comércio em volta de cada evento.'
  WHEN 'Imunidade tributária das igrejas' THEN 'Igrejas deixariam de pagar impostos também sobre o que compram. De um lado, menos arrecadação para saúde e educação; do outro, mais recursos para os templos e suas obras sociais.'
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassinos e bingos voltam a funcionar legalmente no país: empregos e impostos de um lado; risco de vício em jogo e lavagem de dinheiro do outro.'
- WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Exigia autorização dos próprios colegas, em voto secreto, para processar criminalmente um parlamentar. Na prática, tornaria mais difícil punir deputados por crimes, inclusive corrupção.'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Se essa proposta tivesse sido aprovada, deputados e senadores só poderiam ser processados criminalmente com autorização dos próprios colegas, em voto secreto. Na prática, o Congresso viraria juiz de si mesmo, e crimes como corrupção ficariam muito mais difíceis de punir.'
  WHEN 'Reforma agrária e acesso à terra' THEN 'Decide se terras improdutivas podem ser desapropriadas para assentar famílias sem terra e se ocupações de terras públicas viram propriedade privada. Afeta o preço dos alimentos e os conflitos no campo.'
  WHEN 'Reforma tributária do consumo' THEN 'Muda os impostos de tudo o que você compra: unifica cinco tributos, devolve dinheiro (cashback) para famílias de baixa renda e taxa mais os produtos que fazem mal à saúde.'
  ELSE impact END;
+
+-- ---------------------------------------------------------------------------
+--  Detalhes de cada politica (texto exibido em "Detalhes" na pagina da politica)
+--  Reescrito para explicar as votacoes em linguagem simples e citar os apelidos
+--  pelos quais as pautas ficaram conhecidas ("PL da Devastacao", "PEC da
+--  Blindagem", "marco dos jogos"...). Mantenha sincronizado ao incluir ou
+--  remover votacoes de uma politica.
+-- ---------------------------------------------------------------------------
+UPDATE policy SET description = CASE name
+ WHEN 'Proteção das mulheres contra a violência' THEN 'Reúne as votações sobre proteção de mulheres contra a violência: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.'
+ WHEN 'Ação climática e conservação' THEN 'Reúne as votações de clima e conservação da natureza: o mercado de carbono, que criou o Sistema Brasileiro de Comércio de Emissões (Lei 15.042/2024); o pacote Combustível do Futuro, de mobilidade de baixo carbono e captura de CO2; a Lei do Mar, de conservação do bioma marinho; a política de produção e consumo sustentáveis; a educação para desastres climáticos; o direito de crianças e adolescentes à Natureza; e a adesão ao tratado de conservação de espécies migratórias. Votar SIM apoia a política.'
+ WHEN 'Mais investimento na educação' THEN 'Reúne as votações sobre dinheiro para a educação pública: o FUNDEB permanente na Constituição (PEC 15/2015), a exclusão da educação do teto de gastos (PEC 24/2019) e dos limites do arcabouço fiscal (PLP 163/2025), a execução orçamentária obrigatória, a política de assistência estudantil e o Pé-de-Meia, a poupança que ajuda o aluno de baixa renda a terminar o ensino médio. Votar SIM apoia mais investimento.'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Reúne as votações sobre igualdade entre mulheres e homens no trabalho, com destaque para a Lei da Igualdade Salarial (PL 1085/2023), que obriga empresas a pagar o mesmo salário para a mesma função e a publicar relatórios de transparência salarial. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas conforme o Congresso votar o tema.'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'Reúne as votações que flexibilizam o licenciamento ambiental, a começar pelo PL 2159/2021, apelidado de "PL da Devastação", que cria a licença por autodeclaração, e pela MPV 1308/2025, que instituiu a licença especial para obras prioritárias. Score alto = defende manter as regras rigorosas; score baixo = votou para flexibilizar.'
+ WHEN 'Direitos dos povos indígenas' THEN 'Reúne as votações sobre os direitos territoriais dos povos indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Inclui também o PL 4497/2024, o "PL da Grilagem", que valida registros de imóveis sobre terras públicas e terras indígenas em demarcação. Score alto = defende os direitos indígenas.'
+ WHEN 'Igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
+ WHEN 'Direitos dos trabalhadores' THEN 'Reúne as votações sobre direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
+ WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
+ WHEN 'Endurecimento das penas' THEN 'Reúne as votações que aumentam penas e endurecem o cumprimento delas: pena maior para porte ilegal de arma de uso restrito (PL 4149/2004), para furto e roubo (PL 3780/2023) e para lesão corporal grave (PL 6749/2016), além da exigência de cumprir 80% da pena antes de progredir de regime em crimes hediondos (PL 1112/2023). Score alto = apoia o endurecimento penal.'
+ WHEN 'Financiamento à cultura' THEN 'Reúne as votações sobre dinheiro público para cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025), que repassa cerca de R$ 15 bilhões a estados e municípios ao longo de cinco anos, e a regulamentação do streaming (PL 8889/2017), que cobra uma contribuição de plataformas como Netflix e Prime Video para financiar o audiovisual brasileiro. Score alto = apoia o financiamento à cultura.'
+ WHEN 'Reforma agrária e acesso à terra' THEN 'Reúne as votações sobre terra e reforma agrária: o PL 4357/2023, que proíbe desapropriar imóveis produtivos para fins de reforma agrária; o PL 4497/2024, o "PL da Grilagem", que valida registros sobre terras públicas em faixa de fronteira, inclusive sobre terras indígenas em demarcação; e o PL 709/2023, que endurece a punição a famílias que ocupam terras. Score alto = defende a reforma agrária e o acesso à terra.'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Reúne as votações sobre a PEC 3/2021, a "PEC da Blindagem", que exigiria autorização prévia da própria Câmara ou do Senado, em voto secreto, para o STF processar criminalmente um parlamentar. Foi aprovada pela Câmara em setembro de 2025 e, depois de protestos em todo o país, rejeitada pelo Senado. Score alto = a favor da blindagem.'
+ WHEN 'Imunidade tributária das igrejas' THEN 'Reúne as votações sobre a PEC 5/2023, que amplia a imunidade tributária das igrejas: hoje elas não pagam impostos sobre templos e patrimônio, e a proposta estende o benefício à compra de bens e serviços usados nas atividades religiosas. Aprovada pela Câmara em dois turnos em maio de 2026. Score alto = a favor da ampliação.'
+ WHEN 'Legalização dos jogos de azar' THEN 'Reúne as votações sobre o PL 442/1991, o "marco dos jogos", que legaliza cassinos em resorts, bingos, jogo do bicho e apostas em corridas de cavalo. Foi aprovado pela Câmara em fevereiro de 2022 e segue parado no Senado. Score alto = a favor da legalização.'
+ WHEN 'Reforma tributária do consumo' THEN 'Reúne as votações da reforma tributária do consumo (PEC 45/2019), promulgada como Emenda Constitucional 132/2023: substitui cinco tributos (PIS, Cofins, IPI, ICMS e ISS) por um IVA dual (CBS federal e IBS de estados e municípios), cria o cashback, que devolve imposto a famílias de baixa renda, e o imposto seletivo sobre produtos nocivos à saúde e ao meio ambiente. Inclui os votos das duas casas. Score alto = a favor da reforma.'
+ ELSE description END;

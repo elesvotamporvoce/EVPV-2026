@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import HomeSearch from "@/components/HomeSearch";
 import BigNumbers from "@/components/BigNumbers";
+import FeaturedRotator from "@/components/FeaturedRotator";
 import { CARGO_LABEL, FEATURED_POLICIES, MANDATE_CLASS, MANDATE_LABEL, featuredRank, scoreColor } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
@@ -180,7 +181,7 @@ export default async function Home() {
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
             Políticos mais procurados
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FeaturedRotator>
             {procurados.map(({ person, nVotes, eligible }) => (
               <Link
                 key={person.id}
@@ -222,7 +223,7 @@ export default async function Home() {
                 )}
               </Link>
             ))}
-          </div>
+          </FeaturedRotator>
         </section>
       )}
 
