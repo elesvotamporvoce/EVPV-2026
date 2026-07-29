@@ -192,14 +192,14 @@ export default async function Home() {
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
             Políticos mais procurados
           </h2>
-          <FeaturedRotator>
+          <FeaturedRotator size={4} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {procurados.map(({ person, nVotes, eligible }) => (
               <Link
                 key={person.id}
                 href={`/pessoas/${person.id}`}
-                className="rounded-xl border border-slate-200 bg-white p-5 text-center hover:border-brand-light hover:shadow-sm"
+                className="rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-brand-light hover:shadow-sm"
               >
-                <span className="mx-auto block h-20 w-20 overflow-hidden rounded-full bg-slate-100">
+                <span className="mx-auto block h-16 w-16 overflow-hidden rounded-full bg-slate-100">
                   {person.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -210,15 +210,15 @@ export default async function Home() {
                     />
                   ) : null}
                 </span>
-                <p className="mt-3 text-lg font-semibold text-slate-800">
+                <p className="mt-2.5 text-[15px] font-semibold leading-snug text-slate-800">
                   {person.name}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-500">
                   {person.party_sigla ?? "sem partido"}
                   {person.uf ? ` · ${person.uf}` : ""} · {CARGO_LABEL[person.house]}
                 </p>
                 {nVotes !== null && eligible !== null && eligible > 0 && (
-                  <p className="mt-3 text-xs text-slate-400">
+                  <p className="mt-2 text-[11px] leading-snug text-slate-400">
                     Votou em {nVotes.toLocaleString("pt-BR")} de{" "}
                     {eligible.toLocaleString("pt-BR")} sessões
                   </p>

@@ -24,7 +24,12 @@ export default function FeaturedRotator({
     if (page >= pages) setPage(0);
   }, [page, pages]);
 
-  const visible = items.slice(page * size, page * size + size);
+  // Wrap-around: se a última página ficaria incompleta, completa com os
+  // primeiros itens, para o grid nunca aparecer quebrado.
+  const visible =
+    items.length >= size
+      ? Array.from({ length: size }, (_, i) => items[(page * size + i) % items.length])
+      : items;
   const go = (dir: number) => setPage((p) => (p + dir + pages) % pages);
 
   if (pages <= 1) return <div className={className}>{visible}</div>;

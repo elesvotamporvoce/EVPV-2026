@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
 import PersonCard from "@/components/PersonCard";
-import SearchFilters from "@/components/SearchFilters";
 import Link from "next/link";
 import type { PersonDir } from "@/lib/types";
 
@@ -8,83 +7,46 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Eleições 2026",
   description:
-    "Quais deputados e senadores atuais são candidatos nas eleições de 2026, e como cada um votou no mandato.",
+    "Deputados e senadores atuais com pré-candidatura anunciada ou candidatura registrada para 2026, e como cada um votou no mandato.",
+  // Página ainda não divulgada: fora do menu e fora dos buscadores até
+  // termos candidaturas suficientes.
+  robots: { index: false, follow: false },
 };
 
-const PAGE_SIZE = 48;
+const SITUACAO_LABEL: Record<string, string> = {
+  anunciado: "Pré-candidatura anunciada",
+  pendente: "Registro em análise",
+  deferido: "Candidatura deferida",
+  indeferido: "Registro indeferido",
+};
 
-async function getParties(): Promise<string[]> {
-  const { data } = await supabase
-    .from("person_directory")
-    .select("party_sigla")
-    .not("party_sigla", "is", null)
-    .limit(2000);
-  const siglas = (data ?? []).map((r) => r.party_sigla as string).filter(Boolean);
-  return [...new Set(siglas)].sort();
-}
-
-export default async function Eleicoes2026Page({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    q?: string;
-    house?: string;
-    uf?: string;
-    party?: string;
-    page?: string;
-    so?: string;
-  }>;
-}) {
-  const sp = await searchParams;
-  const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
-  const from = (page - 1) * PAGE_SIZE;
-
+export default async function Eleicoes2026Page() {
   const { data: cand } = await supabase
     .from("candidatura_2026")
-    .select("person_id, cargo, uf, situacao")
+    .select("person_id, cargo, uf, situacao, fonte, atualizado_em")
+    .order("situacao")
     .limit(2000);
   const candRows = (cand ?? []) as {
     person_id: number;
     cargo: string | null;
     uf: string | null;
     situacao: string | null;
+    fonte: string | null;
   }[];
-  const candBy = new Map(candRows.map((c) => [c.person_id, c]));
-  const soCandidatos = sp.so === "1";
 
-  let query = supabase
-    .from("person_directory")
-    .select("*", { count: "exact" })
-    .in("mandate_status", ["em_exercicio", "licenciado"])
-    .order("name");
-
-  if (sp.q) query = query.ilike("name", `%${sp.q}%`);
-  if (sp.house) query = query.eq("house", sp.house);
-  if (sp.uf) query = query.eq("uf", sp.uf);
-  if (sp.party) query = query.eq("party_sigla", sp.party);
-  if (soCandidatos) {
-    const ids = candRows.map((c) => c.person_id);
-    query = query.in("id", ids.length ? ids : [-1]);
+  let people: PersonDir[] = [];
+  if (candRows.length) {
+    const { data } = await supabase
+      .from("person_directory")
+      .select("*")
+      .in(
+        "id",
+        candRows.map((c) => c.person_id)
+      )
+      .order("name");
+    people = (data ?? []) as PersonDir[];
   }
-
-  const [{ data, count }, parties] = await Promise.all([
-    query.range(from, from + PAGE_SIZE - 1),
-    getParties(),
-  ]);
-  const people = (data ?? []) as PersonDir[];
-  const total = count ?? 0;
-  const pages = Math.ceil(total / PAGE_SIZE);
-
-  const qs = (p: number) => {
-    const params = new URLSearchParams();
-    if (sp.q) params.set("q", sp.q);
-    if (sp.house) params.set("house", sp.house);
-    if (sp.uf) params.set("uf", sp.uf);
-    if (sp.party) params.set("party", sp.party);
-    if (soCandidatos) params.set("so", "1");
-    params.set("page", String(p));
-    return `/eleicoes-2026?${params.toString()}`;
-  };
+  const candBy = new Map(candRows.map((c) => [c.person_id, c]));
 
   return (
     <div className="space-y-6">
@@ -93,76 +55,112 @@ export default async function Eleicoes2026Page({
         <div className="rounded-lg border border-amber-500 bg-amber-100 p-4">
           <p className="font-semibold text-amber-900">Lista parcial</p>
           <p className="mt-1 text-[15px] leading-relaxed text-amber-900/90">
-            As convenções partidárias vão até 5 de agosto e o prazo para
-            registrar candidatura termina em 15 de agosto de 2026. Até lá, esta
-            lista está incompleta: quem ainda não aparece como candidato pode vir
-            a se candidatar. Registrar candidatura também não é o mesmo que ter
-            candidatura confirmada, porque a Justiça Eleitoral ainda julga cada
-            pedido.
+            Esta lista reúne quem já anunciou pré-candidatura ou já registrou
+            candidatura, e por isso ainda está incompleta. As convenções
+            partidárias vão até 5 de agosto e o prazo para registrar candidatura
+            termina em 15 de agosto de 2026. Registrar candidatura também não é
+            o mesmo que tê-la confirmada: a Justiça Eleitoral ainda julga cada
+            pedido, e indicamos a situação de cada uma.
           </p>
         </div>
         <p className="text-slate-600">
-          Aqui estão os {total.toLocaleString("pt-BR")} deputados e senadores em
-          exercício. Quem já tem candidatura registrada para 2026 aparece com o
-          selo <span className="font-semibold text-brand">Candidato 2026</span>.
+          Deputados e senadores em exercício que já se movimentaram para 2026.
           Clique em qualquer um para ver como votou durante o mandato.
         </p>
       </div>
 
-      <SearchFilters parties={parties} basePath="/eleicoes-2026" />
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href={soCandidatos ? "/eleicoes-2026" : "/eleicoes-2026?so=1"}
-          className={`rounded-lg border px-4 py-2 text-sm font-semibold ${
-            soCandidatos
-              ? "border-brand bg-brand text-white"
-              : "border-slate-300 text-slate-700 hover:border-brand hover:text-brand"
-          }`}
-        >
-          {soCandidatos ? "✓ Só candidatos confirmados" : "Ver só candidatos confirmados"}
-        </Link>
-        <span className="text-sm text-slate-500">
-          {candRows.length} candidatura{candRows.length === 1 ? "" : "s"}{" "}
-          registrada{candRows.length === 1 ? "" : "s"} até agora
-        </span>
-      </div>
-
       {people.length === 0 ? (
-        <p className="py-12 text-center text-slate-500">
-          {soCandidatos
-            ? "Ainda não há candidaturas registradas na nossa base. Volte depois das convenções partidárias."
-            : "Nenhum parlamentar encontrado com esses filtros."}
-        </p>
+        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+          <p className="font-semibold text-slate-700">
+            Ainda não há pré-candidaturas ou candidaturas na nossa base.
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-slate-500">
+            As convenções partidárias começam agora e o registro das
+            candidaturas vai até 15 de agosto. Assim que houver nomes
+            confirmados, eles aparecem aqui. Enquanto isso, veja{" "}
+            <Link href="/pessoas" className="text-brand hover:underline">
+              todos os parlamentares
+            </Link>{" "}
+            e como cada um vota.
+          </p>
+        </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {people.map((p) => (
-            <PersonCard
-              key={p.id}
-              p={p}
-              candidato={candBy.get(p.id)?.situacao ? true : candBy.has(p.id)}
-            />
-          ))}
+          {people.map((p) => {
+            const c = candBy.get(p.id);
+            return (
+              <div key={p.id} className="space-y-1">
+                <PersonCard p={p} candidato />
+                {c && (
+                  <p className="px-1 text-xs text-slate-500">
+                    {c.cargo ? `${c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
+                    {SITUACAO_LABEL[c.situacao ?? ""] ?? "Situação não informada"}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-4 pt-4 text-sm">
-          {page > 1 && (
-            <Link href={qs(page - 1)} className="text-brand hover:underline">
-              ← Anterior
-            </Link>
-          )}
-          <span className="text-slate-500">
-            Página {page} de {pages}
-          </span>
-          {page < pages && (
-            <Link href={qs(page + 1)} className="text-brand hover:underline">
-              Próxima →
-            </Link>
-          )}
-        </div>
-      )}
+      <section className="rounded-lg border border-slate-200 bg-white p-5">
+        <h2 className="font-semibold text-slate-800">De onde vêm estes dados</h2>
+        <ul className="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-slate-600">
+          <li>
+            Candidaturas registradas:{" "}
+            <a
+              href="https://divulgacandcontas.tse.jus.br"
+              target="_blank"
+              rel="noreferrer"
+              className="text-brand hover:underline"
+            >
+              DivulgaCandContas, do TSE
+            </a>
+            , sistema oficial que publica os pedidos de registro e a situação de
+            cada um.
+          </li>
+          <li>
+            Dados consolidados e histórico de eleições:{" "}
+            <a
+              href="https://dadosabertos.tse.jus.br"
+              target="_blank"
+              rel="noreferrer"
+              className="text-brand hover:underline"
+            >
+              Portal de Dados Abertos do TSE
+            </a>
+            .
+          </li>
+          <li>
+            Calendário eleitoral e prazos:{" "}
+            <a
+              href="https://www.tse.jus.br"
+              target="_blank"
+              rel="noreferrer"
+              className="text-brand hover:underline"
+            >
+              Tribunal Superior Eleitoral
+            </a>
+            .
+          </li>
+          <li>
+            Pré-candidaturas anunciadas: declarações públicas do próprio
+            parlamentar ou do partido, antes do registro oficial. São marcadas
+            como &quot;pré-candidatura anunciada&quot; justamente por ainda não
+            constarem no TSE.
+          </li>
+        </ul>
+        <p className="mt-3 text-xs text-slate-400">
+          Encontrou um nome errado ou faltando? Escreva para{" "}
+          <a
+            href="mailto:contato@elesvotamporvoce.org"
+            className="text-brand hover:underline"
+          >
+            contato@elesvotamporvoce.org
+          </a>
+          .
+        </p>
+      </section>
     </div>
   );
 }

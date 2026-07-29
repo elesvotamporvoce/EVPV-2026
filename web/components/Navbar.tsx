@@ -6,13 +6,12 @@ const links = [
   { href: "/pessoas", label: "Parlamentares" },
   { href: "/politicas", label: "Políticas" },
   { href: "/seu-perfil", label: "Seu perfil" },
-  { href: "/eleicoes-2026", label: "Eleições 2026" },
   { href: "/sobre", label: "Sobre o site" },
 ];
 
 export default function Navbar() {
   return (
-    <header className="site-nav bg-brand-ink">
+    <header className="site-nav sticky top-0 z-50 bg-brand-ink shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link
           href="/"

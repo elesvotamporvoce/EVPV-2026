@@ -188,7 +188,7 @@ export default async function PersonPage({
 
       {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
           nas bordas da caixa durante o scroll) */}
-      <div className="sticky top-0 z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
+      <div className="sticky top-[58px] z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
       <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100">
           {dir.photo_url ? (
