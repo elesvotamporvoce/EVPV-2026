@@ -68,7 +68,7 @@ export const UFS = [
 // Políticas em destaque no site (aparecem primeiro, com selo)
 export const FEATURED_POLICIES = [
   "Combate à violência contra a mulher",
-  "Direitos dos trabalhadores",
+  "Proteção dos direitos trabalhistas",
   "Ação climática e conservação",
   "Mais investimento na educação",
 ];
