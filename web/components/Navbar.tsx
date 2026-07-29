@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LogoMark from "./Logo";
+import NavMenu from "./NavMenu";
 
 const links = [
   { href: "/pessoas", label: "Parlamentares" },
@@ -19,13 +20,7 @@ export default function Navbar() {
           <LogoMark className="h-4 w-auto" />
           <span className="text-lg">Eles Votam por Você</span>
         </Link>
-        <nav className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px] font-semibold">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="nav-link text-white/75 hover:text-white">
-              {l.label}
-            </Link>
-          ))}
-        </nav>
+        <NavMenu links={links} />
       </div>
     </header>
   );

@@ -156,12 +156,12 @@ export default async function Home() {
       <section className="home-hero relative left-1/2 -mt-8 w-screen -translate-x-1/2 bg-brand-ink text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center">
           <h1 className="mx-auto max-w-3xl text-4xl font-bold text-brand-light sm:text-5xl">
-            Seu deputado e senador votam como você votaria?
+            Seu político vota como você votaria?
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            Promessa não vira lei. Voto sim. E cada voto mexe com seu salário,
-            sua saúde e seus direitos. Veja como cada um vota e tire suas próprias
-            conclusões.
+            O papel de um político é votar em projetos de lei.
+            <br />E cada voto mexe com seu salário, sua saúde e seus direitos.
+            <br />Veja aqui como cada um vota!
           </p>
           <div className="mt-7">
             <HomeSearch />
