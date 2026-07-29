@@ -62,6 +62,13 @@ export default async function PersonPage({
   const { dir, part, scores, votes } = await getPerson(id);
   if (!dir) notFound();
 
+  const { data: candRow } = await supabase
+    .from("candidatura_2026")
+    .select("cargo, uf, situacao")
+    .eq("person_id", id)
+    .maybeSingle();
+  const cand = candRow as { cargo: string | null; uf: string | null; situacao: string | null } | null;
+
   // Senadores: como ha poucos temas com voto aberto no Senado, mostramos
   // TODAS as politicas; as sem dados ganham aviso + referencia do partido
   let allScores = scores;
@@ -194,7 +201,22 @@ export default async function PersonPage({
           )}
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
+            {cand && (
+              <Link
+                href="/eleicoes-2026"
+                className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white hover:bg-brand-dark"
+                title={
+                  cand.cargo
+                    ? `Candidatura registrada: ${cand.cargo}`
+                    : "Candidatura registrada para 2026"
+                }
+              >
+                Candidato 2026
+              </Link>
+            )}
+          </div>
           <div className="mt-1.5 space-y-1.5">
           <p className="text-slate-500">
             {dir.party_sigla ?? "sem partido"}

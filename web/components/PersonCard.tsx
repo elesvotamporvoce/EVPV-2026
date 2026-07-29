@@ -1,8 +1,14 @@
 import Link from "next/link";
-import { HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL } from "@/lib/format";
+import { HOUSE_LABEL } from "@/lib/format";
 import type { PersonDir } from "@/lib/types";
 
-export default function PersonCard({ p }: { p: PersonDir }) {
+export default function PersonCard({
+  p,
+  candidato = false,
+}: {
+  p: PersonDir;
+  candidato?: boolean;
+}) {
   return (
     <Link
       href={`/pessoas/${p.id}`}
@@ -25,19 +31,15 @@ export default function PersonCard({ p }: { p: PersonDir }) {
       </div>
       <div className="min-w-0">
         <p className="truncate font-medium text-slate-800">{p.name}</p>
+        {candidato && (
+          <span className="my-0.5 inline-block rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-white">
+            Candidato 2026
+          </span>
+        )}
         <p className="truncate text-xs text-slate-500">
           {p.party_sigla ?? "sem partido"}
           {p.uf ? ` · ${p.uf}` : ""} · {HOUSE_LABEL[p.house]}
         </p>
-        {p.mandate_status && (
-          <p
-            className={`truncate text-xs font-semibold ${
-              MANDATE_CLASS[p.mandate_status] ?? "text-slate-500"
-            }`}
-          >
-            Mandato: {MANDATE_LABEL[p.mandate_status] ?? p.mandate_status}
-          </p>
-        )}
       </div>
     </Link>
   );

@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import HomeSearch from "@/components/HomeSearch";
 import BigNumbers from "@/components/BigNumbers";
 import FeaturedRotator from "@/components/FeaturedRotator";
-import { CARGO_LABEL, FEATURED_POLICIES, MANDATE_CLASS, MANDATE_LABEL, featuredRank, scoreColor } from "@/lib/format";
+import { CARGO_LABEL, FEATURED_POLICIES, featuredRank, scoreColor } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -217,15 +217,6 @@ export default async function Home() {
                   {person.party_sigla ?? "sem partido"}
                   {person.uf ? ` · ${person.uf}` : ""} · {CARGO_LABEL[person.house]}
                 </p>
-                {person.mandate_status && (
-                  <p
-                    className={`mt-1 text-sm font-semibold ${
-                      MANDATE_CLASS[person.mandate_status] ?? "text-slate-500"
-                    }`}
-                  >
-                    Mandato: {MANDATE_LABEL[person.mandate_status] ?? person.mandate_status}
-                  </p>
-                )}
                 {nVotes !== null && eligible !== null && eligible > 0 && (
                   <p className="mt-3 text-xs text-slate-400">
                     Votou em {nVotes.toLocaleString("pt-BR")} de{" "}

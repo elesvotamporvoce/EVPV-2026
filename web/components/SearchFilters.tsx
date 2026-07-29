@@ -6,7 +6,13 @@ import NameSuggest from "./NameSuggest";
 import { UFS } from "@/lib/format";
 
 // Filtro client-side que atualiza a URL (?q=&house=&uf=). A página é server-side.
-export default function SearchFilters({ parties }: { parties: string[] }) {
+export default function SearchFilters({
+  parties,
+  basePath = "/pessoas",
+}: {
+  parties: string[];
+  basePath?: string;
+}) {
   const router = useRouter();
   const sp = useSearchParams();
   const [, startTransition] = useTransition();
@@ -18,7 +24,7 @@ export default function SearchFilters({ parties }: { parties: string[] }) {
       else params.delete(k);
     }
     params.delete("page");
-    startTransition(() => router.push(`/pessoas?${params.toString()}`));
+    startTransition(() => router.push(`${basePath}?${params.toString()}`));
   }
 
   return (
