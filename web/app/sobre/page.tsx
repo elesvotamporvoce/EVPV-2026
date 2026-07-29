@@ -137,6 +137,23 @@ export default function SobrePage() {
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
+          E quando quase todos votam igual?
+        </h2>
+        <p className="text-slate-600">
+          Uma votação aprovada por 470 a 1 quase não distingue parlamentares:
+          saber que alguém acompanhou a maioria esmagadora informa pouco sobre
+          suas convicções. Por isso, quando 95% ou mais dos votos vão para o
+          mesmo lado, a votação entra com peso reduzido. Não a descartamos,
+          porque ela diz muito sobre a minoria que votou contra a corrente. O
+          corte é automático, calculado a partir do resultado apurado — não é
+          escolha editorial nossa caso a caso. Na página de cada política, essas
+          votações aparecem marcadas como &quot;quase unânime · peso reduzido&quot;,
+          com a porcentagem apurada, para você conferir.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">
           Quem decide se um parlamentar apoia uma política?
         </h2>
         <p className="text-slate-600">

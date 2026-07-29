@@ -34,10 +34,17 @@ import os
 import sys
 
 # ---- Constantes AJUSTÁVEIS da metodologia -------------------------------
-WEIGHT = {"normal": 10, "strong": 25}   # voto forte pesa mais
+WEIGHT = {"weak": 4, "normal": 10, "strong": 25}   # voto forte pesa mais
 ABSENCE_FACTOR = 0.20                    # ausência/abstenção entra com 20% do peso
 ABSENCE_CREDIT = 0.50                    # e vale como "neutro" (meio-termo)
 MIN_ATTENDED = 2                         # menos que isso -> 'sem dados suficientes'
+
+# Votação quase unânime quase não distingue parlamentares: se 95% ou mais votaram
+# do mesmo lado, saber que alguém acompanhou a maioria informa pouco. Ainda assim
+# NÃO descartamos a votação, porque ela informa muito sobre a minoria que votou
+# contra a corrente. Solução: rebaixamos para o peso 'weak', automaticamente, pela
+# margem apurada — a curadoria não precisa lembrar da regra.
+LOPSIDED_THRESHOLD = 0.95
 
 # votos decisivos; o resto (abstenção, obstrução, ausente, outro, artigo17)
 # é tratado como não-decisivo ("absent")
@@ -123,6 +130,30 @@ def load_policies(cur):
     return policies
 
 
+def lopsided_divisions(cur, division_ids, threshold=LOPSIDED_THRESHOLD):
+    """
+    Devolve o set de division_ids em que >= threshold dos votos decisivos ficou
+    do mesmo lado. Essas votações entram com peso 'weak'.
+    """
+    if not division_ids:
+        return set()
+    cur.execute(
+        """SELECT division_id,
+                  COUNT(*) FILTER (WHERE option = 'sim') AS sim,
+                  COUNT(*) FILTER (WHERE option = 'nao') AS nao
+             FROM vote
+            WHERE division_id = ANY(%s)
+            GROUP BY division_id""",
+        (list(division_ids),),
+    )
+    out = set()
+    for division_id, sim, nao in cur.fetchall():
+        total = (sim or 0) + (nao or 0)
+        if total and max(sim or 0, nao or 0) / total >= threshold:
+            out.add(division_id)
+    return out
+
+
 def votes_for_divisions(cur, division_ids):
     """(person_id, division_id) -> option, para as votações dadas."""
     if not division_ids:
@@ -140,7 +171,26 @@ def votes_for_divisions(cur, division_ids):
 def compute_policy(cur, policy_id, divisions):
     """Calcula e grava agreement_score para uma política. Retorna nº de pessoas."""
     div_ids = [d[0] for d in divisions]
-    stance_by_div = {d[0]: (d[1], d[2]) for d in divisions}
+    lopsided = lopsided_divisions(cur, div_ids)
+    # margem >= LOPSIDED_THRESHOLD rebaixa o peso, mesmo que a curadoria tenha
+    # marcado a votação como 'strong'.
+    stance_by_div = {
+        d[0]: (d[1], "weak" if d[0] in lopsided else d[2])
+        for d in divisions
+    }
+    if lopsided:
+        print(f"  {len(lopsided)} votação(ões) quase unânime(s) rebaixada(s) a peso 'weak'")
+
+    # Grava o peso efetivo de volta no banco: o site le essa coluna (via a view
+    # policy_division_detail) para mostrar ao usuario o MESMO peso que usamos no
+    # calculo. Sem isso a UI desenharia ★ de "voto forte" numa votacao rebaixada.
+    for did, (_stance, eff) in stance_by_div.items():
+        cur.execute(
+            "UPDATE policy_division SET effective_strength = %s "
+            " WHERE policy_id = %s AND division_id = %s",
+            (eff, policy_id, did),
+        )
+
     per_person = votes_for_divisions(cur, div_ids)
 
     rows = 0
@@ -164,6 +214,19 @@ def compute_policy(cur, policy_id, divisions):
              category, attended),
         )
         rows += 1
+
+    # Remove scores órfãos: quem tem linha gravada mas não votou em NENHUMA das
+    # votações atuais da política (acontece quando uma votação sai da política).
+    cur.execute(
+        """DELETE FROM agreement_score a
+            WHERE a.policy_id = %s
+              AND NOT EXISTS (SELECT 1 FROM vote v
+                               WHERE v.person_id = a.person_id
+                                 AND v.division_id = ANY(%s))""",
+        (policy_id, div_ids),
+    )
+    if cur.rowcount:
+        print(f"  {cur.rowcount} score(s) órfão(s) removido(s)")
     return rows
 
 
@@ -227,6 +290,19 @@ def self_test():
     s, a = agreement_from_comparisons([("for", "normal", "sim"),
                                        ("for", "normal", "ausente")])
     assert s > 85 and a == 1, (s, a)
+
+    # peso 'weak': votacao quase unanime quase nao move o score.
+    # concorda no weak (4), discorda no normal (10) -> 4/14 = ~28.6
+    s, a = agreement_from_comparisons([("for", "weak", "sim"),
+                                       ("for", "normal", "nao")])
+    assert abs(s - 100 * 4 / 14) < 1e-6, s
+    # o inverso pesa muito mais: concorda no normal, discorda no weak -> 10/14
+    s2, _ = agreement_from_comparisons([("for", "normal", "sim"),
+                                        ("for", "weak", "nao")])
+    assert s2 > s, (s, s2)
+    # strength desconhecido cai no default 'normal' (proteção contra dado sujo)
+    s3, _ = agreement_from_comparisons([("for", "xpto", "sim")])
+    assert s3 == 100.0, s3
 
     print("✅ self-test: todas as asserções da lógica de score passaram.")
     print("   exemplos:")
