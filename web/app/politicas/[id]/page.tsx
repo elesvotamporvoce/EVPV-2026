@@ -199,21 +199,23 @@ export default async function PolicyPage({
         </div>
       )}
 
-      {/* Cabeçalho fixo, em caixa (igual ao do parlamentar) */}
+      {/* Mais a favor / mais contra */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <RankList title="Top 10 que mais votaram a favor" rows={top} />
+        <RankList title="Top 10 que mais votaram contra" rows={bottom} />
+      </section>
+
+      {/* Resumo das votações que compõem a política */}
       <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-slate-800">Detalhes</h2>
+        <h2 className="text-lg font-semibold text-slate-800">
+          Resumo das votações
+        </h2>
         {pol.description && (
           <p className="mt-2 max-w-3xl text-lg leading-relaxed text-slate-600">
             {pol.description}
           </p>
         )}
       </div>
-
-      {/* Mais a favor / mais contra */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        <RankList title="Top 10 que mais votaram a favor" rows={top} />
-        <RankList title="Top 10 que mais votaram contra" rows={bottom} />
-      </section>
 
       {/* Votações que compõem a política */}
       <section>

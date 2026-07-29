@@ -9,12 +9,12 @@
 BEGIN;
 
 -- ---------------------------------------------------------------------------
---  Proteção das mulheres contra a violência
+--  Combate à violência contra a mulher
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Proteção das mulheres contra a violência';
+DELETE FROM policy WHERE name = 'Combate à violência contra a mulher';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Proteção das mulheres contra a violência',
+    'Combate à violência contra a mulher',
     'Reúne as votações sobre proteção de mulheres contra a violência: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.',
     false) RETURNING id
 )
@@ -127,12 +127,12 @@ JOIN (VALUES
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Direitos dos povos indígenas (provisória — por ora, o Marco Temporal)
+--  Demarcação de terras indígenas (provisória — por ora, o Marco Temporal)
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Direitos dos povos indígenas';
+DELETE FROM policy WHERE name = 'Demarcação de terras indígenas';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Direitos dos povos indígenas',
+    'Demarcação de terras indígenas',
     'Defesa dos direitos territoriais dos povos indígenas: CONTRA o Marco Temporal (PL 490/2007, que restringe a demarcação de terras às ocupadas em 5/10/1988). Score alto = defende os direitos indígenas. Cobre as duas casas: PL 490/2007 (Câmara), PL 2903/2023 e PEC 48/2023 (Senado) e PL 4497/2024 (registros sobre terras em demarcação, vetado).',
     true) RETURNING id
 )
@@ -354,13 +354,13 @@ COMMIT;
 --  "Por que isso importa para você?" — texto prático por política (coluna impact)
 -- ============================================================================
 UPDATE policy SET impact = CASE name
- WHEN 'Proteção das mulheres contra a violência' THEN 'Define o quanto o Estado protege mulheres da violência doméstica e do feminicídio: monitoramento de agressores, atendimento especializado nas delegacias e punição de quem agride. Afeta a segurança de mães, filhas e companheiras em todo o país.'
- WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe direto no contracheque de milhões de trabalhadoras.'
- WHEN 'Ação climática e conservação' THEN 'Influencia o preço e a origem da sua energia, a frequência das secas e enchentes que atingem cidades e alimentos, e o futuro das florestas e do mar que sustentam pesca e agricultura.'
- WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é o filtro que avalia se uma obra ou fábrica pode poluir rios, ar e comunidades vizinhas. Flexibilizar acelera empreendimentos; manter o rigor protege quem vive perto deles.'
- WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública: salário de professor, merenda, vaga em creche e apoio para o aluno de baixa renda terminar o ensino médio. Impacto direto em quem estuda ou tem filhos na rede pública.'
- WHEN 'Direitos dos povos indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas que as ocupam tradicionalmente ou fazendeiros e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima.'
- WHEN 'Igualdade racial' THEN 'Define cotas em concursos públicos, punição para o racismo e financiamento de candidaturas negras. Mexe com oportunidades de emprego e com a representação política da maioria da população brasileira.'
+ WHEN 'Combate à violência contra a mulher' THEN 'Define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos: tornozeleira no agressor, arma proibida para quem responde por agressão e delegacia preparada para atender a vítima. Afeta a segurança de mães, filhas e companheiras em todo o país.'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe direto no contracheque de milhões de trabalhadoras. Quem resiste vê interferência na negociação entre empresa e empregado.'
+ WHEN 'Ação climática e conservação' THEN 'Influencia o preço e a origem da sua energia, a frequência das secas e enchentes que atingem cidades e alimentos, e o futuro das florestas e do mar que sustentam pesca e agricultura. De um lado, isso empurra a indústria a se modernizar; do outro, há custo de adaptação que pode chegar ao consumidor.'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que avalia se uma obra ou fábrica pode poluir rios, ar e comunidades vizinhas. De um lado, flexibilizar diminui burocracias e acelera empreendimentos; do outro, significa menos proteção a quem vive perto deles e menos controle sobre quem paga a conta de um acidente.'
+ WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública: salário de professor, merenda, vaga em creche e apoio para o aluno de baixa renda terminar o ensino médio. Impacto direto em quem estuda ou tem filhos na rede pública. Para quem defende, é investimento que se paga no futuro; para quem critica, é gasto sem garantia de melhora no aprendizado.'
+ WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas ou os produtores e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima. De um lado, segurança jurídica para quem investe e produz (agronegócio); do outro, o território de comunidades que vivem ali há gerações.'
+ WHEN 'Igualdade racial' THEN 'Define a punição para quem comete racismo, cotas em concursos públicos e as regras de financiamento de candidaturas negras. Para quem defende, corrige uma desigualdade histórica; para quem critica, cria distinção entre cidadãos por critério de raça.'
  WHEN 'Direitos dos trabalhadores' THEN 'Decide a sua jornada (fim da escala 6x1), o seu FGTS e os seus direitos na contratação. Impacto direto no tempo livre e no bolso de quem trabalha com carteira assinada.'
  WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Decide se quem participou da invasão e depredação dos prédios dos Três Poderes cumpre a pena aplicada ou é perdoado. Define o precedente para futuros ataques às instituições.'
  WHEN 'Endurecimento das penas' THEN 'Penas maiores e prisão mais longa para furto, roubo e porte ilegal de arma. Afeta a segurança pública, a superlotação dos presídios e o custo do sistema prisional, pago com o seu imposto.'
@@ -380,12 +380,12 @@ UPDATE policy SET impact = CASE name
 --  remover votacoes de uma politica.
 -- ---------------------------------------------------------------------------
 UPDATE policy SET description = CASE name
- WHEN 'Proteção das mulheres contra a violência' THEN 'Reúne as votações sobre proteção de mulheres contra a violência: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.'
+ WHEN 'Combate à violência contra a mulher' THEN 'Reúne as votações sobre o combate à violência contra a mulher: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.'
  WHEN 'Ação climática e conservação' THEN 'Reúne as votações de clima e conservação da natureza: o mercado de carbono, que criou o Sistema Brasileiro de Comércio de Emissões (Lei 15.042/2024); o pacote Combustível do Futuro, de mobilidade de baixo carbono e captura de CO2; a Lei do Mar, de conservação do bioma marinho; a política de produção e consumo sustentáveis; a educação para desastres climáticos; o direito de crianças e adolescentes à Natureza; e a adesão ao tratado de conservação de espécies migratórias. Votar SIM apoia a política.'
  WHEN 'Mais investimento na educação' THEN 'Reúne as votações sobre dinheiro para a educação pública: o FUNDEB permanente na Constituição (PEC 15/2015), a exclusão da educação do teto de gastos (PEC 24/2019) e dos limites do arcabouço fiscal (PLP 163/2025), a execução orçamentária obrigatória, a política de assistência estudantil e o Pé-de-Meia, a poupança que ajuda o aluno de baixa renda a terminar o ensino médio. Votar SIM apoia mais investimento.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Reúne as votações sobre igualdade entre mulheres e homens no trabalho, com destaque para a Lei da Igualdade Salarial (PL 1085/2023), que obriga empresas a pagar o mesmo salário para a mesma função e a publicar relatórios de transparência salarial. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas conforme o Congresso votar o tema.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'Reúne as votações que flexibilizam o licenciamento ambiental, a começar pelo PL 2159/2021, apelidado de "PL da Devastação", que cria a licença por autodeclaração, e pela MPV 1308/2025, que instituiu a licença especial para obras prioritárias. Score alto = defende manter as regras rigorosas; score baixo = votou para flexibilizar.'
- WHEN 'Direitos dos povos indígenas' THEN 'Reúne as votações sobre os direitos territoriais dos povos indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Inclui também o PL 4497/2024, o "PL da Grilagem", que valida registros de imóveis sobre terras públicas e terras indígenas em demarcação. Score alto = defende os direitos indígenas.'
+ WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Inclui também o PL 4497/2024, o "PL da Grilagem", que valida registros de imóveis sobre terras públicas e terras indígenas em demarcação. Score alto = defende os direitos territoriais indígenas.'
  WHEN 'Igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
  WHEN 'Direitos dos trabalhadores' THEN 'Reúne as votações sobre direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
  WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
