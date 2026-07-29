@@ -51,13 +51,23 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Ação climática e conservação
+--  Redução das emissões de carbono
+--
+--  Separada em 29/07/2026 da antiga "Ação climática e conservação", que juntava
+--  tres eixos distintos num so score: mitigacao/mercado de carbono, conservacao
+--  de biodiversidade e educacao ambiental. Um parlamentar pode apoiar tratado de
+--  especies migratorias e rejeitar mercado de carbono sem nenhuma incoerencia.
+--  Ver "Conservação da natureza e da biodiversidade" logo abaixo.
+--
+--  ATENCAO: a votacao 2238434-80 (PL 528/2020) foi aprovada 429 a 19 (96%).
+--  Quase unanime, separa pouco. Ver tarefa "Definir política sobre votações
+--  quase unânimes" no to-do.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Ação climática e conservação';
+DELETE FROM policy WHERE name IN ('Ação climática e conservação', 'Redução das emissões de carbono');
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Ação climática e conservação',
-    'Políticas de clima e conservação da natureza: mercado de carbono (Lei 15.042/2024), Combustível do Futuro e biocombustíveis, bioma marinho (Lei do Mar), produção e consumo sustentáveis, educação para desastres climáticos, direito das crianças à Natureza e tratados de conservação. Votar SIM apoia a política.',
+    'Redução das emissões de carbono',
+    'Reúne as votações sobre os mecanismos de corte de emissões: o Sistema Brasileiro de Comércio de Emissões, o mercado regulado de carbono criado pela Lei 15.042/2024; e o pacote Combustível do Futuro, que trata de mobilidade de baixo carbono e da captura e estocagem geológica de dióxido de carbono. Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -65,16 +75,38 @@ SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('1548579-144','for','normal'),  -- PL 182/2024 economia verde (destaque)
   ('1548579-194','for','strong'),  -- mercado de carbono: aprovacao final do Substitutivo do Senado (Lei 15.042/2024)
-  ('2238434-80','for','normal'),   -- Combustivel do Futuro (PL 528/2020): aprovacao principal
+  ('2238434-80','for','normal'),   -- Combustivel do Futuro (PL 528/2020): aprovacao principal -- 429 a 19, quase unanime
+  ('2238434-100','for','normal')   -- PL 528/2020 biocombustíveis
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  Conservação da natureza e da biodiversidade
+--
+--  Metade conservacionista da antiga "Ação climática e conservação".
+--  O PL 2809/2024 (educacao para reacao a desastres climaticos, 295 a 118) ficou
+--  DE FORA: e educacao ambiental, eixo proprio, e sozinho nao sustenta politica.
+--  Retomar se surgir mais votacao de educacao ambiental.
+--
+--  O PL 2225/2024 (direito de criancas e adolescentes a Natureza) e o
+--  PL 3899/2012 (producao e consumo sustentaveis) entraram aqui por decisao
+--  editorial de 29/07/2026: encaixam frouxamente, mas ampliam a base de 3 para 5.
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Conservação da natureza e da biodiversidade';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Conservação da natureza e da biodiversidade',
+    'Reúne as votações sobre proteção de ecossistemas e espécies: a Lei do Mar, que institui a política de conservação do bioma marinho brasileiro; a adesão ao tratado internacional de conservação de espécies migratórias; a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis; e o direito de crianças e adolescentes à Natureza. Votar SIM apoia a política.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
   ('604557-191','for','normal'),   -- Lei do Mar (PL 6969/2013): aprovacao do substitutivo
-  ('2238434-100','for','normal'),  -- PL 528/2020 biocombustíveis
-  -- PL 2215/2024 removido: institui data comemorativa (Dia Nacional para a Acao
-  -- Climatica), sem efeito substantivo sobre a politica climatica.
   ('604557-205','for','normal'),   -- PL 6969/2013 Bioma Marinho
-  ('2438687-71','for','normal'),   -- PL 2225/2024 crianças e Natureza
-  ('545304-134','for','normal'),   -- PL 3899/2012 Producao/Consumo Sustentáveis
-  ('2448069-50','for','normal'),   -- PL 2809/2024 educação p/ desastres
-  ('2603342-42','for','normal')    -- MSC 112/2026 espécies migratórias
+  ('2603342-42','for','normal'),   -- MSC 112/2026 especies migratorias
+  ('2438687-71','for','normal'),   -- PL 2225/2024 criancas e Natureza
+  ('545304-134','for','normal')    -- PL 3899/2012 Producao/Consumo Sustentaveis
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -362,7 +394,8 @@ COMMIT;
 UPDATE policy SET impact = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos: tornozeleira no agressor, arma proibida para quem responde por agressão e delegacia preparada para atender a vítima. Afeta a segurança de mães, filhas e companheiras em todo o país.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe direto no contracheque de milhões de trabalhadoras. Quem resiste vê interferência na negociação entre empresa e empregado.'
- WHEN 'Ação climática e conservação' THEN 'Influencia o preço e a origem da sua energia, a frequência das secas e enchentes que atingem cidades e alimentos, e o futuro das florestas e do mar que sustentam pesca e agricultura. De um lado, isso empurra a indústria a se modernizar; do outro, há custo de adaptação que pode chegar ao consumidor.'
+ WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço e na origem do combustível que você põe no tanque e da energia que chega na sua casa, e define se as grandes emissoras de carbono pagam pelo que emitem. De um lado, empurra a indústria a se modernizar e abre um mercado novo; do outro, há custo de adaptação que pode ser repassado ao consumidor.'
+ WHEN 'Conservação da natureza e da biodiversidade' THEN 'Afeta a pesca, o turismo de litoral e a fauna que depende de rotas migratórias, além de definir regras para os setores que exploram recursos naturais. Protege serviços que sustentam economia local; em contrapartida, impõe limites a atividades produtivas em áreas sensíveis.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que avalia se uma obra ou fábrica pode poluir rios, ar e comunidades vizinhas. De um lado, flexibilizar diminui burocracias e acelera empreendimentos; do outro, significa menos proteção a quem vive perto deles e menos controle sobre quem paga a conta de um acidente.'
  WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública: salário de professor, merenda, vaga em creche e apoio para o aluno de baixa renda terminar o ensino médio. Impacto direto em quem estuda ou tem filhos na rede pública. Para quem defende, é investimento que se paga no futuro; para quem critica, é gasto sem garantia de melhora no aprendizado.'
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas ou os produtores e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima. De um lado, segurança jurídica para quem investe e produz (agronegócio); do outro, o território de comunidades que vivem ali há gerações.'
@@ -386,7 +419,8 @@ UPDATE policy SET impact = CASE name
 -- ---------------------------------------------------------------------------
 UPDATE policy SET description = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Reúne as votações sobre o combate à violência contra a mulher: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.'
- WHEN 'Ação climática e conservação' THEN 'Reúne as votações de clima e conservação da natureza: o mercado de carbono, que criou o Sistema Brasileiro de Comércio de Emissões (Lei 15.042/2024); o pacote Combustível do Futuro, de mobilidade de baixo carbono e captura de CO2; a Lei do Mar, de conservação do bioma marinho; a política de produção e consumo sustentáveis; a educação para desastres climáticos; o direito de crianças e adolescentes à Natureza; e a adesão ao tratado de conservação de espécies migratórias. Votar SIM apoia a política.'
+ WHEN 'Redução das emissões de carbono' THEN 'Reúne as votações sobre os mecanismos de corte de emissões: o Sistema Brasileiro de Comércio de Emissões, o mercado regulado de carbono criado pela Lei 15.042/2024; e o pacote Combustível do Futuro, que trata de mobilidade de baixo carbono e da captura e estocagem geológica de dióxido de carbono. Votar SIM apoia a política.'
+ WHEN 'Conservação da natureza e da biodiversidade' THEN 'Reúne as votações sobre proteção de ecossistemas e espécies: a Lei do Mar, que institui a política de conservação do bioma marinho brasileiro; a adesão ao tratado internacional de conservação de espécies migratórias; a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis; e o direito de crianças e adolescentes à Natureza. Votar SIM apoia a política.'
  WHEN 'Mais investimento na educação' THEN 'Reúne as votações sobre dinheiro para a educação pública: o FUNDEB permanente na Constituição (PEC 15/2015), a exclusão da educação do teto de gastos (PEC 24/2019) e dos limites do arcabouço fiscal (PLP 163/2025), a execução orçamentária obrigatória, a política de assistência estudantil e o Pé-de-Meia, a poupança que ajuda o aluno de baixa renda a terminar o ensino médio. Votar SIM apoia mais investimento.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Reúne as votações sobre igualdade entre mulheres e homens no trabalho, com destaque para a Lei da Igualdade Salarial (PL 1085/2023), que obriga empresas a pagar o mesmo salário para a mesma função e a publicar relatórios de transparência salarial. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas conforme o Congresso votar o tema.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'Reúne as votações que flexibilizam o licenciamento ambiental, a começar pelo PL 2159/2021, apelidado de "PL da Devastação", que cria a licença por autodeclaração, e pela MPV 1308/2025, que instituiu a licença especial para obras prioritárias. Score alto = defende manter as regras rigorosas; score baixo = votou para flexibilizar.'
