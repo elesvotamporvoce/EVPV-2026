@@ -190,12 +190,12 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Anistia e redução de penas do 8 de Janeiro (política de um projeto só)
+--  Anistia do 8 de Janeiro (PL da Dosimetria) (política de um projeto só)
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Anistia e redução de penas do 8 de Janeiro';
+DELETE FROM policy WHERE name = 'Anistia do 8 de Janeiro (PL da Dosimetria)';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Anistia e redução de penas do 8 de Janeiro',
+    'Anistia do 8 de Janeiro (PL da Dosimetria)',
     'Posição sobre o PL 2162/2023 ("PL da Dosimetria"): concede anistia a participantes das manifestações de motivação política de 2022-2023 e reduz as penas dos condenados pelos atos de 8 de janeiro. Vetado pelo presidente; o veto foi derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.',
     false) RETURNING id
 )
@@ -210,26 +210,32 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Endurecimento das penas
---  (excluído de propósito: PL 6240/2013, desaparecimento forçado — criminalização
---   puxada por direitos humanos, eixo diferente; PL 4333/2025, ementa processual vaga)
+--  ON HOLD: politica de aumento de penas (ex-"Endurecimento das penas")
+--
+--  Retirada do ar em 29/07/2026 para reanalise. Motivo editorial: o conjunto
+--  misturava eixos diferentes e o recorte nao ficou honesto.
+--    - PL 3780/2023 (furto e roubo) e crime patrimonial, nao violento.
+--    - PL 6749/2016 (agressao a profissionais de saude) e PL 1112/2023
+--      (homicidio de agentes de seguranca) seguem a mesma logica: pena maior
+--      pela CATEGORIA DA VITIMA, o que e um eixo proprio ("protecao penal
+--      reforcada a categorias profissionais"), diferente de "penas maiores".
+--    - PL 4149/2004 e sobre ARMAS (porte de uso proibido, disparo, trafico),
+--      eixo que provavelmente merece politica propria.
+--
+--  Votacoes ja mapeadas, para retomar a curadoria:
+--    ('264726-144','for','strong'),   -- PL 4149/2004 arma de uso proibido
+--    ('2376169-101','for','normal'),  -- PL 3780/2023 furto e roubo
+--    ('2121642-105','for','normal'),  -- PL 6749/2016 agressao a prof. de saude
+--    ('2351284-38','for','normal')    -- PL 1112/2023 progressao 80% (homicidio
+--                                     --   de agente de seguranca)
+--  Candidatas nao usadas: PL 5582/2025 (faccoes/crime organizado, 4 votacoes),
+--    PL 1637/2019 (medida de seguranca p/ inimputavel), PL 5352/2023 (arma de
+--    alto potencial destrutivo), PL 488/2019 (penas p/ pedofilia),
+--    PL 2307/2007 (adulteracao de alimentos como crime hediondo).
+--
+--  Ver tarefa "Reanalisar politica de penas" no to-do.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Endurecimento das penas';
-WITH p AS (
-  INSERT INTO policy (name, description, provisional) VALUES (
-    'Endurecimento das penas',
-    'Penas mais duras e cumprimento mais rigoroso: aumento das penas para porte ilegal de arma de uso proibido (PL 4149/2004), para furto e roubo (PL 3780/2023) e para lesão corporal (PL 6749/2016), além da exigência de 80% de cumprimento da pena para progressão de regime (PL 1112/2023). Score alto = apoia o endurecimento penal.',
-    false) RETURNING id
-)
-INSERT INTO policy_division (policy_id, division_id, stance, strength)
-SELECT p.id, d.id, v.stance, v.strength FROM p
-JOIN (VALUES
-  ('264726-144','for','strong'),   -- PL 4149/2004 porte de arma proibida
-  ('2376169-101','for','normal'),  -- PL 3780/2023 furto e roubo
-  ('2121642-105','for','normal'),  -- PL 6749/2016 lesão corporal
-  ('2351284-38','for','normal')    -- PL 1112/2023 progressão 80%
-) AS v(ext, stance, strength) ON TRUE
-JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
 
 -- ---------------------------------------------------------------------------
 --  Financiamento à cultura
@@ -362,9 +368,8 @@ UPDATE policy SET impact = CASE name
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas ou os produtores e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima. De um lado, segurança jurídica para quem investe e produz (agronegócio); do outro, o território de comunidades que vivem ali há gerações.'
  WHEN 'Igualdade racial' THEN 'Define a punição para quem comete racismo, cotas em concursos públicos e as regras de financiamento de candidaturas negras. Para quem defende, corrige uma desigualdade histórica; para quem critica, cria distinção entre cidadãos por critério de raça.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre (fim da escala 6x1) e no bolso de quem tem carteira assinada: quantos dias o trabalhador folga por semana e quanto entra no seu FGTS e no INSS. Quem é a favor vê mais direitos garantidos; quem é contra enxerga contratação mais cara para as empresas.'
- WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Decide se quem participou da invasão e depredação dos prédios dos Três Poderes cumpre a pena aplicada ou é perdoado. Define o precedente para futuros ataques às instituições.'
- WHEN 'Endurecimento das penas' THEN 'Penas maiores e prisão mais longa para furto, roubo e porte ilegal de arma. Afeta a segurança pública, a superlotação dos presídios e o custo do sistema prisional, pago com o seu imposto.'
- WHEN 'Financiamento à cultura' THEN 'Decide se o setor tem financiamento estável chegando a shows, cinema, teatro e pontos de cultura da sua cidade, e se as plataformas de streaming passam a pagar uma contribuição que financia produções brasileiras. Tem impacto na economia também: emprega técnicos, músicos e produtores, e movimenta o comércio em volta de cada evento.'
+ WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023. Quem vota a favor da anistia fala em exagero nas condenações; quem vota contra fala na impunidade e possibilidade de criar precedentes para novos ataques às instituições.'
+ WHEN 'Financiamento à cultura' THEN 'Decide se o setor tem financiamento estável chegando a shows, cinema, teatro e pontos de cultura da sua cidade, e se as plataformas de streaming passam a pagar uma contribuição que financia produções brasileiras. Para quem defende, é investimento que volta em emprego, economia e cultura; para quem critica, é despesa fixa criada em lei.'
  WHEN 'Imunidade tributária das igrejas' THEN 'Igrejas deixariam de pagar impostos também sobre o que compram. De um lado, menos arrecadação para saúde e educação; do outro, mais recursos para os templos e suas obras sociais.'
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassinos e bingos voltam a funcionar legalmente no país: empregos e impostos de um lado; risco de vício em jogo e lavagem de dinheiro do outro.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Se essa proposta tivesse sido aprovada, deputados e senadores só poderiam ser processados criminalmente com autorização dos próprios colegas, em voto secreto. Na prática, o Congresso viraria juiz de si mesmo, e crimes como corrupção ficariam muito mais difíceis de punir.'
@@ -388,8 +393,7 @@ UPDATE policy SET description = CASE name
  WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Inclui também o PL 4497/2024, o "PL da Grilagem", que valida registros de imóveis sobre terras públicas e terras indígenas em demarcação. Score alto = defende os direitos territoriais indígenas.'
  WHEN 'Igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Reúne as votações sobre a proteção dos direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
- WHEN 'Anistia e redução de penas do 8 de Janeiro' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
- WHEN 'Endurecimento das penas' THEN 'Reúne as votações que aumentam penas e endurecem o cumprimento delas: pena maior para porte ilegal de arma de uso restrito (PL 4149/2004), para furto e roubo (PL 3780/2023) e para lesão corporal grave (PL 6749/2016), além da exigência de cumprir 80% da pena antes de progredir de regime em crimes hediondos (PL 1112/2023). Score alto = apoia o endurecimento penal.'
+ WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
  WHEN 'Financiamento à cultura' THEN 'Reúne as votações sobre dinheiro público para cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025), que repassa cerca de R$ 15 bilhões a estados e municípios ao longo de cinco anos, e a regulamentação do streaming (PL 8889/2017), que cobra uma contribuição de plataformas como Netflix e Prime Video para financiar o audiovisual brasileiro. Score alto = apoia o financiamento à cultura.'
  WHEN 'Reforma agrária e acesso à terra' THEN 'Reúne as votações sobre terra e reforma agrária: o PL 4357/2023, que proíbe desapropriar imóveis produtivos para fins de reforma agrária; o PL 4497/2024, o "PL da Grilagem", que valida registros sobre terras públicas em faixa de fronteira, inclusive sobre terras indígenas em demarcação; e o PL 709/2023, que endurece a punição a famílias que ocupam terras. Score alto = defende a reforma agrária e o acesso à terra.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Reúne as votações sobre a PEC 3/2021, a "PEC da Blindagem", que exigiria autorização prévia da própria Câmara ou do Senado, em voto secreto, para o STF processar criminalmente um parlamentar. Foi aprovada pela Câmara em setembro de 2025 e, depois de protestos em todo o país, rejeitada pelo Senado. Score alto = a favor da blindagem.'
