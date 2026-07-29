@@ -6,7 +6,7 @@ para aplicar o schema no Supabase sem instalar nada localmente).
 
 Uso:
   export DATABASE_URL="postgresql://.../postgres?sslmode=require"
-  python scripts/apply_sql.py db/schema.sql db/views_agreement.sql
+  python scripts/apply_sql.py db/schema.sql db/views_agreement.sql db/views_policy_detail.sql
 """
 
 import os

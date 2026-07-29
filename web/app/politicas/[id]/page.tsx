@@ -14,6 +14,11 @@ type Div = {
   policy_id: number;
   stance: string;
   strength: string;
+  /** peso realmente usado no score; 'weak' quando a votação foi quase unânime */
+  effective_strength: string | null;
+  votos_sim: number | null;
+  votos_nao: number | null;
+  pct_maioria: number | null;
   division_id: number;
   description: string | null;
   occurred_at: string | null;
@@ -260,7 +265,11 @@ export default async function PolicyPage({
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <StanceChip stance={d.stance} strength={d.strength} />
+                <StanceChip
+                  stance={d.stance}
+                  strength={d.effective_strength ?? d.strength}
+                  pctMaioria={d.pct_maioria}
+                />
                 {person && (
                   <VoteChip
                     prefix={firstName!}
@@ -332,17 +341,43 @@ function RankList({ title, rows }: { title: string; rows: ScoreNamed[] }) {
   );
 }
 
-function StanceChip({ stance, strength }: { stance: string; strength: string }) {
+function StanceChip({
+  stance,
+  strength,
+  pctMaioria,
+}: {
+  stance: string;
+  strength: string;
+  pctMaioria: number | null;
+}) {
   const forStance = stance === "for";
+  const weak = strength === "weak";
+  const titulo =
+    strength === "strong"
+      ? "Peso maior: votação decisiva"
+      : weak
+        ? "Peso reduzido: quase todos votaram do mesmo lado, então essa votação distingue pouco os parlamentares"
+        : "Peso normal";
   return (
-    <span
-      className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
-        forStance ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-      }`}
-      title={strength === "strong" ? "Peso maior" : "Peso normal"}
-    >
-      {forStance ? "Sim = a favor" : "Sim = contra"}
-      {strength === "strong" ? " ★" : ""}
+    <span className="flex shrink-0 flex-col items-end gap-1">
+      <span
+        className={`rounded px-2 py-0.5 text-xs font-medium ${
+          forStance ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+        }`}
+        title={titulo}
+      >
+        {forStance ? "Sim = a favor" : "Sim = contra"}
+        {strength === "strong" ? " ★" : ""}
+      </span>
+      {weak && (
+        <span
+          className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
+          title={titulo}
+        >
+          {pctMaioria ? `quase unânime (${pctMaioria}%)` : "quase unânime"} · peso
+          reduzido
+        </span>
+      )}
     </span>
   );
 }

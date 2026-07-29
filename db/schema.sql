@@ -149,6 +149,11 @@ CREATE TABLE IF NOT EXISTS policy_division (
   division_id  INTEGER NOT NULL REFERENCES division(id) ON DELETE CASCADE,
   stance       TEXT NOT NULL CHECK (stance IN ('for','against')),
   strength     TEXT NOT NULL CHECK (strength IN ('normal','strong')) DEFAULT 'normal',
+  -- Peso REALMENTE usado no score, escrito pelo scoring/score.py.
+  -- Vira 'weak' quando a votacao e quase unanime (margem >= LOPSIDED_THRESHOLD):
+  -- quase unanimidade quase nao distingue parlamentares. NULL = score nao rodou ainda.
+  -- O site le esta coluna (via view policy_division_detail), nao `strength`.
+  effective_strength TEXT CHECK (effective_strength IN ('weak','normal','strong')),
   PRIMARY KEY (policy_id, division_id)
 );
 

@@ -18,6 +18,7 @@ END="${END:-2025-03-15}"
 echo "==> 1/7 schema + views"
 psql "$DATABASE_URL" -q -f db/schema.sql
 psql "$DATABASE_URL" -q -f db/views_agreement.sql
+psql "$DATABASE_URL" -q -f db/views_policy_detail.sql
 
 echo "==> 2/7 ingestão Câmara ($START..$END, plenário)"
 python ingest/ingest_camara.py --start "$START" --end "$END" --plen-only

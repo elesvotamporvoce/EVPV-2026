@@ -78,8 +78,11 @@ Para a API em produção com muitos acessos, prefira a string do **pooler**.
 ## Alternativa: aplicar o schema pelo navegador
 
 Se preferir, em vez de deixar o workflow criar o schema, abra o **SQL Editor** do
-Supabase e cole o conteúdo de `db/schema.sql` e depois `db/views_agreement.sql`.
-É 100% no navegador, sem instalar nada.
+Supabase e cole o conteúdo de `db/schema.sql`, depois `db/views_agreement.sql`
+e depois `db/views_policy_detail.sql`. É 100% no navegador, sem instalar nada.
+
+As três são necessárias: sem `views_policy_detail.sql` as páginas de política e
+de parlamentar quebram, porque leem a view `policy_division_detail`.
 
 ## Observações honestas
 

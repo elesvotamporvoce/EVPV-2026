@@ -37,7 +37,7 @@ jobs:
       - name: Garantir schema (idempotente)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python scripts/apply_sql.py db/schema.sql db/views_agreement.sql
+        run: python scripts/apply_sql.py db/schema.sql db/views_agreement.sql db/views_policy_detail.sql
 
       - name: Backfill Camara + Senado + filiacoes + scores
         env:
