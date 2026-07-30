@@ -57,7 +57,7 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 --  tres eixos distintos num so score: mitigacao/mercado de carbono, conservacao
 --  de biodiversidade e educacao ambiental. Um parlamentar pode apoiar tratado de
 --  especies migratorias e rejeitar mercado de carbono sem nenhuma incoerencia.
---  Ver "Conservação da natureza e da biodiversidade" logo abaixo.
+--  Ver "Conservação da biodiversidade" logo abaixo.
 --
 --  ATENCAO: a votacao 2238434-80 (PL 528/2020) foi aprovada 429 a 19 (96%).
 --  Quase unanime, separa pouco. Ver tarefa "Definir política sobre votações
@@ -81,7 +81,7 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Conservação da natureza e da biodiversidade
+--  Conservação da biodiversidade
 --
 --  Metade conservacionista da antiga "Ação climática e conservação".
 --  O PL 2809/2024 (educacao para reacao a desastres climaticos, 295 a 118) ficou
@@ -92,10 +92,10 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 --  PL 3899/2012 (producao e consumo sustentaveis) entraram aqui por decisao
 --  editorial de 29/07/2026: encaixam frouxamente, mas ampliam a base de 3 para 5.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Conservação da natureza e da biodiversidade';
+DELETE FROM policy WHERE name = 'Conservação da biodiversidade';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Conservação da natureza e da biodiversidade',
+    'Conservação da biodiversidade',
     'Reúne as votações sobre proteção de ecossistemas e espécies: a Lei do Mar, que institui a política de conservação do bioma marinho brasileiro; a adesão ao tratado internacional de conservação de espécies migratórias; a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis; e o direito de crianças e adolescentes à Natureza. Votar SIM apoia a política.',
     false) RETURNING id
 )
@@ -196,12 +196,12 @@ JOIN (VALUES
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Igualdade racial
+--  Políticas de igualdade racial
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Igualdade racial';
+DELETE FROM policy WHERE name = 'Políticas de igualdade racial';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Igualdade racial',
+    'Políticas de igualdade racial',
     'Promoção da igualdade racial: cota de 30% em concursos públicos para pretos, pardos, indígenas e quilombolas; equiparação da injúria racial ao crime de racismo; feriado nacional da Consciência Negra; "Lista Suja" do racismo no futebol; e CONTRA a anistia aos partidos que descumpriram as cotas de financiamento de candidaturas negras (PEC 9/2023). Score alto = apoia a igualdade racial.',
     false) RETURNING id
 )
@@ -284,12 +284,12 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 
 -- ---------------------------------------------------------------------------
---  Financiamento à cultura
+--  Verba e regras para a cultura
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Financiamento à cultura';
+DELETE FROM policy WHERE name = 'Verba e regras para a cultura';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Financiamento à cultura',
+    'Verba e regras para a cultura',
     'Fomento público à cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025, R$ 15 bilhões para o setor) e regulamentar o streaming (PL 8889/2017) com contribuição para o audiovisual nacional. Score alto = apoia o financiamento à cultura.',
     false) RETURNING id
 )
@@ -341,12 +341,12 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Imunidade tributária das igrejas (PEC 5/2023) — política de um projeto só
+--  Isenção de impostos para igrejas (PEC 5/2023) — política de um projeto só
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Imunidade tributária das igrejas';
+DELETE FROM policy WHERE name = 'Isenção de impostos para igrejas';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Imunidade tributária das igrejas',
+    'Isenção de impostos para igrejas',
     'Posição sobre a PEC 5/2023: amplia a imunidade tributária de templos e entidades religiosas para a aquisição de bens e serviços necessários às suas atividades. Aprovada pela Câmara em dois turnos em maio de 2026. Score alto = a favor da ampliação da imunidade.',
     false) RETURNING id
 )
@@ -405,7 +405,7 @@ COMMIT;
 -- ============================================================================
 --  "Por que isso importa para você?" — texto prático por política (coluna impact)
 -- ---------------------------------------------------------------------------
---  Acesso a medicamentos e insumos
+--  Abastecimento público de medicamentos
 --
 --  Criada em 30/07/2026. Primeira politica de saude do site — o tema tinha 94
 --  proposicoes votadas e nenhuma politica.
@@ -429,11 +429,11 @@ COMMIT;
 --  dentro de supermercado). Parecia encaixar pelo tema "medicamentos", mas e
 --  regulacao de varejo, nao abastecimento — outro eixo.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Acesso a medicamentos e insumos';
+DELETE FROM policy WHERE name = 'Abastecimento público de medicamentos';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Acesso a medicamentos e insumos',
-    'Reúne as votações sobre a capacidade do Estado de produzir e comprar medicamentos e insumos de saúde: a Estratégia Nacional de Saúde, que autoriza licitação reservada a empresas estratégicas de saúde instaladas no país (PL 2583/2020); a contratação direta de hemoderivados produzidos por instituição pública, como a Hemobrás (PL 424/2015); e a declaração de interesse público dos medicamentos Mounjaro e Zepbound, primeiro passo para a licença compulsória, a chamada quebra de patente (PL 68/2026). Score alto = defende o abastecimento público e a produção nacional.',
+    'Abastecimento público de medicamentos',
+    'Reúne as votações sobre como o Estado garante remédio e insumo: licitação reservada à indústria instalada no país, compra direta de hemoderivados do produtor público, como a Hemobrás, e o primeiro passo para quebrar a patente do Mounjaro e do Zepbound. Score alto = defende o abastecimento público e a produção nacional.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -471,23 +471,23 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ============================================================================
 UPDATE policy SET impact = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'Define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos: tornozeleira no agressor, arma proibida para quem responde por agressão e delegacia preparada para atender a vítima. Afeta a segurança de mães, filhas e companheiras em todo o país.'
- WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe direto no contracheque de milhões de trabalhadoras. Quem resiste vê interferência na negociação entre empresa e empregado.'
- WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço e na origem do combustível que você põe no tanque e da energia que chega na sua casa, e define se as grandes emissoras de carbono pagam pelo que emitem. De um lado, empurra a indústria a se modernizar e abre um mercado novo; do outro, há custo de adaptação que pode ser repassado ao consumidor.'
- WHEN 'Conservação da natureza e da biodiversidade' THEN 'Afeta a pesca, o turismo de litoral e a fauna que depende de rotas migratórias, além de definir regras para os setores que exploram recursos naturais. Protege serviços que sustentam economia local; em contrapartida, impõe limites a atividades produtivas em áreas sensíveis.'
+ WHEN 'Combate à violência contra a mulher' THEN 'Trata da segurança de mães, filhas e companheiras: define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos. Para quem defende, fecha brechas que custam vidas; para quem critica, restrições aplicadas antes da condenação.'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe nos direitos e no contracheque de milhões de trabalhadoras. Para quem defende, é direito básico; para quem critica, é mais custo e obrigação para o empregador.'
+ WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço do combustível que você põe no tanque e da energia da sua casa, e define se quem mais polui paga pelo que emite. De um lado, indústria mais moderna e um mercado novo de crédito de carbono; do outro, custo de adaptação que pode chegar ao consumidor.'
+ WHEN 'Conservação da biodiversidade' THEN 'Mexe no que pode e no que não pode em áreas de natureza preservada, do bioma marinho às rotas de aves migratórias. De um lado, base para a pesca e o turismo continuarem existindo; do outro, limite à atividade produtiva no litoral e em área sensível.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que avalia se uma obra ou fábrica pode poluir rios, ar e comunidades vizinhas. De um lado, flexibilizar diminui burocracias e acelera empreendimentos; do outro, significa menos proteção a quem vive perto deles e menos controle sobre quem paga a conta de um acidente.'
- WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública: salário de professor, merenda, vaga em creche e apoio para o aluno de baixa renda terminar o ensino médio. Impacto direto em quem estuda ou tem filhos na rede pública. Para quem defende, é investimento que se paga no futuro; para quem critica, é gasto sem garantia de melhora no aprendizado.'
+ WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública: salário de professor, merenda, vaga em creche e apoio para o aluno de baixa renda. Impacto direto em quem estuda ou tem filhos na rede pública. Para quem defende, é investimento que se paga no futuro; para quem critica, é gasto sem garantia de melhora no aprendizado.'
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas ou os produtores e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima. De um lado, segurança jurídica para quem investe e produz (agronegócio); do outro, o território de comunidades que vivem ali há gerações.'
- WHEN 'Igualdade racial' THEN 'Define a punição para quem comete racismo, cotas em concursos públicos e as regras de financiamento de candidaturas negras. Para quem defende, corrige uma desigualdade histórica; para quem critica, cria distinção entre cidadãos por critério de raça.'
+ WHEN 'Políticas de igualdade racial' THEN 'Define se há reserva de vaga para pessoas negras em concurso público, qual a punição para quem comete racismo e se partido é obrigado a bancar candidatura negra. Para quem defende, corrige desigualdade histórica; para quem critica, separa cidadãos por raça.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre (fim da escala 6x1) e no bolso de quem tem carteira assinada: quantos dias o trabalhador folga por semana e quanto entra no seu FGTS e no INSS. Quem é a favor vê mais direitos garantidos; quem é contra enxerga contratação mais cara para as empresas.'
  WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023. Quem vota a favor da anistia fala em exagero nas condenações; quem vota contra fala na impunidade e possibilidade de criar precedentes para novos ataques às instituições.'
- WHEN 'Financiamento à cultura' THEN 'Decide se o setor tem financiamento estável chegando a shows, cinema, teatro e pontos de cultura da sua cidade, e se as plataformas de streaming passam a pagar uma contribuição que financia produções brasileiras. Para quem defende, é investimento que volta em emprego, economia e cultura; para quem critica, é despesa fixa criada em lei.'
- WHEN 'Imunidade tributária das igrejas' THEN 'Igrejas deixariam de pagar impostos também sobre o que compram. De um lado, menos arrecadação para saúde e educação; do outro, mais recursos para os templos e suas obras sociais.'
- WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassinos e bingos voltam a funcionar legalmente no país: empregos e impostos de um lado; risco de vício em jogo e lavagem de dinheiro do outro.'
- WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Se essa proposta tivesse sido aprovada, deputados e senadores só poderiam ser processados criminalmente com autorização dos próprios colegas, em voto secreto. Na prática, o Congresso viraria juiz de si mesmo, e crimes como corrupção ficariam muito mais difíceis de punir.'
- WHEN 'Reforma agrária e acesso à terra' THEN 'Decide se terras improdutivas podem ser desapropriadas para assentar famílias sem terra e se ocupações de terras públicas viram propriedade privada. Afeta o preço dos alimentos e os conflitos no campo.'
- WHEN 'Acesso a medicamentos e insumos' THEN 'Define se o SUS pode comprar direto do produtor público em vez de licitar, se as compras públicas podem ser reservadas à indústria instalada no país, e se o Brasil quebra a patente de um remédio caro para fabricar versão mais barata. De um lado, menos dependência de fornecedor único e preço menor no fim da conta; do outro, menos concorrência nas compras públicas e proteção de patente mais fraca, o que parte da indústria trata como desestímulo a investir em pesquisa.'
- WHEN 'Reforma tributária do consumo' THEN 'Muda os impostos de tudo o que você compra: unifica cinco tributos, devolve dinheiro (cashback) para famílias de baixa renda e taxa mais os produtos que fazem mal à saúde.'
+ WHEN 'Verba e regras para a cultura' THEN 'Decide se shows, cinema, teatro e ponto de cultura da sua cidade têm verba previsível, e se o streaming paga uma contribuição que financia produção brasileira. Para quem defende, volta em emprego e economia; para quem critica, é despesa fixa criada em lei.'
+ WHEN 'Isenção de impostos para igrejas' THEN 'Hoje as igrejas não pagam imposto sobre templo e patrimônio; a proposta estende isso para bens e serviços que elas compram. De um lado, menos arrecadação para saúde e educação; do outro, mais recursos para templos e atividades religiosas.'
+ WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassino, bingo e jogo do bicho passam a funcionar legalmente. De um lado, emprego, turismo e imposto arrecadado; do outro, risco de vício em jogo e de lavagem de dinheiro.'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Define se deputado e senador respondem a processo criminal como qualquer cidadão. Hoje é o STF que decide abrir a ação; pela proposta, seria preciso autorização dos próprios parlamentares, em voto secreto. De um lado, defesa contra perseguição política; do outro, mais dificuldade para punir corrupção e crimes graves.'
+ WHEN 'Reforma agrária e acesso à terra' THEN 'Trata do acesso à terra por três caminhos: desapropriar fazenda que descumpre a função social (regra ambiental e trabalhista, por exemplo), assentar família sem terra e regularizar terra pública. Os projetos aprovados dificultam os três. De um lado, segurança jurídica; do outro, reforma agrária travada e facilitação de grilagem.'
+ WHEN 'Abastecimento público de medicamentos' THEN 'Mexe no preço e no acesso ao remédio que chega ao posto de saúde. De um lado, produção nacional e quebra de patente que barateiam o medicamento; do outro, menos concorrência e proteção de patente mais fraca.'
+ WHEN 'Reforma tributária do consumo' THEN 'Mexe no preço do que você compra e no que sobra no fim do mês: unifica cinco impostos, devolve dinheiro a quem ganha pouco e taxa mais bebida e cigarro. De um lado, menos burocracia para as empresas; do outro, o setor de serviços tende a pagar mais.'
  ELSE impact END;
 
 -- ---------------------------------------------------------------------------
@@ -500,19 +500,19 @@ UPDATE policy SET impact = CASE name
 UPDATE policy SET description = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Reúne as votações sobre o combate à violência contra a mulher: a inclusão da violência vicária (usar os filhos para atingir a mãe) na Lei Maria da Penha, o monitoramento eletrônico de agressores, a proibição de porte de arma para quem responde por agressão, o atendimento especializado a mulheres indígenas nas delegacias, o combate à violência política de gênero e a criação do Sistema Nacional de Enfrentamento à Violência contra Meninas e Mulheres. Votar SIM apoia a política.'
  WHEN 'Redução das emissões de carbono' THEN 'Reúne as votações sobre os mecanismos de corte de emissões: o Sistema Brasileiro de Comércio de Emissões, o mercado regulado de carbono criado pela Lei 15.042/2024; e o pacote Combustível do Futuro, que trata de mobilidade de baixo carbono e da captura e estocagem geológica de dióxido de carbono. Votar SIM apoia a política.'
- WHEN 'Conservação da natureza e da biodiversidade' THEN 'Reúne as votações sobre proteção de ecossistemas e espécies: a Lei do Mar, que institui a política de conservação do bioma marinho brasileiro; a adesão ao tratado internacional de conservação de espécies migratórias; a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis; e o direito de crianças e adolescentes à Natureza. Votar SIM apoia a política.'
+ WHEN 'Conservação da biodiversidade' THEN 'Reúne as votações sobre proteção de ecossistemas e espécies: a Lei do Mar, que institui a política de conservação do bioma marinho brasileiro; a adesão ao tratado internacional de conservação de espécies migratórias; a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis; e o direito de crianças e adolescentes à Natureza. Votar SIM apoia a política.'
  WHEN 'Mais investimento na educação' THEN 'Reúne as votações sobre dinheiro para a educação pública: o FUNDEB permanente na Constituição (PEC 15/2015), a exclusão da educação do teto de gastos (PEC 24/2019) e dos limites do arcabouço fiscal (PLP 163/2025), a execução orçamentária obrigatória, a política de assistência estudantil e o Pé-de-Meia, a poupança que ajuda o aluno de baixa renda a terminar o ensino médio. Votar SIM apoia mais investimento.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Reúne as votações sobre igualdade entre mulheres e homens no trabalho, com destaque para a Lei da Igualdade Salarial (PL 1085/2023), que obriga empresas a pagar o mesmo salário para a mesma função e a publicar relatórios de transparência salarial. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas conforme o Congresso votar o tema.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'Reúne as votações que flexibilizam o licenciamento ambiental, a começar pelo PL 2159/2021, apelidado de "PL da Devastação", que cria a licença por autodeclaração, e pela MPV 1308/2025, que instituiu a licença especial para obras prioritárias. Score alto = defende manter as regras rigorosas; score baixo = votou para flexibilizar.'
  WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Score alto = defende os direitos territoriais indígenas.'
- WHEN 'Igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
+ WHEN 'Políticas de igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Reúne as votações sobre a proteção dos direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
  WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
- WHEN 'Financiamento à cultura' THEN 'Reúne as votações sobre dinheiro público para cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025), que repassa cerca de R$ 15 bilhões a estados e municípios ao longo de cinco anos, e a regulamentação do streaming (PL 8889/2017), que cobra uma contribuição de plataformas como Netflix e Prime Video para financiar o audiovisual brasileiro. Score alto = apoia o financiamento à cultura.'
+ WHEN 'Verba e regras para a cultura' THEN 'Reúne as votações sobre dinheiro público para cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025), que repassa cerca de R$ 15 bilhões a estados e municípios ao longo de cinco anos, e a regulamentação do streaming (PL 8889/2017), que cobra uma contribuição de plataformas como Netflix e Prime Video para financiar o audiovisual brasileiro. Score alto = apoia o financiamento à cultura.'
  WHEN 'Reforma agrária e acesso à terra' THEN 'Reúne as votações sobre terra e reforma agrária: o PL 4357/2023, que proíbe desapropriar imóveis produtivos para fins de reforma agrária; o PL 4497/2024, o "PL da Grilagem", que valida registros sobre terras públicas em faixa de fronteira, inclusive sobre terras indígenas em demarcação; e o PL 709/2023, que endurece a punição a famílias que ocupam terras. Score alto = defende a reforma agrária e o acesso à terra.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Reúne as votações sobre a PEC 3/2021, a "PEC da Blindagem", que exigiria autorização prévia da própria Câmara ou do Senado, em voto secreto, para o STF processar criminalmente um parlamentar. Foi aprovada pela Câmara em setembro de 2025 e, depois de protestos em todo o país, rejeitada pelo Senado. Score alto = a favor da blindagem.'
- WHEN 'Imunidade tributária das igrejas' THEN 'Reúne as votações sobre a PEC 5/2023, que amplia a imunidade tributária das igrejas: hoje elas não pagam impostos sobre templos e patrimônio, e a proposta estende o benefício à compra de bens e serviços usados nas atividades religiosas. Aprovada pela Câmara em dois turnos em maio de 2026. Score alto = a favor da ampliação.'
+ WHEN 'Isenção de impostos para igrejas' THEN 'Reúne as votações sobre a PEC 5/2023, que amplia a imunidade tributária das igrejas: hoje elas não pagam impostos sobre templos e patrimônio, e a proposta estende o benefício à compra de bens e serviços usados nas atividades religiosas. Aprovada pela Câmara em dois turnos em maio de 2026. Score alto = a favor da ampliação.'
  WHEN 'Legalização dos jogos de azar' THEN 'Reúne as votações sobre o PL 442/1991, o "marco dos jogos", que legaliza cassinos em resorts, bingos, jogo do bicho e apostas em corridas de cavalo. Foi aprovado pela Câmara em fevereiro de 2022 e segue parado no Senado. Score alto = a favor da legalização.'
- WHEN 'Acesso a medicamentos e insumos' THEN 'Reúne as votações sobre a capacidade do Estado de produzir e comprar medicamentos e insumos de saúde: a Estratégia Nacional de Saúde, que autoriza licitação reservada a empresas estratégicas de saúde instaladas no país (PL 2583/2020); a contratação direta de hemoderivados produzidos por instituição pública, como a Hemobrás (PL 424/2015); e a declaração de interesse público dos medicamentos Mounjaro e Zepbound, primeiro passo para a licença compulsória, a chamada quebra de patente (PL 68/2026). Score alto = defende o abastecimento público e a produção nacional.'
+ WHEN 'Abastecimento público de medicamentos' THEN 'Reúne as votações sobre como o Estado garante remédio e insumo: licitação reservada à indústria instalada no país, compra direta de hemoderivados do produtor público, como a Hemobrás, e o primeiro passo para quebrar a patente do Mounjaro e do Zepbound. Score alto = defende o abastecimento público e a produção nacional.'
  WHEN 'Reforma tributária do consumo' THEN 'Reúne as votações da reforma tributária do consumo (PEC 45/2019), promulgada como Emenda Constitucional 132/2023: substitui cinco tributos (PIS, Cofins, IPI, ICMS e ISS) por um IVA dual (CBS federal e IBS de estados e municípios), cria o cashback, que devolve imposto a famílias de baixa renda, e o imposto seletivo sobre produtos nocivos à saúde e ao meio ambiente. Inclui os votos das duas casas. Score alto = a favor da reforma.'
  ELSE description END;

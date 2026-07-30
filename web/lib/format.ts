@@ -69,7 +69,7 @@ export const UFS = [
 export const FEATURED_POLICIES = [
   "Combate à violência contra a mulher",
   "Proteção dos direitos trabalhistas",
-  "Conservação da natureza e da biodiversidade",
+  "Conservação da biodiversidade",
   "Mais investimento na educação",
 ];
 
