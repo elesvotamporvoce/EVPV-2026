@@ -325,24 +325,12 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const a = answers[current.id];
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-          <span
-            className="block h-full rounded-full bg-brand transition-all"
-            style={{ width: `${(step / list.length) * 100}%` }}
-          />
-        </span>
-        <span className="shrink-0 text-sm text-slate-500">
-          {step + 1} de {list.length}
-        </span>
-      </div>
-
       {/* Nome da politica fixo no topo: a pessoa precisa ver sobre o que esta
           respondendo enquanto rola. top-14 fica logo abaixo da navbar, que e
           sticky top-0. */}
       <div className="sticky top-14 z-30 -mx-4 bg-slate-50 px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
-        <div className="rounded-md bg-violet-100 px-4 py-3 shadow-sm">
-          <h2 className="text-center text-lg font-bold leading-snug text-slate-800 sm:text-xl">
+        <div className="rounded-md bg-brand px-4 py-3 shadow-md">
+          <h2 className="text-center text-lg font-bold leading-snug text-white sm:text-xl">
             {current.name}
           </h2>
         </div>
@@ -390,7 +378,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-4 flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={togglePriority}
@@ -400,7 +388,9 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
                 : "border-slate-300 text-slate-600 hover:border-brand hover:text-brand"
             }`}
           >
-            {a?.priority ? "★ Tema prioritário para mim" : "☆ Esse tema é muito importante para mim"}
+            {a?.priority
+              ? "★ Peso dobrado neste tema"
+              : "★ Dobrar peso: esse tema é essencial para mim"}
           </button>
           <button
             type="button"
@@ -410,6 +400,11 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             Não tenho opinião, pular
           </button>
         </div>
+
+        {/* contagem discreta, no rodape do cartao */}
+        <p className="mt-4 text-right text-xs font-medium text-slate-400">
+          {step + 1}/{list.length}
+        </p>
       </div>
 
       {step > 0 && (
