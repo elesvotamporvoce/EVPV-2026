@@ -404,6 +404,71 @@ COMMIT;
 
 -- ============================================================================
 --  "Por que isso importa para você?" — texto prático por política (coluna impact)
+-- ---------------------------------------------------------------------------
+--  Acesso a medicamentos e insumos
+--
+--  Criada em 30/07/2026. Primeira politica de saude do site — o tema tinha 94
+--  proposicoes votadas e nenhuma politica.
+--
+--  Eixo: o Estado deve garantir o abastecimento de medicamentos e insumos,
+--  inclusive passando por cima de licitacao e de patente.
+--
+--  A direcao de CADA votacao foi conferida na API da Camara, porque as descricoes
+--  oficiais ("Mantido o texto", "Rejeitado o Requerimento") nao dizem o que estava
+--  em jogo:
+--    2252295-130  DTQ 6 (NOVO) pedia suprimir o art. 26 do substitutivo, que
+--                 autoriza licitacao exclusiva para Empresa Estrategica de Saude.
+--                 SIM = manter o artigo = a favor.
+--    947810-85    DTQ 1 (NOVO) pedia suprimir a palavra "publica" (instituicao
+--                 publica produtora de hemoderivados, tipo Hemobras).
+--                 SIM = manter a palavra = a favor do produtor publico.
+--    2252295-110  Requerimento de RETIRADA DE PAUTA, rejeitado 55x212.
+--                 SIM = tirar da pauta = obstruir. Por isso stance 'against'.
+--
+--  FORA por decisao editorial: PL 2158/2023 (venda de medicamento em farmacia
+--  dentro de supermercado). Parecia encaixar pelo tema "medicamentos", mas e
+--  regulacao de varejo, nao abastecimento — outro eixo.
+-- ---------------------------------------------------------------------------
+DELETE FROM policy WHERE name = 'Acesso a medicamentos e insumos';
+WITH p AS (
+  INSERT INTO policy (name, description, provisional) VALUES (
+    'Acesso a medicamentos e insumos',
+    'Reúne as votações sobre a capacidade do Estado de produzir e comprar medicamentos e insumos de saúde: a Estratégia Nacional de Saúde, que autoriza licitação reservada a empresas estratégicas de saúde instaladas no país (PL 2583/2020); a contratação direta de hemoderivados produzidos por instituição pública, como a Hemobrás (PL 424/2015); e a declaração de interesse público dos medicamentos Mounjaro e Zepbound, primeiro passo para a licença compulsória, a chamada quebra de patente (PL 68/2026). Score alto = defende o abastecimento público e a produção nacional.',
+    false) RETURNING id
+)
+INSERT INTO policy_division (policy_id, division_id, stance, strength)
+SELECT p.id, d.id, v.stance, v.strength FROM p
+JOIN (VALUES
+  ('2252295-120','for','strong'),    -- PL 2583/2020: aprovacao do substitutivo (352x63)
+  ('2252295-130','for','normal'),    -- PL 2583/2020: DVS art. 26, licitacao exclusiva mantida (316x110)
+  ('2252295-110','against','normal'),-- PL 2583/2020: retirada de pauta rejeitada (55x212) -> SIM = obstruir
+  ('2589628-8','for','normal'),      -- PL 424/2015: urgencia (286x111)
+  ('947810-85','for','normal'),      -- PL 424/2015: DVS, palavra "publica" mantida (285x106)
+  ('2601223-8','for','normal')       -- PL 68/2026: urgencia da quebra de patente (337x19) -> vira weak
+) AS v(ext, stance, strength) ON TRUE
+JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+
+-- ---------------------------------------------------------------------------
+--  SAUDE: eixos levantados em 30/07/2026 e NAO transformados em politica.
+--  Guardados aqui para nao perder o levantamento. Ver tarefas no to-do.
+--
+--  (a) Internacao de dependentes quimicos — eixo nitido (coercao e autoridade
+--      familiar), mas so 2 votacoes:
+--        PL 4183/2024 internacao de menores  — urgencia 317x117 (div 3789)
+--        PL 1822/2024 internacao imediata    — requerimento rejeitado 99x277 (div 3774)
+--
+--  (b) Pesquisa clinica com seres humanos — PL 7082/2017, 5 votacoes entre 70% e
+--      75%, otima separacao, mas uma proposicao so e tema tecnico:
+--        divs 2314, 2315, 2316, 2317, 2318
+--
+--  (c) Financiamento da saude — o tema que o publico espera, mas os meritos sao
+--      quase unanimes (MPV 1301/2025 aprovada 403x6; PLP 72/2024 aprovado 432x2)
+--      e o disputado e requerimento de obstrucao. Alem disso o PLP 163/2025 ja e
+--      a base da politica de educacao, e o PLP 18/2021 aponta ao CONTRARIO: ele
+--      permite que emendas destinadas a saude paguem o resgate pre-hospitalar dos
+--      bombeiros militares, ampliando o que conta como gasto em saude.
+-- ---------------------------------------------------------------------------
+
 -- ============================================================================
 UPDATE policy SET impact = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos: tornozeleira no agressor, arma proibida para quem responde por agressão e delegacia preparada para atender a vítima. Afeta a segurança de mães, filhas e companheiras em todo o país.'
@@ -421,6 +486,7 @@ UPDATE policy SET impact = CASE name
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassinos e bingos voltam a funcionar legalmente no país: empregos e impostos de um lado; risco de vício em jogo e lavagem de dinheiro do outro.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Se essa proposta tivesse sido aprovada, deputados e senadores só poderiam ser processados criminalmente com autorização dos próprios colegas, em voto secreto. Na prática, o Congresso viraria juiz de si mesmo, e crimes como corrupção ficariam muito mais difíceis de punir.'
  WHEN 'Reforma agrária e acesso à terra' THEN 'Decide se terras improdutivas podem ser desapropriadas para assentar famílias sem terra e se ocupações de terras públicas viram propriedade privada. Afeta o preço dos alimentos e os conflitos no campo.'
+ WHEN 'Acesso a medicamentos e insumos' THEN 'Define se o SUS pode comprar direto do produtor público em vez de licitar, se as compras públicas podem ser reservadas à indústria instalada no país, e se o Brasil quebra a patente de um remédio caro para fabricar versão mais barata. De um lado, menos dependência de fornecedor único e preço menor no fim da conta; do outro, menos concorrência nas compras públicas e proteção de patente mais fraca, o que parte da indústria trata como desestímulo a investir em pesquisa.'
  WHEN 'Reforma tributária do consumo' THEN 'Muda os impostos de tudo o que você compra: unifica cinco tributos, devolve dinheiro (cashback) para famílias de baixa renda e taxa mais os produtos que fazem mal à saúde.'
  ELSE impact END;
 
@@ -447,5 +513,6 @@ UPDATE policy SET description = CASE name
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Reúne as votações sobre a PEC 3/2021, a "PEC da Blindagem", que exigiria autorização prévia da própria Câmara ou do Senado, em voto secreto, para o STF processar criminalmente um parlamentar. Foi aprovada pela Câmara em setembro de 2025 e, depois de protestos em todo o país, rejeitada pelo Senado. Score alto = a favor da blindagem.'
  WHEN 'Imunidade tributária das igrejas' THEN 'Reúne as votações sobre a PEC 5/2023, que amplia a imunidade tributária das igrejas: hoje elas não pagam impostos sobre templos e patrimônio, e a proposta estende o benefício à compra de bens e serviços usados nas atividades religiosas. Aprovada pela Câmara em dois turnos em maio de 2026. Score alto = a favor da ampliação.'
  WHEN 'Legalização dos jogos de azar' THEN 'Reúne as votações sobre o PL 442/1991, o "marco dos jogos", que legaliza cassinos em resorts, bingos, jogo do bicho e apostas em corridas de cavalo. Foi aprovado pela Câmara em fevereiro de 2022 e segue parado no Senado. Score alto = a favor da legalização.'
+ WHEN 'Acesso a medicamentos e insumos' THEN 'Reúne as votações sobre a capacidade do Estado de produzir e comprar medicamentos e insumos de saúde: a Estratégia Nacional de Saúde, que autoriza licitação reservada a empresas estratégicas de saúde instaladas no país (PL 2583/2020); a contratação direta de hemoderivados produzidos por instituição pública, como a Hemobrás (PL 424/2015); e a declaração de interesse público dos medicamentos Mounjaro e Zepbound, primeiro passo para a licença compulsória, a chamada quebra de patente (PL 68/2026). Score alto = defende o abastecimento público e a produção nacional.'
  WHEN 'Reforma tributária do consumo' THEN 'Reúne as votações da reforma tributária do consumo (PEC 45/2019), promulgada como Emenda Constitucional 132/2023: substitui cinco tributos (PIS, Cofins, IPI, ICMS e ISS) por um IVA dual (CBS federal e IBS de estados e municípios), cria o cashback, que devolve imposto a famílias de baixa renda, e o imposto seletivo sobre produtos nocivos à saúde e ao meio ambiente. Inclui os votos das duas casas. Score alto = a favor da reforma.'
  ELSE description END;
