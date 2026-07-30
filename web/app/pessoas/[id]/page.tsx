@@ -69,16 +69,35 @@ export default async function PersonPage({
     .maybeSingle();
   const cand = candRow as { cargo: string | null; uf: string | null; situacao: string | null } | null;
 
-  // Senadores: como ha poucos temas com voto aberto no Senado, mostramos
-  // TODAS as politicas; as sem dados ganham aviso + referencia do partido
+  // Senadores: mostramos APENAS as politicas que tiveram votacao no Senado.
+  // As demais so foram votadas na Camara — o senador nunca teve a chance de se
+  // posicionar, e exibi-las como "sem votos suficientes" sugeriria falta onde
+  // houve ausencia de oportunidade.
+  // Dentro das que o Senado votou, ainda completamos com as que este senador
+  // nao votou o bastante: ai "sem votos suficientes" e a leitura correta.
   let allScores = scores;
+  let soNaCamara: { id: number; name: string }[] = [];
   if (dir.house === "senado") {
-    const { data: allPols } = await supabase
+    const { data: senDivs } = await supabase
+      .from("policy_division_detail")
+      .select("policy_id, house")
+      .eq("house", "senado");
+    const idsSenado = [
+      ...new Set(((senDivs ?? []) as { policy_id: number }[]).map((r) => r.policy_id)),
+    ];
+    const { data: todasPols } = await supabase
       .from("policy")
       .select("id, name")
       .order("name");
+    const allPols = ((todasPols ?? []) as { id: number; name: string }[]).filter(
+      (p) => idsSenado.includes(p.id)
+    );
+    // Temas que o Senado nao votou: viram uma nota no fim, nao blocos vazios.
+    soNaCamara = ((todasPols ?? []) as { id: number; name: string }[]).filter(
+      (p) => !idsSenado.includes(p.id)
+    );
     const have = new Set(scores.map((s) => s.policy_id));
-    const extras = ((allPols ?? []) as { id: number; name: string }[])
+    const extras = allPols
       .filter((p) => !have.has(p.id))
       .map(
         (p) =>
@@ -189,7 +208,7 @@ export default async function PersonPage({
       {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
           nas bordas da caixa durante o scroll) */}
       <div className="sticky top-[58px] z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
-      <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
+      <div className="flex flex-col items-center gap-4 rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100">
           {dir.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -201,7 +220,7 @@ export default async function PersonPage({
           )}
         </div>
         <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
             <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
             {cand && (
               <Link
@@ -249,13 +268,11 @@ export default async function PersonPage({
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Políticas</h2>
         {dir.house === "senado" && (
           <div className="mb-4 rounded-lg border border-brand-light bg-violet-50 p-4 text-sm leading-relaxed text-slate-700">
-            Quase metade das votações do Senado é secreta, principalmente as
-            sabatinas: a aprovação ou rejeição, em voto secreto, de indicados a
-            cargos como ministro do STF e embaixador. O painel registra que o
-            senador votou, mas <strong>não revela o voto</strong>. Sem o voto de cada senador,
-            não há como saber a posição individual e incluir essas sessões nas
-            políticas. Por isso, senadores costumam ter menos políticas com
-            posição do que deputados.
+            Quase metade das votações do Senado é secreta. O painel registra
+            que o senador votou, mas <strong>não revela o voto</strong>. Sem o
+            voto de cada senador, não há como saber a posição individual e
+            incluir essas sessões nas políticas. Por isso, senadores costumam
+            ter menos políticas com posição do que deputados.
           </div>
         )}
         {sortedScores.length === 0 ? (
@@ -297,8 +314,15 @@ export default async function PersonPage({
                   dir.party_sigla &&
                   partyAvg.has(s.policy_id) && (
                     <p className="mb-3 text-center text-sm text-slate-500">
-                      Como referência, a média do {dir.party_sigla} é{" "}
-                      {supportTip(partyAvg.get(s.policy_id)!)}.
+                      Como referência, a média do{" "}
+                      <span className="font-semibold text-slate-600">
+                        {dir.party_sigla}
+                      </span>{" "}
+                      nesta política é{" "}
+                      <span className="font-semibold text-slate-600">
+                        {supportTip(partyAvg.get(s.policy_id)!)}
+                      </span>
+                      .
                     </p>
                   )}
                 <PositionBar
@@ -308,6 +332,30 @@ export default async function PersonPage({
                 />
               </Link>
             ))}
+          </div>
+        )}
+
+        {soNaCamara.length > 0 && (
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+            <p>
+              Os outros {soNaCamara.length} temas do site foram votados{" "}
+              <strong>apenas na Câmara</strong>. O Senado ainda não votou nenhum
+              deles, então não há como registrar a posição de um senador:
+            </p>
+            <p className="mt-2">
+              {soNaCamara.map((p, i) => (
+                <span key={p.id}>
+                  {i > 0 && ", "}
+                  <Link
+                    href={`/politicas/${p.id}`}
+                    className="text-brand hover:underline"
+                  >
+                    {p.name}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
           </div>
         )}
       </section>
