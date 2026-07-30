@@ -159,8 +159,8 @@ export default async function Home() {
             Seu político vota como você votaria?
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            Deputados e senadores votam no seu lugar.
-            <br />Veja o que eles já decidiram sobre a sua vida.
+            O papel de um político é votar em projetos de lei.
+            <br />Cada voto mexe com seu salário, sua saúde e seus direitos.
           </p>
           <div className="mt-7">
             <HomeSearch />
