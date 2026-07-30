@@ -149,7 +149,11 @@ JOIN (VALUES
   ('camara','2541109-45','for','normal'),   -- PLP 163/2025 fora dos limites fiscais (destaque)
   ('camara','1198512-250','for','strong'),  -- FUNDEB permanente: 1º turno do substitutivo (principal)
   ('camara','1198512-279','for','normal'),  -- PEC 15/2015 FUNDEB permanente (destaque)
-  ('camara','2208007-48','for','normal'),   -- PEC 96/2019 execução obrigatória
+  -- REMOVIDA em 30/07/2026: ('camara','2208007-48','for','normal') -- PEC 96/2019
+  --   Votacao da CCJC, nao do plenario: so 52 deputados podiam votar, e os outros
+  --   837 entravam como "ausentes" sem nunca ter tido a chance. O score.py agora
+  --   ignora automaticamente qualquer votacao fora de PLEN/SF (ver PLENARY_BODIES),
+  --   entao mesmo que volte para ca ela nao entra no calculo.
   ('camara','2409076-34','for','normal'),   -- PLP 243/2023 Pé-de-Meia (Câmara)
   ('camara','2465240-36','for','normal'),   -- PL 3118/2024 assistência estudantil
   ('senado','7030','for','strong'),         -- PLP 163/2025 (Senado)
@@ -159,22 +163,32 @@ JOIN (VALUES
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Demarcação de terras indígenas (provisória — por ora, o Marco Temporal)
+--  Demarcação de terras indígenas
+--
+--  30/07/2026: o PL 4497/2024 ("PL da Grilagem") FOI RETIRADO desta politica.
+--  Ele trata de ratificacao de registros imobiliarios em faixa de fronteira —
+--  titulacao de terra, nao demarcacao indigena — e estava vinculado tambem a
+--  politica "Reforma agraria e acesso a terra", com a mesma direcao. Era a unica
+--  proposicao servindo duas politicas, e aqui parecia preenchimento. Segue na
+--  politica de reforma agraria, onde o eixo encaixa.
+--    ('camara','2471177-56','against','normal')
+--    ('camara','2471177-102','against','strong')
+--
+--  Tambem saiu a flag provisional: a politica tem 5 votacoes, todas de marco
+--  temporal, e o eixo esta fechado.
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Demarcação de terras indígenas';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Demarcação de terras indígenas',
-    'Defesa dos direitos territoriais dos povos indígenas: CONTRA o Marco Temporal (PL 490/2007, que restringe a demarcação de terras às ocupadas em 5/10/1988). Score alto = defende os direitos indígenas. Cobre as duas casas: PL 490/2007 (Câmara), PL 2903/2023 e PEC 48/2023 (Senado) e PL 4497/2024 (registros sobre terras em demarcação, vetado).',
-    true) RETURNING id
+    'Defesa dos direitos territoriais dos povos indígenas: CONTRA o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988. Score alto = defende os direitos indígenas. Cobre as duas casas: PL 490/2007 (Câmara), PL 2903/2023 e PEC 48/2023 (Senado).',
+    false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('camara','345311-270','against','strong'),  -- PL 490/2007 Marco Temporal (Câmara)
   ('camara','345311-279','against','normal'),  -- PL 490/2007 destaque
-  ('camara','2471177-56','against','normal'),  -- PL 4497/2024 registros s/ demarcação
-  ('camara','2471177-102','against','strong'), -- PL 4497/2024: aprovacao final do Substitutivo do Senado (dez/2025)
   ('senado','6756','against','strong'),        -- PL 2903/2023 Marco Temporal (Senado, 43x21)
   ('senado','7032','against','strong'),        -- PEC 48/2023 1º turno (52x14)
   ('senado','7033','against','normal')         -- PEC 48/2023 2º turno (52x15)
@@ -424,7 +438,7 @@ UPDATE policy SET description = CASE name
  WHEN 'Mais investimento na educação' THEN 'Reúne as votações sobre dinheiro para a educação pública: o FUNDEB permanente na Constituição (PEC 15/2015), a exclusão da educação do teto de gastos (PEC 24/2019) e dos limites do arcabouço fiscal (PLP 163/2025), a execução orçamentária obrigatória, a política de assistência estudantil e o Pé-de-Meia, a poupança que ajuda o aluno de baixa renda a terminar o ensino médio. Votar SIM apoia mais investimento.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Reúne as votações sobre igualdade entre mulheres e homens no trabalho, com destaque para a Lei da Igualdade Salarial (PL 1085/2023), que obriga empresas a pagar o mesmo salário para a mesma função e a publicar relatórios de transparência salarial. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas conforme o Congresso votar o tema.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'Reúne as votações que flexibilizam o licenciamento ambiental, a começar pelo PL 2159/2021, apelidado de "PL da Devastação", que cria a licença por autodeclaração, e pela MPV 1308/2025, que instituiu a licença especial para obras prioritárias. Score alto = defende manter as regras rigorosas; score baixo = votou para flexibilizar.'
- WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Inclui também o PL 4497/2024, o "PL da Grilagem", que valida registros de imóveis sobre terras públicas e terras indígenas em demarcação. Score alto = defende os direitos territoriais indígenas.'
+ WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Score alto = defende os direitos territoriais indígenas.'
  WHEN 'Igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Reúne as votações sobre a proteção dos direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
  WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'

@@ -46,6 +46,13 @@ MIN_ATTENDED = 2                         # menos que isso -> 'sem dados suficien
 # margem apurada — a curadoria não precisa lembrar da regra.
 LOPSIDED_THRESHOLD = 0.95
 
+# Só contam votações de PLENÁRIO, onde todo parlamentar tinha a chance de votar.
+# Numa votação de comissão (CCJC, CE, CMADS...) só os membros podem votar, e o
+# motor trataria os demais como "ausentes" — o que confunde "não quis votar" com
+# "não podia votar" e contamina o score de quem nem era da comissão.
+#   PLEN = plenário da Câmara | SF = plenário do Senado
+PLENARY_BODIES = {"PLEN", "SF"}
+
 # votos decisivos; o resto (abstenção, obstrução, ausente, outro, artigo17)
 # é tratado como não-decisivo ("absent")
 DECISIVE = {"sim", "nao"}
@@ -130,6 +137,20 @@ def load_policies(cur):
     return policies
 
 
+def committee_divisions(cur, division_ids):
+    """Devolve o set de division_ids que NÃO são de plenário (ou seja, comissões)."""
+    if not division_ids:
+        return set()
+    cur.execute(
+        "SELECT id, body FROM division WHERE id = ANY(%s)",
+        (list(division_ids),),
+    )
+    return {
+        did for did, body in cur.fetchall()
+        if (body or "").upper() not in PLENARY_BODIES
+    }
+
+
 def lopsided_divisions(cur, division_ids, threshold=LOPSIDED_THRESHOLD):
     """
     Devolve o set de division_ids em que >= threshold dos votos decisivos ficou
@@ -171,6 +192,18 @@ def votes_for_divisions(cur, division_ids):
 def compute_policy(cur, policy_id, divisions):
     """Calcula e grava agreement_score para uma política. Retorna nº de pessoas."""
     div_ids = [d[0] for d in divisions]
+
+    # Descarta comissões: só plenário conta (ver PLENARY_BODIES).
+    comissoes = committee_divisions(cur, div_ids)
+    if comissoes:
+        print(f"  {len(comissoes)} votação(ões) de comissão ignorada(s) "
+              f"(só plenário conta): {sorted(comissoes)}")
+        divisions = [d for d in divisions if d[0] not in comissoes]
+        div_ids = [d[0] for d in divisions]
+        if not div_ids:
+            print("  nenhuma votação de plenário restou — política sem score")
+            return 0
+
     lopsided = lopsided_divisions(cur, div_ids)
     # margem >= LOPSIDED_THRESHOLD rebaixa o peso, mesmo que a curadoria tenha
     # marcado a votação como 'strong'.
@@ -303,6 +336,11 @@ def self_test():
     # strength desconhecido cai no default 'normal' (proteção contra dado sujo)
     s3, _ = agreement_from_comparisons([("for", "xpto", "sim")])
     assert s3 == 100.0, s3
+
+    # plenario vs comissao: a regra e um teste de pertinencia, testavel sem banco
+    assert "PLEN" in PLENARY_BODIES and "SF" in PLENARY_BODIES
+    for comissao in ("CCJC", "CE", "CMADS", "CDHMIR", "CFT"):
+        assert comissao not in PLENARY_BODIES, comissao
 
     print("✅ self-test: todas as asserções da lógica de score passaram.")
     print("   exemplos:")

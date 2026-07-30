@@ -5,6 +5,7 @@ import ScoreBadge from "@/components/ScoreBadge";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
 import VoteChip from "@/components/VoteChip";
+import InfoQuaseUnanime from "@/components/InfoQuaseUnanime";
 import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
@@ -269,6 +270,8 @@ export default async function PolicyPage({
                   stance={d.stance}
                   strength={d.effective_strength ?? d.strength}
                   pctMaioria={d.pct_maioria}
+                  votosSim={d.votos_sim}
+                  votosNao={d.votos_nao}
                 />
                 {person && (
                   <VoteChip
@@ -345,38 +348,36 @@ function StanceChip({
   stance,
   strength,
   pctMaioria,
+  votosSim,
+  votosNao,
 }: {
   stance: string;
   strength: string;
   pctMaioria: number | null;
+  votosSim: number | null;
+  votosNao: number | null;
 }) {
   const forStance = stance === "for";
   const weak = strength === "weak";
-  const titulo =
-    strength === "strong"
-      ? "Peso maior: votação decisiva"
-      : weak
-        ? "Peso reduzido: quase todos votaram do mesmo lado, então essa votação distingue pouco os parlamentares"
-        : "Peso normal";
   return (
-    <span className="flex shrink-0 flex-col items-end gap-1">
+    <span className="flex shrink-0 items-center gap-1.5">
       <span
         className={`rounded px-2 py-0.5 text-xs font-medium ${
           forStance ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
         }`}
-        title={titulo}
+        title={
+          strength === "strong" ? "Peso maior: votação decisiva" : "Peso normal"
+        }
       >
         {forStance ? "Sim = a favor" : "Sim = contra"}
         {strength === "strong" ? " ★" : ""}
       </span>
       {weak && (
-        <span
-          className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500"
-          title={titulo}
-        >
-          {pctMaioria ? `quase unânime (${pctMaioria}%)` : "quase unânime"} · peso
-          reduzido
-        </span>
+        <InfoQuaseUnanime
+          pctMaioria={pctMaioria}
+          votosSim={votosSim}
+          votosNao={votosNao}
+        />
       )}
     </span>
   );

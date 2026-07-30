@@ -147,8 +147,21 @@ export default function SobrePage() {
           porque ela diz muito sobre a minoria que votou contra a corrente. O
           corte é automático, calculado a partir do resultado apurado — não é
           escolha editorial nossa caso a caso. Na página de cada política, essas
-          votações aparecem marcadas como &quot;quase unânime · peso reduzido&quot;,
-          com a porcentagem apurada, para você conferir.
+          votações trazem um <strong>i</strong> ao lado do selo: clique para ver o
+          placar e a explicação.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">
+          Só entram votações de plenário
+        </h2>
+        <p className="text-slate-600">
+          Numa votação de comissão, apenas os poucos parlamentares que são membros
+          dela podem votar. Contar isso seria injusto: os demais apareceriam como
+          ausentes sem nunca ter tido a chance de se posicionar. Por isso
+          consideramos só as votações de plenário — da Câmara e do Senado — onde
+          todos podiam votar.
         </p>
       </section>
 
