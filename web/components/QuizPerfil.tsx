@@ -162,6 +162,9 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   if (!started) {
     return (
       <div className="rounded-xl border border-brand-light bg-violet-50 p-6 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-brand">
+          Quem vota como você?
+        </h1>
         <p className="text-lg font-semibold text-slate-800">
           Responda como você votaria
         </p>
@@ -334,21 +337,37 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
         </span>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <div className="rounded-md bg-violet-100 px-4 py-3">
-          <h2 className="text-center text-xl font-bold leading-snug text-slate-800">
+      {/* Nome da politica fixo no topo: a pessoa precisa ver sobre o que esta
+          respondendo enquanto rola. top-14 fica logo abaixo da navbar, que e
+          sticky top-0. */}
+      <div className="sticky top-14 z-30 -mx-4 bg-slate-50 px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
+        <div className="rounded-md bg-violet-100 px-4 py-3 shadow-sm">
+          <h2 className="text-center text-lg font-bold leading-snug text-slate-800 sm:text-xl">
             {current.name}
           </h2>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
         {current.impact && (
-          <div className="mt-4 rounded-none border-l-4 border-amber-500 bg-amber-100 p-4">
-            <p className="text-sm font-semibold text-amber-900">
+          <details className="group rounded-none border-l-4 border-amber-500 bg-amber-100">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-semibold text-amber-900 marker:hidden">
               Por que isso importa para você?
-            </p>
-            <p className="mt-1 text-[15px] leading-relaxed text-amber-900/90">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </summary>
+            <p className="px-4 pb-4 text-[15px] leading-relaxed text-amber-900/90">
               {current.impact}
             </p>
-          </div>
+          </details>
         )}
 
         <p className="mt-5 text-center font-semibold text-slate-700">

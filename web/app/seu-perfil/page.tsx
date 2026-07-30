@@ -31,10 +31,8 @@ export default async function SeuPerfilPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-center text-2xl font-bold text-brand">
-        Quem vota como você?
-      </h1>
-
+      {/* O titulo vive dentro do QuizPerfil: ele some depois que a pessoa
+          comeca a responder, para dar lugar ao nome da politica fixo no topo. */}
       <QuizPerfil policies={policies} />
     </div>
   );
