@@ -141,7 +141,19 @@ CREATE TABLE IF NOT EXISTS policy (
   id           SERIAL PRIMARY KEY,
   name         TEXT NOT NULL,
   description  TEXT,
-  provisional  BOOLEAN NOT NULL DEFAULT TRUE
+  provisional  BOOLEAN NOT NULL DEFAULT TRUE,
+  -- Texto exibido na pagina da politica. E COMPOSTO a partir das colunas do quiz
+  -- (ver db/seed_policies.sql), para que site e quiz nunca contem historias diferentes.
+  impact       TEXT,
+  -- Textos do quiz. side_a e SEMPRE o lado que da score alto.
+  -- quiz_hook = o impact sem o fecho dos dois lados, que no quiz vive nas opcoes.
+  -- As duas posicoes sao nomeadas pelo CONTEUDO, nunca "a favor"/"contra" — e o que
+  -- torna as politicas invertidas legiveis para quem responde.
+  quiz_hook    TEXT,
+  side_a_title TEXT,
+  side_a_note  TEXT,
+  side_b_title TEXT,
+  side_b_note  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS policy_division (

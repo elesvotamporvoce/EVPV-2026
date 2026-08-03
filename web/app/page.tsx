@@ -155,32 +155,35 @@ export default async function Home() {
     <div className="space-y-12">
       <section className="home-hero relative left-1/2 -mt-8 w-screen -translate-x-1/2 bg-brand-ink text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold text-brand-light sm:text-5xl">
-            Seu político vota como você votaria?
+          <h1 className="text-4xl font-bold text-brand-light sm:text-5xl">
+            Você sabia que seu político vota por você?
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            O papel de um político é votar em projetos de lei.
-            <br />Cada voto mexe com seu salário, sua saúde e seus direitos.
-          </p>
-          <div className="mt-7">
+          <ol className="mx-auto mt-6 flex max-w-md flex-col gap-2.5 text-left">
+            {[
+              "Você elege um deputado e um senador",
+              "Eles votam sim ou não em cada projeto de lei",
+              "O que passa vira regra para todo mundo",
+            ].map((txt, i) => (
+              <li key={txt} className="flex items-center gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-light/20 text-[13px] font-semibold text-brand-light">
+                  {i + 1}
+                </span>
+                <span className="text-white/75">{txt}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8">
             <HomeSearch />
           </div>
-          <BigNumbers
-            items={[
-              { value: people, label: "parlamentares analisados" },
-              { value: divisions, label: "sessões de votação" },
-              { value: policies.length, label: "temas políticos" },
-            ]}
-          />
           <div className="mt-9">
             <Link
               href="/seu-perfil"
               className="inline-block rounded-lg bg-brand px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-brand/25 hover:bg-brand-dark"
             >
-              Quem vota como você?
+              Teste: quem te representa?
             </Link>
             <p className="mt-2.5 text-sm text-white/60">
-              Responda como você votaria e descubra quem te representa
+              Responda e descubra quem pensa igual a você
             </p>
           </div>
         </div>
@@ -322,6 +325,17 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Números do projeto, em destaque antes das principais políticas */}
+      <section className="rounded-xl bg-brand-ink px-4 py-9 text-white">
+        <BigNumbers
+          items={[
+            { value: people, label: "parlamentares analisados" },
+            { value: divisions, label: "sessões de votação" },
+            { value: policies.length, label: "temas políticos" },
+          ]}
+        />
+      </section>
 
       <section>
         <div className="mb-4 flex items-end justify-between">

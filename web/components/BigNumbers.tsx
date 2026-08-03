@@ -30,7 +30,7 @@ export default function BigNumbers({
   items: { value: number; label: string }[];
 }) {
   return (
-    <div className="mt-10 flex flex-wrap items-start justify-center gap-x-12 gap-y-6">
+    <div className="flex flex-wrap items-start justify-center gap-x-12 gap-y-6">
       {items.map((it) => (
         <div key={it.label} className="text-center">
           <p className="text-4xl font-bold leading-none text-brand-light sm:text-5xl">

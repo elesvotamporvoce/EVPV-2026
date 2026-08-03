@@ -236,13 +236,13 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Anistia do 8 de Janeiro (PL da Dosimetria) (política de um projeto só)
+--  Redução de penas do 8 de Janeiro (política de um projeto só)
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Anistia do 8 de Janeiro (PL da Dosimetria)';
+DELETE FROM policy WHERE name = 'Redução de penas do 8 de Janeiro';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Anistia do 8 de Janeiro (PL da Dosimetria)',
-    'Posição sobre o PL 2162/2023 ("PL da Dosimetria"): concede anistia a participantes das manifestações de motivação política de 2022-2023 e reduz as penas dos condenados pelos atos de 8 de janeiro. Vetado pelo presidente; o veto foi derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.',
+    'Redução de penas do 8 de Janeiro',
+    'O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A anistia caiu no substitutivo: o texto aprovado não perdoa ninguém, mas reduz penas de quem participou dos atos de 8 de janeiro de 2023. Proíbe somar as penas de golpe e de abolição violenta do Estado Democrático de Direito quando praticadas no mesmo contexto, cria redução de um a dois terços para quem agiu em meio à multidão sem financiar nem liderar, e devolve a progressão de regime a um sexto da pena. Aprovado pela Câmara e pelo Senado, vetado integralmente e promulgado como Lei 15.402/2026 depois de o Congresso derrubar o veto. Score alto = a favor da redução das penas.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -470,6 +470,90 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 -- ---------------------------------------------------------------------------
 
 -- ============================================================================
+--  TEXTOS DO QUIZ
+--
+--  O quiz mostra um gancho curto (quiz_hook) e DUAS POSICOES NOMEADAS PELO
+--  CONTEUDO, nunca "a favor" e "contra". Isso resolve a leitura das politicas
+--  invertidas: a pessoa escolhe uma posicao concreta, e a curadoria e quem sabe
+--  qual delas o Congresso votou.
+--
+--  CONVENCOES:
+--   * side_a e SEMPRE o lado que da score alto. A ordem fixa gera vies de
+--     posicao (a primeira opcao e mais escolhida) e isso foi assumido
+--     conscientemente em 31/07/2026.
+--   * quiz_hook = o impact SEM o fecho dos dois lados. No quiz os dois lados
+--     vivem nas opcoes; repetir seria dizer a mesma coisa duas vezes na tela.
+--   * teto de referencia de 150 caracteres por nota, flexivel. O que importa
+--     mais e os dois lados da MESMA politica ficarem proximos em tamanho, para
+--     as caixas de altura igual do quiz nao abrirem buraco.
+--   * o impact da pagina e COMPOSTO no fim deste arquivo a partir destas pecas,
+--     para quiz e site nunca divergirem.
+-- ============================================================================
+UPDATE policy SET quiz_hook = CASE name
+ WHEN 'Combate à violência contra a mulher' THEN 'Trata da segurança de mulheres em todo o Brasil: define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos.'
+ WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço do combustível que você põe no tanque e da energia da sua casa, e define se as empresas que mais poluem pagam pelo que emitem.'
+ WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar.'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
+ WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa no interior do país: estabelece a regra que define se uma área vira terra indígena ou continua como está.'
+ WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana e quanto entra no seu FGTS e no INSS.'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023.'
+ ELSE quiz_hook END;
+
+UPDATE policy SET side_a_title = CASE name
+ WHEN 'Combate à violência contra a mulher' THEN 'Proteger desde a denúncia'
+ WHEN 'Redução das emissões de carbono' THEN 'Quem polui deve pagar'
+ WHEN 'Mais investimento na educação' THEN 'Priorizar a verba da educação'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Direito básico, não benefício'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'Melhor demorar do que remediar'
+ WHEN 'Demarcação de terras indígenas' THEN 'Tem que considerar quem foi expulso'
+ WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'A CLT é o piso, não o teto'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'Corrigir penas desproporcionais'
+ ELSE side_a_title END;
+
+UPDATE policy SET side_a_note = CASE name
+ WHEN 'Combate à violência contra a mulher' THEN 'o período mais perigoso é logo depois que a mulher denuncia, não depois da sentença'
+ WHEN 'Redução das emissões de carbono' THEN 'grandes emissores passam a ter limite e a comprar crédito de quem emite menos'
+ WHEN 'Mais investimento na educação' THEN 'escola e universidade dependem de dinheiro garantido e não podem sofrer quando o governo corta gastos'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'barragens que romperam eram classificadas como de impacto médio antes do desastre'
+ WHEN 'Demarcação de terras indígenas' THEN 'comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
+ WHEN 'Políticas de igualdade racial' THEN 'séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'sem mínimo garantido em lei, a negociação vira imposição de quem tem mais poder'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
+ ELSE side_a_note END;
+
+UPDATE policy SET side_b_title = CASE name
+ WHEN 'Combate à violência contra a mulher' THEN 'Aplicar melhor o que já existe'
+ WHEN 'Redução das emissões de carbono' THEN 'Sem custo novo sobre produzir'
+ WHEN 'Mais investimento na educação' THEN 'Cautela com gasto obrigatório'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'A demora também cobra caro'
+ WHEN 'Demarcação de terras indígenas' THEN 'Uma data encerra a disputa'
+ WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'Deixar empresa e trabalhador negociarem'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'Manter as penas como foram fixadas'
+ ELSE side_b_title END;
+
+UPDATE policy SET side_b_note = CASE name
+ WHEN 'Combate à violência contra a mulher' THEN 'falta delegacia e estrutura, não lei nova; mais regra não muda o atendimento'
+ WHEN 'Redução das emissões de carbono' THEN 'a conta do carbono chega no combustível e na energia, e quem paga é o consumidor'
+ WHEN 'Mais investimento na educação' THEN 'despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
+ WHEN 'Rigor no licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
+ WHEN 'Demarcação de terras indígenas' THEN 'sem data, qualquer área pode ser reivindicada e ninguém tem segurança sobre o próprio título'
+ WHEN 'Políticas de igualdade racial' THEN 'política que classifica por raça oficializa uma divisão que não deveria existir'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato'
+ ELSE side_b_note END;
+
+-- O impact exibido na pagina da politica e derivado das pecas acima.
+UPDATE policy SET impact =
+  quiz_hook || ' Para quem defende, ' || side_a_note || '; para quem critica, ' || side_b_note || '.'
+WHERE quiz_hook IS NOT NULL;
+-- ============================================================================
 UPDATE policy SET impact = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Trata da segurança de mães, filhas e companheiras: define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos. Para quem defende, fecha brechas que custam vidas; para quem critica, restrições aplicadas antes da condenação.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Decide se as empresas são obrigadas a pagar o mesmo salário a homens e mulheres na mesma função. Mexe nos direitos e no contracheque de milhões de trabalhadoras. Para quem defende, é direito básico; para quem critica, é mais custo e obrigação para o empregador.'
@@ -480,7 +564,7 @@ UPDATE policy SET impact = CASE name
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa: os povos indígenas ou os produtores e empresas. Afeta os conflitos no campo, a preservação da floresta e o clima. De um lado, segurança jurídica para quem investe e produz (agronegócio); do outro, o território de comunidades que vivem ali há gerações.'
  WHEN 'Políticas de igualdade racial' THEN 'Define se há reserva de vaga para pessoas negras em concurso público, qual a punição para quem comete racismo e se partido é obrigado a bancar candidatura negra. Para quem defende, corrige desigualdade histórica; para quem critica, separa cidadãos por raça.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre (fim da escala 6x1) e no bolso de quem tem carteira assinada: quantos dias o trabalhador folga por semana e quanto entra no seu FGTS e no INSS. Quem é a favor vê mais direitos garantidos; quem é contra enxerga contratação mais cara para as empresas.'
- WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023. Quem vota a favor da anistia fala em exagero nas condenações; quem vota contra fala na impunidade e possibilidade de criar precedentes para novos ataques às instituições.'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023. Quem vota a favor da anistia fala em exagero nas condenações; quem vota contra fala na impunidade e possibilidade de criar precedentes para novos ataques às instituições.'
  WHEN 'Política nacional de cultura' THEN 'Decide se shows, cinema, teatro e ponto de cultura da sua cidade têm verba previsível, e se o streaming paga uma contribuição que financia produção brasileira. Para quem defende, volta em emprego e economia; para quem critica, é despesa fixa criada em lei.'
  WHEN 'Isenção de impostos para igrejas' THEN 'Hoje as igrejas não pagam imposto sobre templo e patrimônio; a proposta estende isso para bens e serviços que elas compram. De um lado, menos arrecadação para saúde e educação; do outro, mais recursos para templos e atividades religiosas.'
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassino, bingo e jogo do bicho passam a funcionar legalmente. De um lado, emprego, turismo e imposto arrecadado; do outro, risco de vício em jogo e de lavagem de dinheiro.'
@@ -507,7 +591,7 @@ UPDATE policy SET description = CASE name
  WHEN 'Demarcação de terras indígenas' THEN 'Reúne as votações sobre a demarcação de terras indígenas, com destaque para o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988: aprovado na Câmara (PL 490/2007) e no Senado (PL 2903/2023), e depois inserido na Constituição pela PEC 48/2023. Score alto = defende os direitos territoriais indígenas.'
  WHEN 'Políticas de igualdade racial' THEN 'Reúne as votações sobre igualdade racial: a reserva de 30% das vagas em concursos públicos para pessoas negras, indígenas e quilombolas; a equiparação da injúria racial ao crime de racismo, com pena maior; o feriado nacional da Consciência Negra; a "Lista Suja" do racismo no futebol; e a PEC 9/2023, que perdoou os partidos que descumpriram a cota de financiamento de candidaturas negras (nessa, votar NÃO é que apoia a política). Score alto = apoia a igualdade racial.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Reúne as votações sobre a proteção dos direitos de quem trabalha: a favor da PEC 221/2019, que acaba com a escala 6x1 e reduz a jornada máxima, e contra o Contrato Verde e Amarelo (MPV 905/2019) e sua retomada no PL 5496/2013, que criavam contratos de jovens com FGTS e contribuição ao INSS reduzidos. Score alto = defende os direitos dos trabalhadores.'
- WHEN 'Anistia do 8 de Janeiro (PL da Dosimetria)' THEN 'Reúne as votações sobre o PL 2162/2023, o "PL da Dosimetria", que perdoa e reduz as penas de condenados pelos atos de 8 de janeiro de 2023, quando as sedes dos Três Poderes foram invadidas e depredadas. Inclui a votação de urgência, que acelerou a tramitação, e a aprovação do texto. O projeto foi vetado pelo presidente e o veto derrubado pelo Congresso. Score alto = a favor da anistia e da redução de penas.'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A anistia caiu no substitutivo: o texto aprovado não perdoa ninguém, mas reduz penas de quem participou dos atos de 8 de janeiro de 2023. Proíbe somar as penas de golpe e de abolição violenta do Estado Democrático de Direito quando praticadas no mesmo contexto, cria redução de um a dois terços para quem agiu em meio à multidão sem financiar nem liderar, e devolve a progressão de regime a um sexto da pena. Aprovado pela Câmara e pelo Senado, vetado integralmente e promulgado como Lei 15.402/2026 depois de o Congresso derrubar o veto. Score alto = a favor da redução das penas.'
  WHEN 'Política nacional de cultura' THEN 'Reúne as votações sobre dinheiro público para cultura: tornar permanente a Política Nacional Aldir Blanc (PL 363/2025), que repassa cerca de R$ 15 bilhões a estados e municípios ao longo de cinco anos, e a regulamentação do streaming (PL 8889/2017), que cobra uma contribuição de plataformas como Netflix e Prime Video para financiar o audiovisual brasileiro. Score alto = apoia o financiamento à cultura.'
  WHEN 'Reforma agrária e acesso à terra' THEN 'Reúne as votações sobre terra e reforma agrária: o PL 4357/2023, que proíbe desapropriar imóveis produtivos para fins de reforma agrária; o PL 4497/2024, o "PL da Grilagem", que valida registros sobre terras públicas em faixa de fronteira, inclusive sobre terras indígenas em demarcação; e o PL 709/2023, que endurece a punição a famílias que ocupam terras. Score alto = defende a reforma agrária e o acesso à terra.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Reúne as votações sobre a PEC 3/2021, a "PEC da Blindagem", que exigiria autorização prévia da própria Câmara ou do Senado, em voto secreto, para o STF processar criminalmente um parlamentar. Foi aprovada pela Câmara em setembro de 2025 e, depois de protestos em todo o país, rejeitada pelo Senado. Score alto = a favor da blindagem.'

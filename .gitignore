@@ -17,3 +17,13 @@ venv/
 # Documentos de referencia do build — ficam locais, nao vao para o repo.
 theyvoteforyou-architecture-and-build-guide.md
 CATALOGO_POLITICAS.md
+
+# Curadoria — material de trabalho, ainda NAO publicavel (decisao de 31/07/2026).
+# Vive na pasta local do projeto. Quando for hora de publicar, e so remover estas
+# linhas e mover os arquivos de volta.
+CURADORIA.md
+Curadoria-EVPV.docx
+Proposicoes-fila-de-curadoria.xlsx
+export_proposicoes.sql
+scripts/export_proposicoes.sql
+*.csv
