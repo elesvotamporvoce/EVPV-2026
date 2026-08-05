@@ -492,7 +492,7 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 UPDATE policy SET quiz_hook = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Trata da segurança de mulheres em todo o Brasil: define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos.'
  WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço do combustível que você põe no tanque e da energia da sua casa, e define se as empresas que mais poluem pagam pelo que emitem.'
- WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar.'
+ WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa no interior do país: estabelece a regra que define se uma área vira terra indígena ou continua como está.'
