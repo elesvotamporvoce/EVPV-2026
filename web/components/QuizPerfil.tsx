@@ -167,12 +167,12 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           Quem vota como você?
         </h1>
         <p className="text-lg font-semibold text-slate-800">
-          Responda como você votaria
+          Responda como você votaria em cada tema político
         </p>
         <p className="mx-auto mt-2 max-w-xl leading-relaxed text-slate-600">
-          Diga como você votaria em cada tema. No final, comparamos suas
-          respostas com os votos reais do Congresso e mostramos quais partidos e
-          parlamentares mais votam como você. Leva cerca de 3 minutos.
+          No final, comparamos suas respostas com os votos do Congresso e
+          mostramos quais partidos e políticos mais se alinham com você. Leva
+          cerca de 3 minutos.
         </p>
         <button
           type="button"
@@ -333,37 +333,43 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const a = answers[current.id];
   return (
     <div className="space-y-4">
-      {/* Nome da politica fixo no topo: a pessoa precisa ver sobre o que esta
+      {/* Pergunta fixa no topo: a pessoa precisa ver sobre o que esta
           respondendo enquanto rola. top-14 fica logo abaixo da navbar, que e
           sticky top-0. */}
       <div className="sticky top-14 z-30 -mx-4 bg-slate-50 px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
         <div className="rounded-md bg-brand px-4 pb-3 pt-2 shadow-md">
-          <p className="text-center text-[11px] uppercase tracking-widest text-white/60">
-            política
-          </p>
-          <h2 className="text-center text-lg font-bold leading-snug text-white sm:text-xl">
-            {current.name}
+          <div className="relative flex items-center justify-center py-1">
+            <p className="text-center text-[13px] uppercase tracking-widest text-white/60">
+              política
+            </p>
+            <span className="absolute right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white">
+              {step + 1}/{list.length}
+            </span>
+          </div>
+          <h2 className="text-center text-lg font-normal leading-snug text-white sm:text-xl">
+            Como você votaria para{" "}
+            <strong className="font-bold">{current.name}</strong>?
           </h2>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        {current.quiz_hook && (
-          <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-4">
-            <p className="text-sm font-semibold text-amber-900">
-              Por que isso importa
-            </p>
-            <p className="mt-1.5 text-[15px] leading-relaxed text-amber-900/90">
-              {current.quiz_hook}
-            </p>
-          </div>
-        )}
+      {current.quiz_hook && (
+        <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-4 text-center">
+          <p className="text-sm font-semibold text-amber-900">
+            Por que isso importa
+          </p>
+          <p className="mt-1.5 text-[15px] leading-relaxed text-amber-900/90">
+            {current.quiz_hook}
+          </p>
+        </div>
+      )}
 
-        <p className="mt-6 text-center text-[19px] font-semibold leading-snug text-slate-900">
-          Como você votaria?
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-center text-[19px] font-semibold leading-snug text-slate-900">
+          Marque seu voto
         </p>
 
-        {/* As tres caixas tem a mesma altura (auto-rows-fr): nenhuma posicao
+        {/* As duas caixas tem a mesma altura (auto-rows-fr): nenhuma posicao
             parece mais importante que a outra por ocupar mais espaco. */}
         <div className="mt-4 grid auto-rows-fr gap-2.5">
           {[
@@ -376,7 +382,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
                 type="button"
                 aria-pressed={a?.value === lado.v}
                 onClick={() => escolher(lado.v)}
-                className={`rounded-lg border-2 bg-violet-100 px-4 py-3 text-left transition ${
+                className={`rounded-lg border-2 bg-violet-100 px-4 py-3 text-center transition ${
                   a?.value === lado.v
                     ? "border-brand ring-2 ring-brand/30"
                     : "border-violet-200 hover:border-brand-light"
@@ -393,21 +399,6 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
               </button>
             ) : null
           )}
-
-          <button
-            type="button"
-            aria-pressed={a !== undefined && a.value === null}
-            onClick={() => escolher(null)}
-            className={`rounded-lg border-2 bg-white px-4 py-3 text-left transition ${
-              a !== undefined && a.value === null
-                ? "border-brand ring-2 ring-brand/30"
-                : "border-slate-300 hover:border-brand-light"
-            }`}
-          >
-            <span className="block font-semibold text-slate-700">
-              Não tenho opinião formada ainda, pular esse tema
-            </span>
-          </button>
         </div>
 
         {/* Dobrar peso: separado por uma linha, e indisponivel para quem pulou */}
@@ -428,13 +419,20 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           </button>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
-            {step + 1}/{list.length}
-          </span>
+        <div className="mt-5 flex items-center justify-center gap-3">
           <button
             type="button"
-            disabled={a === undefined}
+            onClick={() => {
+              escolher(null);
+              setStep((v) => v + 1);
+            }}
+            className="rounded-lg border border-slate-300 px-5 py-3 font-medium text-slate-600 transition hover:border-brand hover:text-brand"
+          >
+            Pular esse tema
+          </button>
+          <button
+            type="button"
+            disabled={a === undefined || a.value === null}
             onClick={() => setStep((v) => v + 1)}
             className="rounded-lg bg-brand px-7 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-slate-300"
           >

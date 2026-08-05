@@ -158,10 +158,10 @@ export default async function Home() {
           <h1 className="text-4xl font-bold text-brand-light sm:text-5xl">
             Você sabia que seu político vota por você?
           </h1>
-          <ol className="mx-auto mt-6 flex max-w-md flex-col gap-2.5 text-left">
+          <ol className="mx-auto mt-6 flex w-fit flex-col gap-2.5 text-left">
             {[
               "Você elege um deputado e um senador",
-              "Eles votam sim ou não em cada projeto de lei",
+              "Eles votam sim ou não em projetos de lei",
               "O que passa vira regra para todo mundo",
             ].map((txt, i) => (
               <li key={txt} className="flex items-center gap-3">
