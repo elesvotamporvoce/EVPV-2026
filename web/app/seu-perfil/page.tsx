@@ -12,7 +12,7 @@ export const metadata = {
 // porque separam melhor quem vota de um jeito e quem vota de outro.
 async function getPolicies() {
   const [{ data: pols }, { data: part }] = await Promise.all([
-    supabase.from("policy").select("id, name, impact, description"),
+    supabase.from("policy").select("id, name, quiz_hook, description"),
     supabase.from("policy_participation").select("policy_id, n_scored"),
   ]);
   const n = new Map(

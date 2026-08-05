@@ -199,7 +199,7 @@ export default async function PolicyPage({
       {pol.impact && (
         <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-5">
           <p className="font-semibold text-amber-900">Por que isso importa para você?</p>
-          <p className="mt-1.5 text-[15px] leading-relaxed text-amber-900/90">
+          <p className="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-amber-900/90">
             {pol.impact}
           </p>
         </div>
@@ -217,7 +217,7 @@ export default async function PolicyPage({
           Resumo das votações
         </h2>
         {pol.description && (
-          <p className="mt-2 max-w-3xl text-lg leading-relaxed text-slate-600">
+          <p className="mt-2 max-w-3xl whitespace-pre-line text-lg leading-relaxed text-slate-600">
             {pol.description}
           </p>
         )}

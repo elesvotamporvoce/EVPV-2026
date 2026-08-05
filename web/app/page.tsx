@@ -16,7 +16,7 @@ async function getData() {
       await Promise.all([
         supabase
           .from("policy")
-          .select("id, name, description, provisional")
+          .select("id, name, description, quiz_hook, provisional")
           .order("name"),
         supabase.from("person").select("id", { count: "exact", head: true }),
         supabase
@@ -351,9 +351,9 @@ export default async function Home() {
               className="rounded-lg border border-slate-200 bg-white p-4 hover:border-brand-light hover:shadow-sm"
             >
               <p className="font-medium text-slate-800">{pol.name}</p>
-              {pol.description && (
+              {(pol.quiz_hook ?? pol.description) && (
                 <p className="mt-1 line-clamp-3 text-sm text-slate-500">
-                  {pol.description}
+                  {pol.quiz_hook ?? pol.description}
                 </p>
               )}
             </Link>

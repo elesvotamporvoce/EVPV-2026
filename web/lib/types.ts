@@ -41,7 +41,14 @@ export type Policy = {
   name: string;
   description: string | null;
   provisional: boolean;
+  /** texto longo da PAGINA da politica ("Por que isso importa para voce") */
   impact: string | null;
+  /** texto curto do QUIZ; independente do impact */
+  quiz_hook: string | null;
+  side_a_title: string | null;
+  side_a_note: string | null;
+  side_b_title: string | null;
+  side_b_note: string | null;
 };
 
 export type PartyPolicyAgreement = {

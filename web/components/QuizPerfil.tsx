@@ -8,7 +8,8 @@ import { UFS, CARGO_LABEL } from "@/lib/format";
 export type QuizPolicy = {
   id: number;
   name: string;
-  impact: string | null;
+  /** texto curto do quiz; a pagina da politica usa outro texto, mais longo */
+  quiz_hook: string | null;
   description: string | null;
 };
 
@@ -337,7 +338,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
-        {current.impact && (
+        {current.quiz_hook && (
           <details className="group rounded-none border-l-4 border-amber-500 bg-amber-100">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-semibold text-amber-900 marker:hidden">
               Por que isso importa para você?
@@ -353,7 +354,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
               </svg>
             </summary>
             <p className="px-4 pb-4 text-[15px] leading-relaxed text-amber-900/90">
-              {current.impact}
+              {current.quiz_hook}
             </p>
           </details>
         )}

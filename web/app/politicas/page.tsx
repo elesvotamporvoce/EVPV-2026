@@ -10,7 +10,7 @@ async function getPolicies(): Promise<Policy[]> {
   try {
     const { data } = await supabase
       .from("policy")
-      .select("id, name, description, impact, provisional")
+      .select("id, name, description, quiz_hook, provisional")
       .order("name");
     const pols = (data ?? []) as Policy[];
     return pols.sort(
@@ -52,9 +52,9 @@ export default async function PoliticasPage() {
                 )}
               </p>
             </div>
-            {(pol.impact ?? pol.description) && (
+            {(pol.quiz_hook ?? pol.description) && (
               <p className="mt-3 text-base leading-relaxed text-slate-600">
-                {pol.impact ?? pol.description}
+                {pol.quiz_hook ?? pol.description}
               </p>
             )}
           </Link>
