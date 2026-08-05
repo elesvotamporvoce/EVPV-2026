@@ -504,7 +504,7 @@ UPDATE policy SET quiz_hook = CASE name
  WHEN 'Política nacional de cultura' THEN 'Decide se shows, cinema, teatro e ponto de cultura da sua cidade têm verba previsível, e se o streaming paga uma contribuição que financia produção brasileira.'
  WHEN 'Isenção de impostos para igrejas' THEN 'Igreja já não paga imposto sobre templo, patrimônio e renda. A proposta estende a isenção para tudo que ela compra.'
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassino, bingo e jogo do bicho passam a funcionar dentro da lei, com regra e imposto, em vez de na clandestinidade.'
- WHEN 'Reforma tributária do consumo' THEN 'Muda o imposto embutido no preço de tudo que você compra: cinco tributos viram um só, e quem ganha pouco recebe parte de volta.'
+ WHEN 'Reforma tributária do consumo' THEN 'Muda o imposto embutido no preço de tudo que você compra: cinco tributos viram um só, e quem ganha pouco recebe parte de volta do valor.'
  WHEN 'Conservação da biodiversidade' THEN 'Define o que pode e o que não pode em área de natureza protegida, do bioma marinho às rotas de aves migratórias.'
  WHEN 'Abastecimento público de medicamentos' THEN 'Mexe no preço e na falta de remédio no posto: produção nacional, compra direta do produtor público e quebra de patente.'
  ELSE quiz_hook END;
