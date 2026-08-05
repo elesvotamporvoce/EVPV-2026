@@ -353,7 +353,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
         )}
 
         <p className="mt-6 text-center text-[19px] font-semibold leading-snug text-slate-900">
-          Como você votaria para a política de {current.name}?
+          Como você votaria?
         </p>
 
         {/* As tres caixas tem a mesma altura (auto-rows-fr): nenhuma posicao
