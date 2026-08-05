@@ -142,11 +142,12 @@ CREATE TABLE IF NOT EXISTS policy (
   name         TEXT NOT NULL,
   description  TEXT,
   provisional  BOOLEAN NOT NULL DEFAULT TRUE,
-  -- Texto exibido na pagina da politica. E COMPOSTO a partir das colunas do quiz
-  -- (ver db/seed_policies.sql), para que site e quiz nunca contem historias diferentes.
+  -- "Por que isso importa para voce" na PAGINA da politica: ~100 palavras, com
+  -- paragrafos, fechando com os dois lados. INDEPENDENTE do quiz_hook desde
+  -- ago/2026; se mudar um, revise o outro (ver db/seed_policies.sql).
   impact       TEXT,
   -- Textos do quiz. side_a e SEMPRE o lado que da score alto.
-  -- quiz_hook = o impact sem o fecho dos dois lados, que no quiz vive nas opcoes.
+  -- quiz_hook = 1-2 frases exibidas no quiz e nos cards de politica.
   -- As duas posicoes sao nomeadas pelo CONTEUDO, nunca "a favor"/"contra" — e o que
   -- torna as politicas invertidas legiveis para quem responde.
   quiz_hook    TEXT,
@@ -167,6 +168,14 @@ CREATE TABLE IF NOT EXISTS policy_division (
   -- O site le esta coluna (via view policy_division_detail), nao `strength`.
   effective_strength TEXT CHECK (effective_strength IN ('weak','normal','strong')),
   PRIMARY KEY (policy_id, division_id)
+);
+
+-- Curadoria dos "Politicos mais procurados" da home (web/app/page.tsx).
+-- Editada a mao no Supabase; futuramente alimentada por analytics.
+-- Estava viva SO no banco, sem definicao versionada; versionada em 04/08/2026.
+CREATE TABLE IF NOT EXISTS home_featured (
+  person_id INTEGER PRIMARY KEY REFERENCES person(id),
+  rank      INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS agreement_score (   -- pré-calculado e cacheado

@@ -318,6 +318,13 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             ter um resultado.
           </p>
         )}
+        <button
+          type="button"
+          onClick={() => setStep(list.length - 1)}
+          className="mt-5 text-sm text-brand hover:underline"
+        >
+          ← Voltar aos temas
+        </button>
       </div>
     );
   }
