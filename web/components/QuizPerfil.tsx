@@ -338,15 +338,15 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           sticky top-0. */}
       <div className="sticky top-14 z-30 -mx-4 bg-slate-50 px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
         <div className="rounded-md bg-brand px-4 pb-3 pt-2 shadow-md">
-          <div className="relative flex items-center justify-center py-1">
+          <div className="flex items-center justify-center gap-2.5 py-1">
             <p className="text-center text-[13px] uppercase tracking-widest text-white/60">
               política
             </p>
-            <span className="absolute right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-[11px] font-semibold text-white">
               {step + 1}/{list.length}
             </span>
           </div>
-          <h2 className="text-center text-lg font-normal leading-snug text-white sm:text-xl">
+          <h2 className="mt-2 text-center text-lg font-normal leading-snug text-white sm:text-xl">
             Como você votaria para{" "}
             <strong className="font-bold">{current.name}</strong>?
           </h2>
@@ -419,7 +419,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           </button>
         </div>
 
-        <div className="mt-5 flex items-center justify-center gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => {
@@ -436,7 +436,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             onClick={() => setStep((v) => v + 1)}
             className="rounded-lg bg-brand px-7 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {step === list.length - 1 ? "Ver meu resultado" : "Confirmar"}
+            {step === list.length - 1 ? "Ver meu resultado" : "Confirmar voto"}
           </button>
         </div>
       </div>
