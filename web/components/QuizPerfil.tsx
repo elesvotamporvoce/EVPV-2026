@@ -11,6 +11,11 @@ export type QuizPolicy = {
   /** texto curto do quiz; a pagina da politica usa outro texto, mais longo */
   quiz_hook: string | null;
   description: string | null;
+  /** lado A e sempre o que da score ALTO na politica */
+  side_a_title: string | null;
+  side_a_note: string | null;
+  side_b_title: string | null;
+  side_b_note: string | null;
 };
 
 type Answer = { value: number | null; priority: boolean };
@@ -28,14 +33,6 @@ type PersonResult = {
 
 type PartyResult = { sigla: string; match: number; n: number };
 
-const OPTIONS = [
-  { label: "Sempre contra", value: 0, color: "#dc2626" },
-  { label: "Geralmente contra", value: 25, color: "#f87171" },
-  { label: "Depende", value: 50, color: "#f59e0b" },
-  { label: "Geralmente a favor", value: 75, color: "#4ade80" },
-  { label: "Sempre a favor", value: 100, color: "#16a34a" },
-];
-
 export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const [started, setStarted] = useState(false);
   const [list, setList] = useState<QuizPolicy[]>(policies);
@@ -50,22 +47,25 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const done = step >= list.length;
   const answered = Object.values(answers).filter((a) => a.value !== null).length;
 
-  function answer(value: number | null) {
+  // Escolher NAO avanca: quem avanca e o botao Confirmar. Assim um toque
+  // acidental nao pula o tema, que era a queixa principal sobre o quiz.
+  function escolher(value: number | null) {
     setAnswers((a) => ({
       ...a,
-      [current.id]: { value, priority: a[current.id]?.priority ?? false },
+      // pular zera o peso dobrado: nao faz sentido priorizar um tema sem opiniao
+      [current.id]: {
+        value,
+        priority: value === null ? false : a[current.id]?.priority ?? false,
+      },
     }));
-    setStep((s) => s + 1);
   }
 
   function togglePriority() {
-    setAnswers((a) => ({
-      ...a,
-      [current.id]: {
-        value: a[current.id]?.value ?? null,
-        priority: !a[current.id]?.priority,
-      },
-    }));
+    setAnswers((a) => {
+      const atual = a[current.id];
+      if (!atual || atual.value === null) return a;
+      return { ...a, [current.id]: { ...atual, priority: !atual.priority } };
+    });
   }
 
   async function calcular(estado: string) {
@@ -330,7 +330,10 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           respondendo enquanto rola. top-14 fica logo abaixo da navbar, que e
           sticky top-0. */}
       <div className="sticky top-14 z-30 -mx-4 bg-slate-50 px-4 pb-2 pt-1 sm:mx-0 sm:px-0">
-        <div className="rounded-md bg-brand px-4 py-3 shadow-md">
+        <div className="rounded-md bg-brand px-4 pb-3 pt-2 shadow-md">
+          <p className="text-center text-[11px] uppercase tracking-widest text-white/60">
+            política
+          </p>
           <h2 className="text-center text-lg font-bold leading-snug text-white sm:text-xl">
             {current.name}
           </h2>
@@ -339,73 +342,98 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         {current.quiz_hook && (
-          <details className="group rounded-none border-l-4 border-amber-500 bg-amber-100">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4 text-sm font-semibold text-amber-900 marker:hidden">
-              Por que isso importa para você?
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 20 20"
-                className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </summary>
-            <p className="px-4 pb-4 text-[15px] leading-relaxed text-amber-900/90">
+          <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-4">
+            <p className="text-sm font-semibold text-amber-900">
+              Por que isso importa
+            </p>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-amber-900/90">
               {current.quiz_hook}
             </p>
-          </details>
+          </div>
         )}
 
-        <p className="mt-5 text-center font-semibold text-slate-700">
-          Como você votaria?
+        <p className="mt-6 text-center text-[19px] font-semibold leading-snug text-slate-900">
+          Como você votaria para a política de {current.name}?
         </p>
-        <div className="mt-3 space-y-2">
-          {OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              onClick={() => answer(o.value)}
-              className="flex w-full items-center gap-3 rounded-lg border border-slate-300 px-4 py-3 text-left font-medium text-slate-700 hover:border-brand hover:bg-violet-50"
-            >
-              <span
-                className="h-3.5 w-3.5 shrink-0 rounded-full"
-                style={{ background: o.color }}
-              />
-              {o.label}
-            </button>
-          ))}
+
+        {/* As tres caixas tem a mesma altura (auto-rows-fr): nenhuma posicao
+            parece mais importante que a outra por ocupar mais espaco. */}
+        <div className="mt-4 grid auto-rows-fr gap-2.5">
+          {[
+            { v: 100, titulo: current.side_a_title, nota: current.side_a_note },
+            { v: 0, titulo: current.side_b_title, nota: current.side_b_note },
+          ].map((lado) =>
+            lado.titulo ? (
+              <button
+                key={lado.v}
+                type="button"
+                aria-pressed={a?.value === lado.v}
+                onClick={() => escolher(lado.v)}
+                className={`rounded-lg border-2 bg-violet-100 px-4 py-3 text-left transition ${
+                  a?.value === lado.v
+                    ? "border-brand ring-2 ring-brand/30"
+                    : "border-violet-200 hover:border-brand-light"
+                }`}
+              >
+                <span className="block font-semibold text-slate-800">
+                  {lado.titulo}
+                </span>
+                {lado.nota && (
+                  <span className="mt-0.5 block text-sm leading-snug text-slate-600">
+                    ({lado.nota})
+                  </span>
+                )}
+              </button>
+            ) : null
+          )}
+
+          <button
+            type="button"
+            aria-pressed={a !== undefined && a.value === null}
+            onClick={() => escolher(null)}
+            className={`rounded-lg border-2 bg-white px-4 py-3 text-left transition ${
+              a !== undefined && a.value === null
+                ? "border-brand ring-2 ring-brand/30"
+                : "border-slate-300 hover:border-brand-light"
+            }`}
+          >
+            <span className="block font-semibold text-slate-700">
+              Não tenho opinião formada ainda, pular esse tema
+            </span>
+          </button>
         </div>
 
-        <div className="mt-4 flex flex-col items-center gap-3">
+        {/* Dobrar peso: separado por uma linha, e indisponivel para quem pulou */}
+        <div className="mt-5 border-t border-slate-200 pt-4 text-center">
           <button
             type="button"
             onClick={togglePriority}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+            disabled={a === undefined || a.value === null}
+            className={`rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
               a?.priority
-                ? "border-brand bg-brand text-white"
-                : "border-slate-300 text-slate-600 hover:border-brand hover:text-brand"
+                ? "border-green-500 bg-green-200 text-green-900"
+                : "border-green-300 bg-green-100 text-green-800 hover:border-green-500"
             }`}
           >
             {a?.priority
               ? "★ Peso dobrado neste tema"
               : "★ Dobrar peso: esse tema é essencial para mim"}
           </button>
-          <button
-            type="button"
-            onClick={() => answer(null)}
-            className="text-sm text-slate-500 underline hover:text-brand"
-          >
-            Não tenho opinião, pular
-          </button>
         </div>
 
-        {/* contagem discreta, no rodape do cartao */}
-        <p className="mt-4 text-right text-xs font-medium text-slate-400">
-          {step + 1}/{list.length}
-        </p>
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
+            {step + 1}/{list.length}
+          </span>
+          <button
+            type="button"
+            disabled={a === undefined}
+            onClick={() => setStep((v) => v + 1)}
+            className="rounded-lg bg-brand px-7 py-3 font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {step === list.length - 1 ? "Ver meu resultado" : "Confirmar"}
+          </button>
+        </div>
       </div>
 
       {step > 0 && (
