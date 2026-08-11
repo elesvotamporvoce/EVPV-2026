@@ -53,7 +53,7 @@ export default async function PoliticasPage() {
               </p>
             </div>
             {(pol.quiz_hook ?? pol.description) && (
-              <p className="mt-3 text-base leading-relaxed text-slate-600">
+              <p className="mt-3 text-center text-base leading-relaxed text-slate-600">
                 {pol.quiz_hook ?? pol.description}
               </p>
             )}

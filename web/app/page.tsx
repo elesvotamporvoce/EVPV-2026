@@ -350,9 +350,9 @@ export default async function Home() {
               href={`/politicas/${pol.id}`}
               className="rounded-lg border border-slate-200 bg-white p-4 hover:border-brand-light hover:shadow-sm"
             >
-              <p className="font-medium text-slate-800">{pol.name}</p>
+              <p className="text-center font-medium text-slate-800">{pol.name}</p>
               {(pol.quiz_hook ?? pol.description) && (
-                <p className="mt-1 line-clamp-3 text-sm text-slate-500">
+                <p className="mt-1 line-clamp-3 text-center text-sm text-slate-500">
                   {pol.quiz_hook ?? pol.description}
                 </p>
               )}
