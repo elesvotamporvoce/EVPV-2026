@@ -52,31 +52,27 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
 --  Redução das emissões de carbono
---
---  Separada em 29/07/2026 da antiga "Ação climática e conservação", que juntava
---  tres eixos distintos num so score: mitigacao/mercado de carbono, conservacao
---  de biodiversidade e educacao ambiental. Um parlamentar pode apoiar tratado de
---  especies migratorias e rejeitar mercado de carbono sem nenhuma incoerencia.
---  Ver "Conservação da biodiversidade" logo abaixo.
---
---  ATENCAO: a votacao 2238434-80 (PL 528/2020) foi aprovada 429 a 19 (96%).
---  Quase unanime, separa pouco. Ver tarefa "Definir política sobre votações
---  quase unânimes" no to-do.
+--  Recomposta em 04/08/2026 apos auditoria dos objetos de cada votacao
+--  (campo descUltimaAberturaVotacao da API da Camara):
+--   * saiu 1548579-144 (destaque de dez/2023): esquerda votou NAO por achar
+--     o texto fraco (agro fora do mercado) — sinal invertido para o eixo
+--   * saiu 2238434-100: supressao tecnica sobre biometano, nao mede clima
+--   * entrou 2269745-84 INVERTIDA: destaque do PSOL para tirar "gas natural"
+--     do Paten; manter o texto = manter o fossil, logo NAO apoia a politica
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name IN ('Ação climática e conservação', 'Redução das emissões de carbono');
+DELETE FROM policy WHERE name = 'Redução das emissões de carbono';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Redução das emissões de carbono',
-    'Reúne as votações sobre os mecanismos de corte de emissões: o Sistema Brasileiro de Comércio de Emissões, o mercado regulado de carbono criado pela Lei 15.042/2024; e o pacote Combustível do Futuro, que trata de mobilidade de baixo carbono e da captura e estocagem geológica de dióxido de carbono. Votar SIM apoia a política.',
+    'Reúne as votações sobre o corte de emissões: a aprovação final do mercado regulado de carbono (PL 182/2024, hoje Lei 15.042/2024), o pacote Combustível do Futuro (PL 528/2020) e, invertido, o destaque que manteve o gás natural entre as fontes do programa de transição energética (PL 327/2021) — nessa, votar NÃO apoia a política. Score alto = apoia a redução das emissões.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('1548579-144','for','normal'),  -- PL 182/2024 economia verde (destaque)
-  ('1548579-194','for','strong'),  -- mercado de carbono: aprovacao final do Substitutivo do Senado (Lei 15.042/2024)
-  ('2238434-80','for','normal'),   -- Combustivel do Futuro (PL 528/2020): aprovacao principal -- 429 a 19, quase unanime
-  ('2238434-100','for','normal')   -- PL 528/2020 biocombustíveis
+  ('2238434-80','for','normal'),    -- PL 528/2020 Combustivel do Futuro (merito; 429x19, vira weak)
+  ('2269745-84','against','normal'),-- Paten: manter gas natural = contra a politica (225x187)
+  ('1548579-194','for','strong')    -- PL 182/2024 mercado de carbono, texto final (336x38)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
