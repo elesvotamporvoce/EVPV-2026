@@ -487,7 +487,7 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 -- ============================================================================
 UPDATE policy SET quiz_hook = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Esta política reúne as votações que aumentaram a proteção da mulher após a denúncia: tornozeleira no agressor, arma proibida para quem responde por agressão e melhor acolhimento na delegacia. Também criou punição específica para quem usa os filhos para ferir a mãe.'
- WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço do combustível que você põe no tanque e da energia da sua casa, e define se as empresas que mais poluem pagam pelo que emitem.'
+ WHEN 'Redução das emissões de carbono' THEN 'O Congresso criou um limite de poluição para as grandes empresas: quem passa do teto paga, quem polui menos vende crédito. Também incentivou combustíveis mais limpos.'
  WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
  WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
@@ -527,7 +527,7 @@ UPDATE policy SET side_a_title = CASE name
 
 UPDATE policy SET side_a_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
- WHEN 'Redução das emissões de carbono' THEN 'grandes emissores passam a ter limite e a comprar crédito de quem emite menos'
+ WHEN 'Redução das emissões de carbono' THEN 'poluir de graça sai caro para todo mundo — o risco é mais seca, enchente e mudança do clima'
  WHEN 'Mais investimento na educação' THEN 'escola e universidade dependem de dinheiro garantido e não podem sofrer quando o governo corta gastos'
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
  WHEN 'Rigor no licenciamento ambiental' THEN 'barragens que romperam eram classificadas como de impacto médio antes do desastre'
@@ -547,7 +547,7 @@ UPDATE policy SET side_a_note = CASE name
 
 UPDATE policy SET side_b_title = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Qualquer violência deve ser combatida, independente de gênero'
- WHEN 'Redução das emissões de carbono' THEN 'Sem custo novo sobre produzir'
+ WHEN 'Redução das emissões de carbono' THEN 'A conta chega no consumidor'
  WHEN 'Mais investimento na educação' THEN 'Cautela com gasto obrigatório'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'
  WHEN 'Rigor no licenciamento ambiental' THEN 'A demora também cobra caro'
@@ -567,7 +567,7 @@ UPDATE policy SET side_b_title = CASE name
 
 UPDATE policy SET side_b_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'não deveria haver medida extra para um gênero e não para o outro'
- WHEN 'Redução das emissões de carbono' THEN 'a conta do carbono chega no combustível e na energia, e quem paga é o consumidor'
+ WHEN 'Redução das emissões de carbono' THEN 'o custo do carbono entra no preço do combustível, da energia e do frete'
  WHEN 'Mais investimento na educação' THEN 'despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano'
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
  WHEN 'Rigor no licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
@@ -596,7 +596,7 @@ Nada disso cria crime novo. Muda a chance de a proteção chegar antes do pior.
 Para quem defende, o período mais perigoso é logo depois que a mulher denuncia, não depois da sentença; para quem critica, a lei deveria valer igual para qualquer agressor, sem medida extra para um gênero e não para o outro.'
  WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa. Estas votações decidem se isso passa a ter preço.
 O mecanismo principal é o mercado de carbono: quem emite acima de um limite compra crédito de quem emite menos. Poluir deixa de ser de graça e vira custo, que pode chegar ao preço final. O outro pacote trata de combustível: diesel verde, aviação e captura de carbono.
-Para quem defende, grandes emissores passam a ter limite e a comprar crédito de quem emite menos; para quem critica, a conta do carbono chega no combustível e na energia, e quem paga é o consumidor.'
+Para quem defende, poluir de graça sai caro para todo mundo — o risco é mais seca, enchente e mudança do clima; para quem critica, o custo do carbono entra no preço do combustível, da energia e do frete.'
  WHEN 'Mais investimento na educação' THEN 'O dinheiro da educação depende de regras que dizem quanto o governo é obrigado a gastar e o que pode ser cortado quando o caixa aperta.
 Estas votações mexeram nessas regras: o Fundeb virou permanente na Constituição, universidades e institutos federais saíram do teto de gastos, e foram criados a assistência estudantil e o Pé-de-Meia. O efeito aparece na creche, no salário do professor e na chance de um adolescente terminar a escola.
 Para quem defende, escola e universidade dependem de dinheiro garantido; para quem critica, despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano.'
