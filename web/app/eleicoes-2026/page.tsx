@@ -90,9 +90,9 @@ export default async function Eleicoes2026Page() {
             Ainda não há pré-candidaturas ou candidaturas na nossa base.
           </p>
           <p className="mx-auto mt-2 max-w-xl text-slate-500">
-            As convenções partidárias começam agora e o registro das
-            candidaturas vai até 15 de agosto. Assim que houver nomes
-            confirmados, eles aparecem aqui. Enquanto isso, veja{" "}
+            O registro no TSE encerrou em 15 de agosto e estamos importando os
+            dados oficiais. Assim que a importação terminar, os nomes aparecem
+            aqui. Enquanto isso, veja{" "}
             <Link href="/pessoas" className="text-brand hover:underline">
               todos os parlamentares
             </Link>{" "}
