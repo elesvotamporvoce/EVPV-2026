@@ -28,7 +28,15 @@ const SITUACAO_LABEL: Record<string, string> = {
   indeferido: "Registro indeferido",
 };
 
-export default async function Eleicoes2026Page() {
+const norm = (x: string) =>
+  x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+export default async function Eleicoes2026Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; uf?: string; casa?: string; partido?: string }>;
+}) {
+  const { q, uf, casa, partido } = await searchParams;
   const { data: cand } = await supabase
     .from("candidatura_2026")
     .select(
@@ -61,6 +69,30 @@ export default async function Eleicoes2026Page() {
   }
   const candBy = new Map(candRows.map((c) => [c.person_id, c]));
 
+  // Filtros (aplicados em memoria: a lista e pequena)
+  people = people.filter((p) => {
+    const c = candBy.get(p.id);
+    if (q && !norm(p.name).includes(norm(q))) return false;
+    if (uf && c?.uf !== uf) return false;
+    if (casa && p.house !== casa) return false;
+    if (partido && p.party_sigla !== partido) return false;
+    return true;
+  });
+  const ufsDisponiveis = [...new Set(candRows.map((c) => c.uf).filter(Boolean))].sort();
+  const partidos = [...new Set(people.map((p) => p.party_sigla).filter(Boolean))].sort();
+
+  // Mais procurados que concorrem
+  const { data: hf } = await supabase
+    .from("home_featured").select("person_id, rank").order("rank");
+  const procuradosIds = ((hf ?? []) as { person_id: number }[])
+    .map((h) => h.person_id).filter((id) => candBy.has(id));
+  const { data: procData } = procuradosIds.length
+    ? await supabase.from("person_directory").select("*").in("id", procuradosIds)
+    : { data: [] };
+  const procurados = procuradosIds
+    .map((id) => ((procData ?? []) as PersonDir[]).find((p) => p.id === id))
+    .filter(Boolean) as PersonDir[];
+
   return (
     <div className="space-y-6">
       <div className="space-y-3">
@@ -80,6 +112,37 @@ export default async function Eleicoes2026Page() {
           Clique em qualquer um para ver como votou durante o mandato.
         </p>
       </div>
+
+      {procurados.length > 0 && (
+        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
+          <p className="mb-3 font-semibold text-slate-800">Mais procurados que vão concorrer</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {procurados.slice(0, 6).map((p) => (
+              <PersonCard key={p.id} p={p} candidato />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <form method="GET" className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm">
+        <input name="q" defaultValue={q ?? ""} placeholder="Nome"
+          className="w-40 rounded-md border border-slate-300 px-3 py-2" />
+        <select name="uf" defaultValue={uf ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
+          <option value="">Estado</option>
+          {ufsDisponiveis.map((u) => (<option key={u} value={u!}>{u}</option>))}
+        </select>
+        <select name="casa" defaultValue={casa ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
+          <option value="">Deputado e senador</option>
+          <option value="camara">Deputado federal</option>
+          <option value="senado">Senador</option>
+        </select>
+        <select name="partido" defaultValue={partido ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
+          <option value="">Partido</option>
+          {partidos.map((pt) => (<option key={pt} value={pt!}>{pt}</option>))}
+        </select>
+        <button type="submit" className="rounded-md bg-brand px-4 py-2 font-semibold text-white">Filtrar</button>
+        <Link href="/eleicoes-2026" className="px-2 py-2 text-brand hover:underline">Limpar</Link>
+      </form>
 
       {people.length === 0 ? (
         <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
