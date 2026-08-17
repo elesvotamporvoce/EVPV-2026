@@ -490,7 +490,7 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 --     para quiz e site nunca divergirem.
 -- ============================================================================
 UPDATE policy SET quiz_hook = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'Trata da segurança de mulheres em todo o Brasil: define como casos de violência doméstica e feminicídio são prevenidos, investigados e atendidos.'
+ WHEN 'Combate à violência contra a mulher' THEN 'Esta política reúne as votações que aumentaram a proteção da mulher após a denúncia: tornozeleira no agressor, arma proibida para quem responde por agressão e melhor acolhimento na delegacia. Também criou punição específica para quem usa os filhos para ferir a mãe.'
  WHEN 'Redução das emissões de carbono' THEN 'Mexe no preço do combustível que você põe no tanque e da energia da sua casa, e define se as empresas que mais poluem pagam pelo que emitem.'
  WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
@@ -510,7 +510,7 @@ UPDATE policy SET quiz_hook = CASE name
  ELSE quiz_hook END;
 
 UPDATE policy SET side_a_title = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'Proteger desde a denúncia'
+ WHEN 'Combate à violência contra a mulher' THEN 'Concordo com essas medidas'
  WHEN 'Redução das emissões de carbono' THEN 'Quem polui deve pagar'
  WHEN 'Mais investimento na educação' THEN 'Priorizar a verba da educação'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Direito básico, não benefício'
@@ -530,7 +530,7 @@ UPDATE policy SET side_a_title = CASE name
  ELSE side_a_title END;
 
 UPDATE policy SET side_a_note = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'o período mais perigoso é logo depois que a mulher denuncia, não depois da sentença'
+ WHEN 'Combate à violência contra a mulher' THEN 'o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
  WHEN 'Redução das emissões de carbono' THEN 'grandes emissores passam a ter limite e a comprar crédito de quem emite menos'
  WHEN 'Mais investimento na educação' THEN 'escola e universidade dependem de dinheiro garantido e não podem sofrer quando o governo corta gastos'
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
@@ -550,7 +550,7 @@ UPDATE policy SET side_a_note = CASE name
  ELSE side_a_note END;
 
 UPDATE policy SET side_b_title = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'Aplicar melhor o que já existe'
+ WHEN 'Combate à violência contra a mulher' THEN 'Qualquer violência deve ser combatida, independente de gênero'
  WHEN 'Redução das emissões de carbono' THEN 'Sem custo novo sobre produzir'
  WHEN 'Mais investimento na educação' THEN 'Cautela com gasto obrigatório'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'
@@ -570,7 +570,7 @@ UPDATE policy SET side_b_title = CASE name
  ELSE side_b_title END;
 
 UPDATE policy SET side_b_note = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'falta delegacia e estrutura, não lei nova; mais regra não muda o atendimento'
+ WHEN 'Combate à violência contra a mulher' THEN 'não deveria haver medida extra para um gênero e não para o outro'
  WHEN 'Redução das emissões de carbono' THEN 'a conta do carbono chega no combustível e na energia, e quem paga é o consumidor'
  WHEN 'Mais investimento na educação' THEN 'despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano'
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
@@ -597,7 +597,7 @@ UPDATE policy SET side_b_note = CASE name
 UPDATE policy SET impact = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'A maior parte da violência contra a mulher acontece dentro de casa, e o agressor quase sempre é conhecido. Estas votações tratam do que o Estado faz depois da denúncia: tornozeleira no agressor, arma proibida para quem responde por agressão, violência vicária reconhecida na Lei Maria da Penha, atendimento à mulher indígena na delegacia e um sistema nacional com recursos garantidos.
 Nada disso cria crime novo. Muda a chance de a proteção chegar antes do pior.
-Para quem defende, o período mais perigoso é logo depois que a mulher denuncia, não depois da sentença; para quem critica, falta delegacia e estrutura, não lei nova.'
+Para quem defende, o período mais perigoso é logo depois que a mulher denuncia, não depois da sentença; para quem critica, a lei deveria valer igual para qualquer agressor, sem medida extra para um gênero e não para o outro.'
  WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa. Estas votações decidem se isso passa a ter preço.
 O mecanismo principal é o mercado de carbono: quem emite acima de um limite compra crédito de quem emite menos. Poluir deixa de ser de graça e vira custo, que pode chegar ao preço final. O outro pacote trata de combustível: diesel verde, aviação e captura de carbono.
 Para quem defende, grandes emissores passam a ter limite e a comprar crédito de quem emite menos; para quem critica, a conta do carbono chega no combustível e na energia, e quem paga é o consumidor.'
