@@ -13,6 +13,17 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+const CARGO_2026: Record<string, string> = {
+  presidente: "Presidente",
+  governador: "Governador(a)",
+  senador: "Senador(a)",
+  deputado_federal: "Deputado(a) Federal",
+  deputado_estadual: "Deputado(a) Estadual",
+};
+
+const brl = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
 const SITUACAO_LABEL: Record<string, string> = {
   anunciado: "Pré-candidatura anunciada",
   pendente: "Registro em análise",
@@ -23,7 +34,9 @@ const SITUACAO_LABEL: Record<string, string> = {
 export default async function Eleicoes2026Page() {
   const { data: cand } = await supabase
     .from("candidatura_2026")
-    .select("person_id, cargo, uf, situacao, fonte, atualizado_em")
+    .select(
+      "person_id, cargo, uf, situacao, fonte, atualizado_em, patrimonio_total, nome_urna, partido_sigla"
+    )
     .order("situacao")
     .limit(2000);
   const candRows = (cand ?? []) as {
@@ -32,6 +45,9 @@ export default async function Eleicoes2026Page() {
     uf: string | null;
     situacao: string | null;
     fonte: string | null;
+    patrimonio_total: number | null;
+    nome_urna: string | null;
+    partido_sigla: string | null;
   }[];
 
   let people: PersonDir[] = [];
@@ -55,12 +71,11 @@ export default async function Eleicoes2026Page() {
         <div className="rounded-lg border border-amber-500 bg-amber-100 p-4">
           <p className="font-semibold text-amber-900">Lista parcial</p>
           <p className="mt-1 text-[15px] leading-relaxed text-amber-900/90">
-            Esta lista reúne quem já anunciou pré-candidatura ou já registrou
-            candidatura, e por isso ainda está incompleta. As convenções
-            partidárias vão até 5 de agosto e o prazo para registrar candidatura
-            termina em 15 de agosto de 2026. Registrar candidatura também não é
-            o mesmo que tê-la confirmada: a Justiça Eleitoral ainda julga cada
-            pedido, e indicamos a situação de cada uma.
+            O prazo de registro no TSE terminou em 15 de agosto de 2026, e esta
+            lista é atualizada a partir dos registros oficiais. Registrar não é
+            o mesmo que ter a candidatura confirmada: a Justiça Eleitoral ainda
+            julga cada pedido, e indicamos a situação de cada um. O patrimônio
+            exibido é o declarado pelo próprio candidato ao TSE.
           </p>
         </div>
         <p className="text-slate-600">
@@ -93,8 +108,14 @@ export default async function Eleicoes2026Page() {
                 <PersonCard p={p} candidato />
                 {c && (
                   <p className="px-1 text-xs text-slate-500">
-                    {c.cargo ? `${c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
+                    {c.cargo ? `${CARGO_2026[c.cargo] ?? c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
                     {SITUACAO_LABEL[c.situacao ?? ""] ?? "Situação não informada"}
+                    {c.patrimonio_total != null && (
+                      <>
+                        {" · patrimônio declarado: "}
+                        {brl(c.patrimonio_total)}
+                      </>
+                    )}
                   </p>
                 )}
               </div>

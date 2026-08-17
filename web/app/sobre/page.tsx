@@ -263,6 +263,31 @@ export default function SobrePage() {
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
+          Escolhas que fizemos — e seus limites
+        </h2>
+        <p className="text-slate-600">
+          Todo método tem escolhas, e preferimos declará-las. Os pesos são
+          nossos: votação normal vale 10, votação decisiva (★) vale 25 e votação
+          quase unânime vale 4. Ausência entra com 20% do peso e conta como
+          meio-termo — nem apoio, nem rejeição. Isso evita punir a falta
+          pontual, mas tem um efeito colateral: quem falta muito tende ao meio
+          da escala, o que pode parecer indecisão em vez de ausência. O perfil
+          mostra a presença separadamente por isso.
+        </p>
+        <p className="text-slate-600">
+          Algumas votações do conjunto são requerimentos de urgência, que
+          decidem se a matéria vai direto ao plenário — medem disposição de
+          pautar, não posição sobre o conteúdo. Mantemos porque, na prática, a
+          urgência costuma ser disputada nos mesmos termos do mérito, mas é uma
+          escolha discutível, e cada página de política mostra quais votações
+          são de que tipo. Por fim, bastam 2 votos para pontuar: em políticas
+          com poucas votações, o resultado individual se apoia em pouca
+          informação, e a página avisa quando é o caso.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">
           Limites e cuidados
         </h2>
         <p className="text-slate-600">

@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Ingestão TSE 2026 — candidaturas e patrimônio dos parlamentares atuais.
+
+Cruza os parlamentares do banco com o DivulgaCandContas do TSE (registro de
+candidaturas encerrado em 15/08/2026) e grava em candidatura_2026:
+cargo, UF, situação, nome de urna, partido, patrimônio declarado e o
+sq_candidato (id do TSE, para conferência manual).
+
+Uso (na sua máquina, com acesso à internet e ao banco):
+  export DATABASE_URL=postgresql://...   # conexão do Supabase
+  python scripts/ingest_tse_2026.py            # tudo
+  python scripts/ingest_tse_2026.py --uf SP    # só um estado
+
+O casamento é por NOME COMPLETO normalizado (sem acento, maiúsculas) + UF.
+Quem não casar sai em nao_casados_tse.csv para revisão manual — nome de urna
+e nome civil às vezes divergem; NÃO complete na mão sem conferir no TSE.
+"""
+import argparse, csv, json, os, re, sys, time, unicodedata
+import urllib.request
+
+import psycopg2
+
+BASE = "https://divulgacandcontas.tse.jus.br/divulga/rest/v1"
+ANO = 2026
+# cargos federais/estaduais em eleição geral; código -> rótulo usado no site
+CARGOS = {"1": "presidente", "3": "governador", "5": "senador",
+          "6": "deputado_federal", "7": "deputado_estadual"}
+SITUACAO = {  # descrição do TSE -> nosso vocabulário
+    "DEFERIDO": "deferido", "DEFERIDO COM RECURSO": "deferido",
+    "INDEFERIDO": "indeferido", "INDEFERIDO COM RECURSO": "indeferido",
+    "AGUARDANDO JULGAMENTO": "pendente", "PENDENTE DE JULGAMENTO": "pendente",
+}
+UFS = ("AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS "
+       "SC SE SP TO").split()
+
+def get(url, tries=3):
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(
+                    url, headers={"User-Agent": "EVPV/1.0"}), timeout=40) as r:
+                return json.load(r)
+        except Exception as e:
+            if i == tries - 1: raise
+            time.sleep(2 * (i + 1))
+
+def norm(s):
+    s = unicodedata.normalize("NFD", s or "")
+    return re.sub(r"[^A-Z ]", "", s.upper().encode("ascii", "ignore").decode())
+
+def eleicao_id():
+    for e in get(f"{BASE}/eleicao/ordinarias"):
+        if str(e.get("ano")) == str(ANO):
+            return e["id"]
+    sys.exit(f"Eleição de {ANO} não encontrada em /eleicao/ordinarias")
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--uf", help="limita a um estado")
+    args = ap.parse_args()
+    dsn = os.environ.get("DATABASE_URL") or sys.exit("defina DATABASE_URL")
+    eid = eleicao_id()
+    print(f"eleição {ANO}: id {eid}")
+
+    con = psycopg2.connect(dsn); cur = con.cursor()
+    cur.execute("SELECT id, name, uf FROM person")
+    pessoas = {}  # (nome_norm, uf) -> person_id
+    for pid, nome, uf in cur.fetchall():
+        pessoas[(norm(nome), uf)] = pid
+
+    achados, nao_casados = 0, []
+    ufs = [args.uf.upper()] if args.uf else UFS
+    for uf in ufs:
+        for cod, rotulo in CARGOS.items():
+            if rotulo == "presidente" and uf != "BR": continue
+            url = f"{BASE}/candidatura/listar/{ANO}/{uf}/{eid}/{cod}/candidatos"
+            try: data = get(url)
+            except Exception as e:
+                print(f"  aviso {uf}/{rotulo}: {e}"); continue
+            for c in data.get("candidatos", []):
+                chave = (norm(c.get("nomeCompleto")), uf)
+                pid = pessoas.get(chave)
+                if pid is None:
+                    nao_casados.append((uf, rotulo, c.get("nomeCompleto"),
+                                        c.get("nomeUrna"), c.get("id")))
+                    continue
+                # detalhe traz situação atual e total de bens
+                det = get(f"{BASE}/candidatura/buscar/{ANO}/{uf}/{eid}/candidato/{c['id']}")
+                sit = SITUACAO.get((det.get("descricaoSituacao") or "").upper().strip(),
+                                   "pendente")
+                bens = det.get("totalDeBens")
+                cur.execute("""
+                    INSERT INTO candidatura_2026
+                      (person_id, cargo, uf, situacao, fonte, atualizado_em,
+                       patrimonio_total, nome_urna, partido_sigla, sq_candidato)
+                    VALUES (%s,%s,%s,%s,'TSE DivulgaCandContas', now(),%s,%s,%s,%s)
+                    ON CONFLICT (person_id) DO UPDATE SET
+                      cargo=EXCLUDED.cargo, uf=EXCLUDED.uf,
+                      situacao=EXCLUDED.situacao, fonte=EXCLUDED.fonte,
+                      atualizado_em=now(),
+                      patrimonio_total=EXCLUDED.patrimonio_total,
+                      nome_urna=EXCLUDED.nome_urna,
+                      partido_sigla=EXCLUDED.partido_sigla,
+                      sq_candidato=EXCLUDED.sq_candidato
+                """, (pid, rotulo, uf, sit, bens,
+                      c.get("nomeUrna"), (c.get("partido") or {}).get("sigla"),
+                      str(c.get("id"))))
+                achados += 1
+            con.commit()
+            print(f"  {uf} {rotulo}: ok (acumulado {achados})")
+            time.sleep(0.4)  # gentileza com a API
+
+    with open("nao_casados_tse.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["uf","cargo","nome_completo","nome_urna","id_tse"])
+        w.writerows(nao_casados)
+    print(f"\nGravadas {achados} candidaturas de parlamentares atuais.")
+    print(f"{len(nao_casados)} candidatos do TSE sem par no banco -> nao_casados_tse.csv")
+    print("(a maioria é candidato que NÃO é parlamentar atual; isso é esperado)")
+
+if __name__ == "__main__":
+    main()

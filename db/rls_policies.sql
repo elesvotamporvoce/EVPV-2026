@@ -12,7 +12,7 @@ BEGIN
   FOREACH t IN ARRAY ARRAY[
     'party','person','party_membership','proposition','division','vote',
     'party_orientation','party_vote_tally','policy','policy_division','agreement_score',
-    'home_featured'
+    'home_featured','candidatura_2026'
   ] LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', t);
     EXECUTE format('DROP POLICY IF EXISTS leitura_publica ON public.%I;', t);

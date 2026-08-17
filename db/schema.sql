@@ -170,6 +170,23 @@ CREATE TABLE IF NOT EXISTS policy_division (
   PRIMARY KEY (policy_id, division_id)
 );
 
+-- Candidaturas dos parlamentares atuais na eleicao de 2026.
+-- Populada por scripts/ingest_tse_2026.py a partir do TSE (DivulgaCandContas);
+-- situacao: anunciado | pendente | deferido | indeferido.
+-- Estava viva SO no banco; versionada em 04/08/2026.
+CREATE TABLE IF NOT EXISTS candidatura_2026 (
+  person_id        INTEGER PRIMARY KEY REFERENCES person(id),
+  cargo            TEXT NOT NULL,
+  uf               TEXT NOT NULL,
+  situacao         TEXT NOT NULL,
+  fonte            TEXT,
+  atualizado_em    TIMESTAMPTZ,
+  patrimonio_total NUMERIC,   -- total de bens declarado ao TSE
+  nome_urna        TEXT,
+  partido_sigla    TEXT,      -- partido DA CANDIDATURA (pode diferir do atual)
+  sq_candidato     TEXT       -- id do candidato no TSE, para conferencia
+);
+
 -- Curadoria dos "Politicos mais procurados" da home (web/app/page.tsx).
 -- Editada a mao no Supabase; futuramente alimentada por analytics.
 -- Estava viva SO no banco, sem definicao versionada; versionada em 04/08/2026.
