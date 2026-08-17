@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { featuredRank } from "@/lib/format";
 import type { Policy } from "@/lib/types";
 
-export const revalidate = 3600;
+export const revalidate = 900;
 export const metadata = { title: "Políticas" };
 
 async function getPolicies(): Promise<Policy[]> {

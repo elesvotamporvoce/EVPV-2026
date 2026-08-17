@@ -6,7 +6,7 @@ import FeaturedRotator from "@/components/FeaturedRotator";
 import { CARGO_LABEL, FEATURED_POLICIES, featuredRank, scoreColor } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
-export const revalidate = 3600;
+export const revalidate = 900;
 
 type Trend = { policy: Policy; rows: PartyPolicyAgreement[] };
 
@@ -394,7 +394,7 @@ export default async function Home() {
             <p className="mt-1">
               Para cada parlamentar, o quanto ele apoia ou rejeita cada política.{" "}
               <Link href="/sobre" className="text-brand hover:underline">
-                Ver metodologia
+                Veja como funciona
               </Link>
               .
             </p>

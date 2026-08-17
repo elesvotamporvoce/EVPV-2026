@@ -147,7 +147,7 @@ export default async function PersonPage({
   const notEnoughIds = allScores
     .filter((s) => s.category === "not_enough")
     .map((s) => s.policy_id);
-  const breakdown = new Map<number, string>();
+  const breakdown = new Map<number, { kind: "for" | "against" | "plain"; text: string }[]>();
   if (notEnoughIds.length) {
     const { data: pdd } = await supabase
       .from("policy_division_detail")
@@ -184,17 +184,18 @@ export default async function PersonPage({
         } else outros += 1;
       }
       const vt = (n: number) => (n === 1 ? "1 votação" : `${n} votações`);
-      const parts: string[] = [];
-      if (aFavor) parts.push(`votou a favor da política em ${vt(aFavor)}`);
-      if (contra) parts.push(`votou contra em ${vt(contra)}`);
-      if (outros) parts.push(`registrou abstenção ou outro voto em ${vt(outros)}`);
-      if (ausente) parts.push(`esteve ausente em ${vt(ausente)}`);
+      // Segmentos tipados para o render colorir "a favor" e "contra".
+      const parts: { kind: "for" | "against" | "plain"; text: string }[] = [];
+      if (aFavor) parts.push({ kind: "for", text: `votou a favor da política em ${vt(aFavor)}` });
+      if (contra) parts.push({ kind: "against", text: `votou contra em ${vt(contra)}` });
+      if (outros) parts.push({ kind: "plain", text: `registrou abstenção ou outro voto em ${vt(outros)}` });
+      if (ausente) parts.push({ kind: "plain", text: `esteve ausente em ${vt(ausente)}` });
       if (parts.length) {
-        const txt =
-          parts.length > 1
-            ? parts.slice(0, -1).join(", ") + " e " + parts[parts.length - 1]
-            : parts[0];
-        breakdown.set(polId, txt.charAt(0).toUpperCase() + txt.slice(1) + ".");
+        parts[0] = {
+          ...parts[0],
+          text: parts[0].text.charAt(0).toUpperCase() + parts[0].text.slice(1),
+        };
+        breakdown.set(polId, parts);
       }
     }
   }
@@ -306,8 +307,23 @@ export default async function PersonPage({
                 </p>
                 {s.category === "not_enough" && breakdown.get(s.policy_id) && (
                   <p className="-mt-2 mb-1.5 text-center text-sm leading-relaxed text-slate-500">
-                    {breakdown.get(s.policy_id)} Poucas votações para atribuir
-                    uma posição.
+                    {breakdown.get(s.policy_id)!.map((seg, i, arr) => (
+                      <span key={i}>
+                        <span
+                          className={
+                            seg.kind === "for"
+                              ? "font-medium text-green-700"
+                              : seg.kind === "against"
+                                ? "font-medium text-red-700"
+                                : undefined
+                          }
+                        >
+                          {seg.text}
+                        </span>
+                        {i < arr.length - 2 ? ", " : i === arr.length - 2 ? " e " : "."}
+                      </span>
+                    ))}{" "}
+                    Poucas votações para atribuir uma posição.
                   </p>
                 )}
                 {s.category === "not_enough" &&

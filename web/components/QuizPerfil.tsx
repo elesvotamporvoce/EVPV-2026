@@ -33,6 +33,8 @@ type PersonResult = {
 
 type PartyResult = { sigla: string; match: number; n: number };
 
+const QUIZ_CURTO = 10; // temas do quiz rapido: os 10 com mais parlamentares posicionados
+
 export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const [started, setStarted] = useState(false);
   const [list, setList] = useState<QuizPolicy[]>(policies);
@@ -174,13 +176,34 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           mostramos quais partidos e políticos mais se alinham com você. Leva
           cerca de 3 minutos.
         </p>
-        <button
-          type="button"
-          onClick={() => setStarted(true)}
-          className="mt-5 rounded-lg bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark"
-        >
-          Começar
-        </button>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setList(policies.slice(0, QUIZ_CURTO));
+              setStep(0);
+              setStarted(true);
+            }}
+            className="rounded-lg bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark"
+          >
+            Quiz rápido · {Math.min(QUIZ_CURTO, policies.length)} temas
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setList(policies);
+              setStep(0);
+              setStarted(true);
+            }}
+            className="rounded-lg border-2 border-brand px-6 py-3 font-semibold text-brand hover:bg-violet-50"
+          >
+            Quiz completo · {policies.length} temas
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-slate-500">
+          O rápido usa os {Math.min(QUIZ_CURTO, policies.length)} temas em que
+          mais parlamentares têm posição. Dá para fazer o completo depois.
+        </p>
         <p className="mt-3 text-xs text-slate-500">
           Suas respostas ficam no seu navegador. Não pedimos cadastro nem
           guardamos nada.
@@ -267,9 +290,9 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             Isto compara as suas respostas com o histórico de votos de cada
             parlamentar nos temas que você respondeu. Não é recomendação de voto:
             um mesmo parlamentar pode concordar com você em um tema e discordar
-            em outro. Veja a{" "}
+            em outro. Veja{" "}
             <Link href="/sobre" className="text-brand hover:underline">
-              metodologia
+              como funciona
             </Link>
             .
           </div>

@@ -179,6 +179,20 @@ export default function SobrePage() {
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
+          Por que o número do projeto às vezes não bate?
+        </h2>
+        <p className="text-slate-600">
+          O Congresso costuma votar vários projetos parecidos de uma vez: eles
+          são &quot;apensados&quot; ao mais antigo e o plenário aprova um texto
+          único, o substitutivo. Por isso a descrição oficial da votação pode
+          citar um número diferente do projeto que lhe deu origem. Nas nossas
+          páginas mostramos o projeto principal, e o link oficial de cada
+          votação leva ao registro completo, onde os apensados aparecem.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">
           Por que não existe política sobre certos temas?
         </h2>
         <p className="text-slate-600">

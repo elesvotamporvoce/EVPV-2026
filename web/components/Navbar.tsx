@@ -18,7 +18,7 @@ export default function Navbar() {
           className="nav-brand flex items-center gap-2.5 font-semibold leading-tight text-white"
         >
           <LogoMark className="h-4 w-auto" />
-          <span className="text-lg">Eles Votam por Você</span>
+          <span className="text-base sm:text-lg">Eles Votam por Você</span>
         </Link>
         <NavMenu links={links} />
       </div>

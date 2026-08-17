@@ -9,7 +9,7 @@ import InfoQuaseUnanime from "@/components/InfoQuaseUnanime";
 import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
-export const revalidate = 3600;
+export const revalidate = 900;
 
 type Div = {
   policy_id: number;

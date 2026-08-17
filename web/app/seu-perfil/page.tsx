@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import QuizPerfil, { type QuizPolicy } from "@/components/QuizPerfil";
 
-export const revalidate = 3600;
+export const revalidate = 900;
 export const metadata = {
   title: "Quem vota como você?",
   description:
