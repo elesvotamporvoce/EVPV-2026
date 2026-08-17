@@ -57,6 +57,10 @@ export default async function PessoasPage({
   const showFeatured =
     !sp.q && !sp.house && !sp.uf && !sp.party && !sp.mandato && page === 1;
 
+  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
+  const candSet = new Set(
+    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  );
   const [{ data, count }, parties, { count: emEx }] = await Promise.all([
     query,
     getParties(),
@@ -113,7 +117,7 @@ export default async function PessoasPage({
           <p className="mb-3 font-semibold text-slate-800">Mais procurados</p>
           <FeaturedRotator className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {destaque.map((p) => (
-              <PersonCard key={p.id} p={p} />
+              <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
             ))}
           </FeaturedRotator>
         </div>
@@ -126,7 +130,7 @@ export default async function PessoasPage({
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {people.map((p) => (
-            <PersonCard key={p.id} p={p} />
+            <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
           ))}
         </div>
       )}

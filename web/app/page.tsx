@@ -104,6 +104,14 @@ async function getData() {
         },
       ].filter((r) => r.person);
     }
+    // Quem e candidato em 2026 (para o selo nos cards)
+    const { data: candIds } = await supabase
+      .from("candidatura_2026")
+      .select("person_id");
+    const candSet = new Set(
+      ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+    );
+
     // Mais procurados (curadoria na tabela home_featured; futuramente analytics)
     type FeaturedCard = { person: PersonDir; nVotes: number | null; eligible: number | null };
     let procurados: FeaturedCard[] = [];
@@ -134,7 +142,7 @@ async function getData() {
       });
     }
 
-    return { policies: pols, principais, trends, recordistas, procurados, people: people ?? 0, divisions: divisions ?? 0 };
+    return { policies: pols, principais, trends, recordistas, procurados, candSet, people: people ?? 0, divisions: divisions ?? 0 };
   } catch {
     return {
       policies: [] as Policy[],
@@ -142,6 +150,7 @@ async function getData() {
       trends: [] as Trend[],
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
       procurados: [] as { person: PersonDir; nVotes: number | null; eligible: number | null }[],
+      candSet: new Set<number>(),
       people: 0,
       divisions: 0,
     };
@@ -149,7 +158,7 @@ async function getData() {
 }
 
 export default async function Home() {
-  const { policies, principais, trends, recordistas, procurados, people, divisions } = await getData();
+  const { policies, principais, trends, recordistas, procurados, candSet, people, divisions } = await getData();
 
   return (
     <div className="space-y-12">
@@ -189,6 +198,25 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Destaque: Eleições 2026 */}
+      <Link
+        href="/eleicoes-2026"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-brand-light bg-violet-50 p-5 hover:border-brand hover:shadow-sm"
+      >
+        <span>
+          <span className="block text-lg font-bold text-brand">
+            Eleições 2026: veja quem está concorrendo
+          </span>
+          <span className="mt-0.5 block text-sm text-slate-600">
+            Candidaturas registradas no TSE, situação de cada uma e o patrimônio
+            declarado — junto com o histórico de votos de cada parlamentar.
+          </span>
+        </span>
+        <span className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">
+          Ver candidatos →
+        </span>
+      </Link>
+
       {procurados.length > 0 && (
         <section>
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
@@ -215,6 +243,11 @@ export default async function Home() {
                 <p className="mt-2.5 text-[15px] font-semibold leading-snug text-slate-800">
                   {person.name}
                 </p>
+                {candSet.has(person.id) && (
+                  <span className="mt-1 inline-block rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Candidato 2026
+                  </span>
+                )}
                 <p className="mt-0.5 text-xs text-slate-500">
                   {person.party_sigla ?? "sem partido"}
                   {person.uf ? ` · ${person.uf}` : ""} · {CARGO_LABEL[person.house]}

@@ -8,9 +8,6 @@ export const metadata = {
   title: "Eleições 2026",
   description:
     "Deputados e senadores atuais com pré-candidatura anunciada ou candidatura registrada para 2026, e como cada um votou no mandato.",
-  // Página ainda não divulgada: fora do menu e fora dos buscadores até
-  // termos candidaturas suficientes.
-  robots: { index: false, follow: false },
 };
 
 const CARGO_2026: Record<string, string> = {

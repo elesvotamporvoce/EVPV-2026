@@ -6,6 +6,7 @@ const links = [
   { href: "/pessoas", label: "Parlamentares" },
   { href: "/politicas", label: "Políticas" },
   { href: "/seu-perfil", label: "Seu perfil" },
+  { href: "/eleicoes-2026", label: "Eleições 2026" },
   { href: "/sobre", label: "Sobre o site" },
 ];
 
