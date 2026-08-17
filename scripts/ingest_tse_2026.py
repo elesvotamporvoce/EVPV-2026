@@ -70,17 +70,20 @@ def main():
         pessoas[(norm(nome), uf)] = pid
 
     achados, nao_casados = 0, []
-    ufs = [args.uf.upper()] if args.uf else UFS
+    ufs = [args.uf.upper()] if args.uf else UFS + ["BR"]
     for uf in ufs:
         for cod, rotulo in CARGOS.items():
-            if rotulo == "presidente" and uf != "BR": continue
+            # presidente e cargo nacional (UF "BR"); os demais, estaduais
+            if (rotulo == "presidente") != (uf == "BR"): continue
             url = f"{BASE}/candidatura/listar/{ANO}/{uf}/{eid}/{cod}/candidatos"
             try: data = get(url)
             except Exception as e:
                 print(f"  aviso {uf}/{rotulo}: {e}"); continue
             for c in data.get("candidatos", []):
-                chave = (norm(c.get("nomeCompleto")), uf)
-                pid = pessoas.get(chave)
+                # tenta pelo nome de urna (costuma ser o nome parlamentar)
+                # e depois pelo nome civil completo
+                pid = (pessoas.get((norm(c.get("nomeUrna")), uf))
+                       or pessoas.get((norm(c.get("nomeCompleto")), uf)))
                 if pid is None:
                     nao_casados.append((uf, rotulo, c.get("nomeCompleto"),
                                         c.get("nomeUrna"), c.get("id")))
