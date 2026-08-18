@@ -145,7 +145,7 @@ export default function SobrePage() {
           suas convicções. Por isso, quando 95% ou mais dos votos vão para o
           mesmo lado, a votação entra com peso reduzido. Não a descartamos,
           porque ela diz muito sobre a minoria que votou contra a corrente. O
-          corte é automático, calculado a partir do resultado apurado — não é
+          corte é automático, calculado a partir do resultado apurado, não é
           escolha editorial nossa caso a caso. Na página de cada política, essas
           votações trazem um <strong>i</strong> ao lado do selo: clique para ver o
           placar e a explicação.
@@ -160,7 +160,7 @@ export default function SobrePage() {
           Numa votação de comissão, apenas os poucos parlamentares que são membros
           dela podem votar. Contar isso seria injusto: os demais apareceriam como
           ausentes sem nunca ter tido a chance de se posicionar. Por isso
-          consideramos só as votações de plenário — da Câmara e do Senado — onde
+          consideramos só as votações de plenário (da Câmara e do Senado) onde
           todos podiam votar.
         </p>
       </section>
@@ -263,20 +263,20 @@ export default function SobrePage() {
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">
-          Escolhas que fizemos — e seus limites
+          Escolhas que fizemos, e seus limites
         </h2>
         <p className="text-slate-600">
           Todo método tem escolhas, e preferimos declará-las. Os pesos são
           nossos: votação normal vale 10, votação decisiva (★) vale 25 e votação
           quase unânime vale 4. Ausência entra com 20% do peso e conta como
-          meio-termo — nem apoio, nem rejeição. Isso evita punir a falta
+          meio-termo: nem apoio, nem rejeição. Isso evita punir a falta
           pontual, mas tem um efeito colateral: quem falta muito tende ao meio
           da escala, o que pode parecer indecisão em vez de ausência. O perfil
           mostra a presença separadamente por isso.
         </p>
         <p className="text-slate-600">
           Algumas votações do conjunto são requerimentos de urgência, que
-          decidem se a matéria vai direto ao plenário — medem disposição de
+          decidem se a matéria vai direto ao plenário: medem disposição de
           pautar, não posição sobre o conteúdo. Mantemos porque, na prática, a
           urgência costuma ser disputada nos mesmos termos do mérito, mas é uma
           escolha discutível, e cada página de política mostra quais votações

@@ -165,11 +165,8 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   if (!started) {
     return (
       <div className="rounded-xl border border-brand-light bg-violet-50 p-6 text-center">
-        <h1 className="mb-4 text-2xl font-bold text-brand">
-          Quem vota como você?
-        </h1>
         <p className="text-lg font-semibold text-slate-800">
-          Responda como você votaria em cada tema político
+          Responda como você votaria em cada tema político.
         </p>
         <p className="mx-auto mt-2 max-w-xl leading-relaxed text-slate-600">
           No final, comparamos suas respostas com os votos do Congresso e

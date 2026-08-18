@@ -106,6 +106,11 @@ export default async function PolicyPage({
   const { pol, parties, top, bottom, divs } = await getPolicy(id);
   if (!pol) notFound();
 
+  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
+  const candSet = new Set(
+    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  );
+
   // Se veio do perfil de um parlamentar, mostra como ELE votou nesta política
   const personId = pessoa ? Number(pessoa) : null;
   let person: PersonDir | null = null;
@@ -207,8 +212,8 @@ export default async function PolicyPage({
 
       {/* Mais a favor / mais contra */}
       <section className="grid gap-6 lg:grid-cols-2">
-        <RankList title="Top 10 que mais votaram a favor" rows={top} />
-        <RankList title="Top 10 que mais votaram contra" rows={bottom} />
+        <RankList title="Top 10 que mais votaram a favor" rows={top} candSet={candSet} />
+        <RankList title="Top 10 que mais votaram contra" rows={bottom} candSet={candSet} />
       </section>
 
       {/* Resumo das votações que compõem a política */}
@@ -296,7 +301,15 @@ export default async function PolicyPage({
   );
 }
 
-function RankList({ title, rows }: { title: string; rows: ScoreNamed[] }) {
+function RankList({
+  title,
+  rows,
+  candSet,
+}: {
+  title: string;
+  rows: ScoreNamed[];
+  candSet: Set<number>;
+}) {
   return (
     <div>
       <h3 className="mb-2 font-semibold text-slate-700">{title}</h3>
@@ -324,8 +337,15 @@ function RankList({ title, rows }: { title: string; rows: ScoreNamed[] }) {
                 )}
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-slate-700">
-                  {r.person_name}
+                <span className="flex items-center gap-1.5">
+                  <span className="truncate text-sm font-medium text-slate-700">
+                    {r.person_name}
+                  </span>
+                  {candSet.has(r.person_id) && (
+                    <span className="shrink-0 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                      Candidato 2026
+                    </span>
+                  )}
                 </span>
                 <span className="text-xs text-slate-400">
                   {r.party_sigla ?? "-"}

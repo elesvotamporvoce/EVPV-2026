@@ -53,6 +53,11 @@ export default async function PartyPage({
   const { party, agr, members } = await getParty(id);
   if (!party) notFound();
 
+  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
+  const candSet = new Set(
+    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  );
+
   return (
     <div className="space-y-8">
       <Link href="/pessoas" className="text-sm text-brand hover:underline">
@@ -93,7 +98,7 @@ export default async function PartyPage({
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Membros</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {members.map((p) => (
-            <PersonCard key={p.id} p={p} />
+            <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
           ))}
         </div>
       </section>

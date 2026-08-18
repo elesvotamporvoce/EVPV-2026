@@ -185,37 +185,28 @@ export default async function Home() {
             <HomeSearch />
           </div>
           <div className="mt-9">
+            <p className="mb-2.5 text-sm text-white/60">
+              Faça o teste e descubra quem pensa igual a você
+            </p>
             <Link
               href="/seu-perfil"
               className="inline-block rounded-lg bg-brand px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-brand/25 hover:bg-brand-dark"
             >
-              Teste: quem te representa?
+              Começar teste
             </Link>
-            <p className="mt-2.5 text-sm text-white/60">
-              Responda e descubra quem pensa igual a você
-            </p>
           </div>
         </div>
       </section>
 
       {/* Destaque: Eleições 2026 */}
-      <Link
-        href="/eleicoes-2026"
-        className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-brand-light bg-violet-50 p-5 hover:border-brand hover:shadow-sm"
-      >
-        <span>
-          <span className="block text-lg font-bold text-brand">
-            Eleições 2026: veja quem está concorrendo
-          </span>
-          <span className="mt-0.5 block text-sm text-slate-600">
-            Candidaturas registradas no TSE, situação de cada uma e o patrimônio
-            declarado — junto com o histórico de votos de cada parlamentar.
-          </span>
-        </span>
-        <span className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">
-          Ver candidatos →
-        </span>
-      </Link>
+      <div className="flex justify-center">
+        <Link
+          href="/eleicoes-2026"
+          className="rounded-xl bg-brand px-8 py-4 text-center text-lg font-semibold text-white shadow-lg shadow-brand/25 hover:bg-brand-dark"
+        >
+          Eleições 2026: Veja quem está concorrendo!
+        </Link>
+      </div>
 
       {procurados.length > 0 && (
         <section>
@@ -344,8 +335,15 @@ export default async function Home() {
                     ) : null}
                   </span>
                   <span className="text-left">
-                    <span className="block text-sm font-medium text-slate-700">
-                      {r.person.name}
+                    <span className="flex items-center gap-1.5">
+                      <span className="block text-sm font-medium text-slate-700">
+                        {r.person.name}
+                      </span>
+                      {candSet.has(r.person.id) && (
+                        <span className="inline-block rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                          Candidato 2026
+                        </span>
+                      )}
                     </span>
                     <span className="text-xs text-slate-400">
                       {r.person.party_sigla ?? ""}

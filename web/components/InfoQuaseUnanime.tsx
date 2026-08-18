@@ -65,7 +65,7 @@ export default function InfoQuaseUnanime({
           {placar && (
             <span className="mb-1 block text-slate-500">
               Placar: {placar}
-              {pctMaioria ? ` — ${pctMaioria}% de um lado.` : "."}
+              {pctMaioria ? ` (${pctMaioria}% de um lado).` : "."}
             </span>
           )}
           Quando quase todo mundo vota igual, o voto de cada um diz pouco: seguir

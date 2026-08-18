@@ -64,10 +64,17 @@ export default async function PersonPage({
 
   const { data: candRow } = await supabase
     .from("candidatura_2026")
-    .select("cargo, uf, situacao")
+    .select("cargo, uf, situacao, patrimonio_total")
     .eq("person_id", id)
     .maybeSingle();
-  const cand = candRow as { cargo: string | null; uf: string | null; situacao: string | null } | null;
+  const cand = candRow as {
+    cargo: string | null;
+    uf: string | null;
+    situacao: string | null;
+    patrimonio_total: number | null;
+  } | null;
+  const brl = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
   // Senadores: mostramos APENAS as politicas que tiveram votacao no Senado.
   // As demais so foram votadas na Camara — o senador nunca teve a chance de se
@@ -257,6 +264,14 @@ export default async function PersonPage({
               {dir.mandate_detail && (
                 <span className="text-slate-500"> · {dir.mandate_detail}</span>
               )}
+            </p>
+          )}
+          {cand && cand.patrimonio_total != null && (
+            <p className="text-sm text-slate-500">
+              Patrimônio declarado (candidatura 2026):{" "}
+              <span className="font-semibold text-slate-700">
+                {brl(cand.patrimonio_total)}
+              </span>
             </p>
           )}
           </div>

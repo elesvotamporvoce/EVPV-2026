@@ -45,9 +45,9 @@ export function categoryLabel(cat: string): string {
 }
 
 export function fmtDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "-";
   return d.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
