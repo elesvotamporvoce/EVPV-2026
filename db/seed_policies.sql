@@ -259,20 +259,35 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
 --  Proteção dos direitos trabalhistas
+--
+--  18/08/2026: revisada e ampliada de 3 para 5 votacoes. Auditoria via
+--  descUltimaAberturaVotacao + orientacoes:
+--   * ENTROU 575585-99 (DTQ 2 Fdr PT-PCdoB-PV, DVS do art. 441-G do
+--     substitutivo do PL 5496: reducao da aliquota patronal previdenciaria).
+--     "Mantido o texto" 312x104: SIM = manter o corte = against.
+--   * ENTROU 2233802-438 (PEC 221, 2o turno, 461x19): consistencia com as
+--     demais PECs do site, que entram com os dois turnos. Vira weak.
+--   * 575585-92 conferida: orientacao PT-PCdoB-PV e PSOL-REDE Nao;
+--     PL/NOVO/blocos Sim; Governo e Maioria Liberado. Sinal ok.
+--   * 2233802-416 (requerimento 372x101) fora: procedimental.
+--   * MPV 905 (abr/2020, legislatura anterior): mantido so o merito -65;
+--     os destaques de 2020 seriam empilhamento de legislatura antiga.
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Proteção dos direitos trabalhistas';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Proteção dos direitos trabalhistas',
-    'Defesa e ampliação dos direitos trabalhistas: A FAVOR do fim da escala 6x1 com jornada máxima de 40h (PEC 221/2019) e CONTRA a redução de FGTS e INSS em contratos de jovens (Contrato Verde e Amarelo, MPV 905/2019, e sua retomada no PL 5496/2013). Score alto = defende os direitos dos trabalhadores.',
+    'Defesa e ampliação dos direitos trabalhistas: A FAVOR do fim da escala 6x1 (PEC 221/2019, dois turnos) e CONTRA a redução de FGTS e INSS em contratos de jovens (Contrato Verde e Amarelo, MPV 905/2019, e sua retomada no PL 5496/2013, mérito e destaque). Score alto = defende os direitos dos trabalhadores.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2233802-424','for','strong'),
-  ('575585-92','against','strong'),
-  ('2229308-65','against','strong')
+  ('2229308-65','against','strong'),  -- MPV 905/2019: Contrato Verde e Amarelo, merito (322x153, abr/2020)
+  ('575585-92','against','strong'),   -- PL 5496/2013: substitutivo do contrato jovem (286x91)
+  ('575585-99','against','normal'),   -- PL 5496/2013: DVS art. 441-G, corte da patronal mantido (312x104)
+  ('2233802-424','for','strong'),     -- PEC 221/2019: 1o turno, fim da escala 6x1 (472x22, vira weak)
+  ('2233802-438','for','normal')      -- PEC 221/2019: 2o turno (461x19, vira weak)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -538,7 +553,7 @@ UPDATE policy SET quiz_hook = CASE name
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
  WHEN 'Marco temporal para terras indígenas' THEN 'O marco temporal decide quem tem direito de reivindicar terra indígena: só quem já estava na área em 5 de outubro de 1988, data da nova Constituição.'
  WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana e quanto entra no seu FGTS e no INSS.'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana (escala 6x1) e quanto entra no seu FGTS e no INSS.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023.'
  WHEN 'Distribuição e acesso à terra' THEN 'Trata de uma disputa antiga no campo: quem tem muita terra e não a usa direito pode perdê-la, e quem não tem nenhuma pode receber.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Define se deputado e senador respondem a processo criminal como qualquer cidadão, ou se dependem da autorização dos colegas para serem julgados.'
@@ -558,7 +573,7 @@ UPDATE policy SET side_a_title = CASE name
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'A demora também cobra caro'
  WHEN 'Marco temporal para terras indígenas' THEN 'Uma data encerra a disputa'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'A CLT é o piso, não o teto'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'Direito não se negocia para baixo'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Corrigir penas desproporcionais'
  WHEN 'Distribuição e acesso à terra' THEN 'Terra tem que cumprir função social'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político também é perseguido'
@@ -578,7 +593,7 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
  WHEN 'Marco temporal para terras indígenas' THEN 'acho que com uma data definida cada um sabe o que é seu, e a disputa acaba'
  WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'sem mínimo garantido em lei, a negociação vira imposição de quem tem mais poder'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que jornada e aposentadoria são garantias mínimas, não moeda de troca'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
  WHEN 'Distribuição e acesso à terra' THEN 'fazenda que desmata ilegalmente ou usa trabalho escravo deveria poder ser desapropriada e virar assentamento'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'o processo pode ser usado só para tirar do caminho quem incomoda'
@@ -618,7 +633,7 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
  WHEN 'Marco temporal para terras indígenas' THEN 'acredito que comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
  WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato'
  WHEN 'Distribuição e acesso à terra' THEN 'propriedade que gera safra e emprego não deveria viver sob risco de desapropriação'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'se cometeu crime, responde como qualquer pessoa'
@@ -646,9 +661,8 @@ Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais se
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado. Esta política simplificou essa análise: criou a licença por autodeclaração, em que o empreendedor diz que cumpre as exigências, tirou regras mais duras de mineração de grande porte e abriu um caminho acelerado para obras estratégicas. Quem votou a favor diz que obra parada também cobra um preço; quem votou contra lembra que as barragens de Mariana e Brumadinho não eram classificadas como de grande impacto.'
  WHEN 'Marco temporal para terras indígenas' THEN 'A Constituição garante aos indígenas as terras que ocupam tradicionalmente, mas a disputa é sobre o que “tradicionalmente” quer dizer. O marco temporal fixa uma data: só teria direito quem estivesse na terra em 5 de outubro de 1988. Para quem defende, uma data acaba com a insegurança sobre quem tem direito a quê; para quem critica, ignora que muitas comunidades foram expulsas à força antes de 1988.'
  WHEN 'Políticas de igualdade racial' THEN 'Esta política reúne decisões sobre desigualdade racial: injúria racial punida como crime de racismo, 30% das vagas de concursos federais reservadas a pessoas negras, indígenas e quilombolas, o 20 de novembro como feriado nacional e a lista suja de clubes punidos por racismo no futebol. Para quem defende, séculos de desigualdade racial não se corrigem sozinhos; para quem critica, lei que classifica por raça oficializa uma divisão que não deveria existir.'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'Carteira assinada significa ter direitos garantidos por lei, que não dependem de negociação, e estas votações tratam de quanto esse piso vale.
-De um lado, a redução da jornada máxima na Constituição, ligada ao fim da escala 6x1. Do outro, contratos com FGTS e INSS reduzidos para jovens: custam menos ao empregador, mas o trabalhador acumula menos fundo de garantia e menos aposentadoria. Por isso apoiar é votar SIM na jornada e NÃO nos contratos.
-Para quem defende, sem mínimo em lei a negociação vira imposição de quem tem mais poder; para quem critica, acordo entre as partes se ajusta ao setor e ao porte.'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'Carteira assinada é o piso de direitos que não depende de negociação, e estas votações mexem nesse piso. De um lado, a redução da jornada máxima na Constituição, ligada ao fim da escala 6x1. Do outro, contratos para jovens com FGTS e INSS reduzidos: custam menos ao empregador, mas rendem menos fundo de garantia e aposentadoria. Por isso apoiar é votar SIM na jornada e NÃO nos contratos.
+Para quem defende, sem mínimo em lei a negociação vira imposição; para quem critica, acordo entre as partes se ajusta melhor a cada setor.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Em 8 de janeiro de 2023, milhares de pessoas invadiram e depredaram as sedes dos três poderes, e centenas foram condenadas.
 O projeto nasceu como anistia e mudou no caminho: o texto aprovado não perdoa ninguém, mas reduz penas. Proíbe somar as condenações por golpe e por abolição do Estado Democrático no mesmo episódio, e corta de um a dois terços a pena de quem participou sem liderar nem financiar.
 Para quem defende, mais de quinze anos para quem só entrou na multidão é punição excessiva; para quem critica, reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato.'
@@ -726,10 +740,10 @@ O PL 4566/2021 equiparou a injúria racial ao crime de racismo, com pena maior. 
 O PL 3268/2021 declarou o 20 de novembro, Dia de Zumbi e da Consciência Negra, feriado nacional. Foi aprovado por 286 a 121.
 O PL 1069/2025 cria a “Lista Suja do Racismo no Futebol”, cadastro de clubes e entidades punidos por racismo. A votação registrada é o destaque que manteve os torcedores no alcance do cadastro, por 295 a 120; o mérito foi aprovado de forma simbólica.
 A PEC 9/2023, que mudou as sanções aos partidos que não aplicaram o mínimo em candidaturas negras, saiu da política: a federação PT-PCdoB-PV e o PSOL votaram em lados opostos, e uma votação com os dois polos trocados não mede este eixo.'
- WHEN 'Proteção dos direitos trabalhistas' THEN 'São três votações, todas na Câmara, e a direção muda conforme a proposta.
-A MPV 905/2019 criou o Contrato de Trabalho Verde e Amarelo, com FGTS e contribuição previdenciária reduzidos para jovens sem vínculo anterior. O PL 5496/2013 retomou a mesma ideia, com contrato por prazo determinado para jovens de 16 a 24 anos sem emprego anterior. Nas duas, apoiar os direitos trabalhistas é votar NÃO, e as duas foram aprovadas.
-A PEC 221/2019 vai na direção oposta: reduz a jornada máxima prevista na Constituição. Pela ementa original, de 44 para 36 horas semanais ao longo de dez anos. É a proposta associada ao fim da escala 6x1, e nela apoiar é votar SIM. A Câmara aprovou o primeiro turno em maio de 2026 por 472 a 22.
-Justamente por ser quase unânime, essa votação entra com peso reduzido: com 96% dos votos de um lado, ela distingue pouco um parlamentar do outro.'
+ WHEN 'Proteção dos direitos trabalhistas' THEN 'São cinco votações, todas na Câmara, e a direção muda conforme a proposta.
+A MPV 905/2019 criou o Contrato de Trabalho Verde e Amarelo, com FGTS e contribuição previdenciária reduzidos para jovens sem vínculo anterior. Foi aprovada por 322 a 153 em abril de 2020, na legislatura anterior. O PL 5496/2013 retomou a mesma ideia em 2023, com contrato por prazo determinado para jovens de 16 a 24 anos: aparece no mérito, aprovado por 286 a 91, e no destaque que manteve o corte da contribuição previdenciária patronal, por 312 a 104. Nessas três, apoiar os direitos trabalhistas é votar NÃO.
+A PEC 221/2019 vai na direção oposta: reduz a jornada máxima prevista na Constituição, de 44 para 36 horas semanais ao longo de dez anos. É a proposta associada ao fim da escala 6x1, e nela apoiar é votar SIM. A Câmara aprovou os dois turnos em 27 de maio de 2026: 472 a 22 e 461 a 19.
+Justamente por serem quase unânimes, as duas votações da PEC entram com peso reduzido: com mais de 95% dos votos de um lado, elas distinguem pouco um parlamentar do outro.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'São quatro votações, todas na Câmara e todas sobre o mesmo projeto, o PL 2162/2023. Votar SIM apoia a redução das penas.
 A primeira, em setembro de 2025, foi o requerimento de urgência, que mandou o texto direto ao plenário. As três seguintes ocorreram na madrugada de 10 de dezembro de 2025: dois destaques e a votação do mérito, aprovada por 291 a 148.
 O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A ementa original concedia anistia aos participantes de manifestações políticas desde outubro de 2022; a anistia caiu no substitutivo, e o texto aprovado passou a apenas reduzir penas.
