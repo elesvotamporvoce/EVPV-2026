@@ -107,32 +107,62 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Rigor no licenciamento ambiental
+--  Flexibilização do licenciamento ambiental
+--
+--  18/08/2026: DES-INVERTIDA e recomposta. Era "Rigor no licenciamento
+--  ambiental", politica invertida com stances 'against'. O que o Congresso
+--  votou em 2025 foi a flexibilizacao; nomeando pelo que foi votado, votar
+--  SIM apoia a politica e some a explicacao de inversao da pagina.
+--  Auditoria via descUltimaAberturaVotacao (API da Camara):
+--   * 257161-454 e o MERITO das Emendas do Senado ao PL 2159/2021 (parecer
+--     Ze Vitor, ressalvados os destaques); mandou o texto a sancao
+--     (Lei 15.190/2025). 267x116.
+--   * entraram os 5 destaques nominais de 17/07/2025: cada um decide uma
+--     medida distinta, nao e empilhamento.
+--   * 2541991-38 e a UNICA votacao nominal da MPV 1308/2025 (Lei 15.300/2025):
+--     DVS da Fdr PSOL-REDE contra o art. 6 (rodovias "estrategicas", BR-319);
+--     "Mantido o texto", 300x123. O merito da MPV (2541991-29) foi simbolico.
+--   * FORA: redacao final 257161-483 (empilharia com o merito), requerimentos
+--     procedimentais 257161-442/446/450 (442 e 446 tem sinal invertido, sao
+--     obstrucao) e as votacoes de 2021 (outra legislatura).
+--   * REMOVIDA a 2324721-94 (PL 1366/2022 silvicultura): estava neste seed
+--     mas NAO estava no banco (divergencia detectada em 18/08/2026) e nao
+--     pertence ao eixo da lei geral do licenciamento.
+--  PENDENTE: votacao dos vetos (VET 29/2025, 27/11/2025, Camara 167x295)
+--  nao esta na API da Camara (PDFs SISCON, ver extract_vetos_cn.py na pasta
+--  do projeto). Se ingerida, entra como 'against': la SIM = manter o veto.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Rigor no licenciamento ambiental';
+DELETE FROM policy WHERE name = 'Flexibilização do licenciamento ambiental';
+DELETE FROM policy WHERE name = 'Rigor no licenciamento ambiental';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Rigor no licenciamento ambiental',
-    'Manter regras rigorosas de licenciamento ambiental: CONTRA o PL 2159/2021 ("PL da Devastação"), a MPV 1308/2025 (licenciamento especial) e a exclusão de atividades do licenciamento. Score alto = defende o rigor do licenciamento.',
+    'Flexibilização do licenciamento ambiental',
+    'Simplificar o licenciamento ambiental: o PL 2159/2021 (lei geral, com a licença por autodeclaração) e a MPV 1308/2025 (licenciamento especial acelerado). Votar SIM apoia a flexibilização.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2324721-94','against','normal'),  -- PL 1366/2022 silvicultura
-  ('257161-454','against','strong'),  -- PL 2159/2021 "PL da Devastação"
-  ('2541991-38','against','strong')   -- MPV 1308/2025 licenciamento especial
+  ('257161-454','for','strong'),   -- PL 2159/2021: merito das Emendas do Senado (267x116)
+  ('257161-462','for','normal'),   -- Emenda 1: mineracao de grande porte fora do regime Conama (242x117)
+  ('257161-465','for','normal'),   -- Emenda 3: Licenca Ambiental Especial monofasica (232x104)
+  ('257161-467','for','normal'),   -- Emenda 4: porte/potencial poluidor pelo ente federativo (234x101)
+  ('257161-476','for','normal'),   -- Emenda 18: amplia a LAC, analise por amostragem (221x77)
+  ('257161-479','for','normal'),   -- Emenda 28: revoga protecoes da Lei da Mata Atlantica (229x82)
+  ('2541991-38','for','strong')    -- MPV 1308/2025: DVS art. 6 mantido (300x123)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Mais investimento na educação
+--  Investimento na educação pública
+--  (renomeada em 18/08/2026; era "Mais investimento na educação")
 --  (sem o SNE/PLP 235, que é governança — candidata a política própria)
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Mais investimento na educação';
+DELETE FROM policy WHERE name = 'Investimento na educação pública';
+DELETE FROM policy WHERE name = 'Mais investimento na educação';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Mais investimento na educação',
+    'Investimento na educação pública',
     'Mais recursos para a educação pública: FUNDEB permanente, exclusão da educação do teto de gastos/arcabouço fiscal, execução orçamentária obrigatória, assistência estudantil e Pé-de-Meia (permanência no ensino médio). Votar SIM apoia mais investimento.',
     false) RETURNING id
 )
@@ -488,9 +518,9 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 UPDATE policy SET quiz_hook = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Esta política reúne as votações que aumentaram a proteção da mulher após a denúncia: tornozeleira no agressor, arma proibida para quem responde por agressão e melhor acolhimento na delegacia. Também criou punição específica para quem usa os filhos para ferir a mãe.'
  WHEN 'Redução das emissões de carbono' THEN 'O Congresso criou um limite de poluição para as grandes empresas: quem passa do teto paga, quem polui menos vende crédito. Também incentivou combustíveis mais limpos.'
- WHEN 'Mais investimento na educação' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
+ WHEN 'Investimento na educação pública' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
- WHEN 'Rigor no licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
  WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa no interior do país: estabelece a regra que define se uma área vira terra indígena ou continua como está.'
  WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana e quanto entra no seu FGTS e no INSS.'
@@ -508,9 +538,9 @@ UPDATE policy SET quiz_hook = CASE name
 UPDATE policy SET side_a_title = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Concordo com essas medidas'
  WHEN 'Redução das emissões de carbono' THEN 'Quem polui deve pagar'
- WHEN 'Mais investimento na educação' THEN 'Priorizar a verba da educação'
+ WHEN 'Investimento na educação pública' THEN 'Priorizar a verba da educação'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Direito básico, não benefício'
- WHEN 'Rigor no licenciamento ambiental' THEN 'Melhor demorar do que remediar'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'A demora também cobra caro'
  WHEN 'Demarcação de terras indígenas' THEN 'Tem que considerar quem foi expulso'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'A CLT é o piso, não o teto'
@@ -528,9 +558,9 @@ UPDATE policy SET side_a_title = CASE name
 UPDATE policy SET side_a_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
  WHEN 'Redução das emissões de carbono' THEN 'poluir de graça sai caro para todo mundo — o risco é mais seca, enchente e mudança do clima'
- WHEN 'Mais investimento na educação' THEN 'escola e universidade dependem de dinheiro garantido e não podem sofrer quando o governo corta gastos'
+ WHEN 'Investimento na educação pública' THEN 'escola e universidade públicas dependem de dinheiro garantido; acredito que mais estudo vira também mais renda, mais saúde e menos violência no futuro'
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
- WHEN 'Rigor no licenciamento ambiental' THEN 'barragens que romperam eram classificadas como de impacto médio antes do desastre'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
  WHEN 'Demarcação de terras indígenas' THEN 'comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
  WHEN 'Políticas de igualdade racial' THEN 'séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'sem mínimo garantido em lei, a negociação vira imposição de quem tem mais poder'
@@ -548,9 +578,9 @@ UPDATE policy SET side_a_note = CASE name
 UPDATE policy SET side_b_title = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'Qualquer violência deve ser combatida, independente de gênero'
  WHEN 'Redução das emissões de carbono' THEN 'A conta chega no consumidor'
- WHEN 'Mais investimento na educação' THEN 'Cautela com gasto obrigatório'
+ WHEN 'Investimento na educação pública' THEN 'Gasto protegido por lei aperta todo o resto'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'
- WHEN 'Rigor no licenciamento ambiental' THEN 'A demora também cobra caro'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'Melhor demorar do que remediar'
  WHEN 'Demarcação de terras indígenas' THEN 'Uma data encerra a disputa'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Deixar empresa e trabalhador negociarem'
@@ -568,9 +598,9 @@ UPDATE policy SET side_b_title = CASE name
 UPDATE policy SET side_b_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'não deveria haver medida extra para um gênero e não para o outro'
  WHEN 'Redução das emissões de carbono' THEN 'o custo do carbono entra no preço do combustível, da energia e do frete'
- WHEN 'Mais investimento na educação' THEN 'despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano'
+ WHEN 'Investimento na educação pública' THEN 'acho que o governo eleito deve poder decidir onde o dinheiro é mais necessário'
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
- WHEN 'Rigor no licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
  WHEN 'Demarcação de terras indígenas' THEN 'sem data, qualquer área pode ser reivindicada e ninguém tem segurança sobre o próprio título'
  WHEN 'Políticas de igualdade racial' THEN 'política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
@@ -597,15 +627,9 @@ Para quem defende, o período mais perigoso é logo depois que a mulher denuncia
  WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa. Estas votações decidem se isso passa a ter preço.
 O mecanismo principal é o mercado de carbono: quem emite acima de um limite compra crédito de quem emite menos. Poluir deixa de ser de graça e vira custo, que pode chegar ao preço final. O outro pacote trata de combustível: diesel verde, aviação e captura de carbono.
 Para quem defende, poluir de graça sai caro para todo mundo — o risco é mais seca, enchente e mudança do clima; para quem critica, o custo do carbono entra no preço do combustível, da energia e do frete.'
- WHEN 'Mais investimento na educação' THEN 'O dinheiro da educação depende de regras que dizem quanto o governo é obrigado a gastar e o que pode ser cortado quando o caixa aperta.
-Estas votações mexeram nessas regras: o Fundeb virou permanente na Constituição, universidades e institutos federais saíram do teto de gastos, e foram criados a assistência estudantil e o Pé-de-Meia. O efeito aparece na creche, no salário do professor e na chance de um adolescente terminar a escola.
-Para quem defende, escola e universidade dependem de dinheiro garantido; para quem critica, despesa garantida em lei tira do governo a margem de escolher prioridades a cada ano.'
- WHEN 'Igualdade de gênero no trabalho' THEN 'Mulheres e homens que fazem o mesmo trabalho nem sempre recebem o mesmo salário. Estas votações tratam de duas obrigações que a lei pode impor à empresa: pagar igual por função igual e publicar quanto paga a cada um, e dar três dias de licença por mês a quem comprove sintomas graves ligados à menstruação.
-São só duas votações, então uma única ausência já desloca bastante o resultado individual.
-Para quem defende, salário igual por trabalho igual e afastamento em condição de saúde não são favor; para quem critica, empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas.'
- WHEN 'Rigor no licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.
-As duas votações aqui afrouxam essa análise: uma cria a licença por autodeclaração, em que o próprio empreendedor diz que cumpre as exigências; a outra cria um rito acelerado para obras estratégicas. Como as propostas flexibilizam, aqui apoiar a política é votar NÃO.
-Para quem defende, barragens que romperam eram classificadas como de impacto médio antes do desastre; para quem critica, obra parada por anos trava saneamento, energia e emprego.'
+ WHEN 'Investimento na educação pública' THEN 'Essas votações protegeram o dinheiro da educação: o Fundeb, que paga professor e merenda, virou permanente na Constituição, universidades ficaram fora do teto de gastos e foi criada uma poupança para o aluno pobre terminar os estudos.'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'Mulheres e homens que fazem o mesmo trabalho nem sempre recebem o mesmo salário. Estas votações tratam de duas obrigações que a lei pode impor à empresa: pagar igual por função igual e publicar quanto paga a cada um, e dar três dias de licença por mês a quem comprove sintomas graves ligados à menstruação. Para quem defende, salário igual por trabalho igual e afastamento em condição de saúde não são favor; para quem critica, empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas.'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado. Essa política simplificou essa análise: criaram a licença por autodeclaração, em que o próprio empreendedor diz que cumpre as exigências, tiraram regras mais duras de mineração de grande porte e abriram um caminho acelerado para obras estratégicas. Quem votou a favor diz que o país tinha milhares de normas e que obra parada também cobra um preço. Quem votou contra lembra que as barragens que romperam em Mariana e Brumadinho não eram classificadas como de grande impacto.'
  WHEN 'Demarcação de terras indígenas' THEN 'A Constituição garante aos indígenas as terras que ocupam tradicionalmente. A disputa é sobre o que “tradicionalmente” quer dizer.
 A tese em jogo é o marco temporal: só teria direito à terra quem estivesse nela em 5 de outubro de 1988. O Congresso aprovou essa tese por lei e depois a escreveu na Constituição. Como as propostas caminham contra a demarcação, aqui apoiar a política é votar NÃO.
 Para quem defende, comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data; para quem critica, sem data qualquer área pode ser reivindicada e ninguém tem segurança sobre o próprio título.'
@@ -666,19 +690,20 @@ Duas dessas votações entram com peso reduzido por terem sido quase unânimes: 
 Duas são do PL 182/2024, que instituiu o Sistema Brasileiro de Comércio de Emissões de Gases de Efeito Estufa, o mercado regulado de carbono, hoje Lei 15.042/2024. Ele fixa limites de emissão para grandes emissores e permite que quem fica abaixo do limite venda o excedente a quem passa. A votação de novembro de 2024, que aprovou o texto vindo do Senado, é a decisiva desta política.
 As outras duas são do PL 528/2020, o pacote Combustível do Futuro: mobilidade de baixo carbono, programa nacional de combustível sustentável de aviação, programa de diesel verde e captura e estocagem geológica de dióxido de carbono.
 Uma das votações do PL 528/2020 foi quase unânime, 429 a 19, e por isso entra com peso reduzido.'
- WHEN 'Mais investimento na educação' THEN 'É a política com mais votações: onze, sendo oito na Câmara e três no Senado. Votar SIM apoia mais investimento em todas.
+ WHEN 'Investimento na educação pública' THEN 'É a política com mais votações: onze, sendo oito na Câmara e três no Senado. Votar SIM apoia mais investimento em todas.
 A PEC 15/2015 tornou o Fundeb permanente na Constituição; antes ele tinha prazo e precisava ser renovado. A PEC 24/2019 excluiu as despesas das instituições federais de ensino dos limites de gasto primário.
 O PLP 243/2023 criou o programa de incentivo à permanência no ensino médio, que deu origem ao Pé-de-Meia, e foi votado nas duas casas. O PLP 153/2024, no Senado, tratou da transferência de saldos do Fundo Nacional de Desenvolvimento da Educação para estados e municípios. O PL 3118/2024 incluiu a assistência estudantil entre as prioridades do Fundo Social.
 O PLP 163/2025 é o mais recente e o mais disputado: exclui despesas com educação e saúde dos limites do arcabouço fiscal. Foi aprovado na Câmara por 296 a 145 e no Senado por 47 a 16.
 Três votações entram com peso reduzido por quase-unanimidade: o primeiro turno da PEC 15/2015, aprovado por 499 a 7, e as duas do Senado que passaram sem nenhum voto contrário.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'São duas votações, ambas na Câmara. Votar SIM apoia a política.
-O PL 1085/2023 é a Lei da Igualdade Salarial: obriga a pagar o mesmo salário a mulheres e homens na mesma função e cria a obrigação de publicar relatórios de transparência salarial. Foi aprovado por 325 a 36 e é a votação decisiva desta política.
-A segunda é o requerimento de urgência do PL 1249/2022, que garante três dias consecutivos de licença por mês às trabalhadoras que comprovem sintomas graves associados ao fluxo menstrual. Urgência decide se a matéria vai direto ao plenário: mede disposição de pautar, não posição sobre o conteúdo.
+O PL 1085/2023 é a Lei da Igualdade Salarial: obriga a pagar o mesmo salário a mulheres e homens na mesma função e cria a obrigação de publicar relatórios de transparência salarial. Foi aprovado por 325 a 36 e é a votação decisiva desta política. Virou a Lei 14.611/2023, declarada constitucional por unanimidade pelo STF em maio de 2026.
+A segunda é o requerimento de urgência do PL 1249/2022, que garante três dias consecutivos de licença por mês às trabalhadoras que comprovem sintomas graves associados ao fluxo menstrual. Urgência decide se a matéria vai direto ao plenário: mede disposição de pautar, não posição sobre o conteúdo. No dia seguinte a Câmara aprovou o substitutivo, que reduziu a licença para até dois dias mediante laudo médico, mas essa votação foi simbólica e por isso não entra aqui.
 Com só duas votações, esta política segue marcada como provisória. Ela está publicada e pontuada, mas com base estreita.'
- WHEN 'Rigor no licenciamento ambiental' THEN 'São duas votações, ambas na Câmara, e esta é uma política invertida: votar NÃO é que apoia o rigor no licenciamento, porque as duas propostas em pauta afrouxam as regras. As duas foram aprovadas.
-O PL 2159/2021 ficou conhecido como “PL da Devastação”. Ele reescreve a lei geral do licenciamento, regulamentando o artigo 225 da Constituição, e cria a licença por autodeclaração, em que o empreendedor declara que atende às condições e recebe a licença sem análise prévia do órgão ambiental. Foi aprovado por 267 a 116.
-A MPV 1308/2025 institui o licenciamento ambiental especial, um rito mais rápido para empreendimentos classificados como estratégicos. A votação registrada é de destaque, quando o plenário decide manter um trecho do texto.
-As duas entram com peso forte por decidirem o mérito da matéria. Com apenas duas votações, a base é estreita: uma ausência pesa muito no índice individual.'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'São sete votações, todas na Câmara. Votar SIM apoia a política.
+Seis são do PL 2159/2021, que reescreveu a lei geral do licenciamento e ficou conhecido como PL da Devastação. A votação de mérito, que mandou o texto à sanção, foi aprovada por 267 a 116 e entra com peso forte. As outras cinco são destaques sobre emendas do Senado, cada uma decidindo uma coisa diferente: tirar a mineração de grande porte do regime do Conama, criar a licença ambiental especial de rito único, deixar o ente federativo definir porte e potencial poluidor, ampliar o autolicenciamento com conferência por amostragem, e revogar exigências da Lei da Mata Atlântica.
+A sétima é da MPV 1308/2025, que criou o licenciamento especial para empreendimentos estratégicos. A votação registrada é o destaque em que o plenário decidiu manter o artigo sobre obras de rodovia. Foi a única votação nominal daquela medida provisória, porque o mérito foi aprovado de forma simbólica.
+Ficaram de fora a redação final e os requerimentos de procedimento, que não decidem o conteúdo, e as votações de 2021, da legislatura anterior.
+O PL 2159/2021 virou a Lei 15.190/2025 e a MPV 1308/2025 virou a Lei 15.300/2025. Em novembro de 2025 o Congresso derrubou a maior parte dos vetos que o governo tinha posto no texto; essa votação ainda não está no site.'
  WHEN 'Demarcação de terras indígenas' THEN 'São cinco votações, duas na Câmara e três no Senado, e esta é uma política invertida: votar NÃO é que apoia os direitos territoriais indígenas, porque todas as propostas instituem o marco temporal.
 O PL 490/2007 foi o primeiro. Regulamenta o artigo 231 da Constituição, que trata das terras indígenas, e fixa o marco temporal. A Câmara o aprovou em maio de 2023 por 283 a 155.
 No Senado, a mesma matéria tramitou como PL 2903/2023 e foi aprovada em setembro de 2023 por 43 a 21. Pouco antes, o Supremo Tribunal Federal havia rejeitado a tese do marco temporal.

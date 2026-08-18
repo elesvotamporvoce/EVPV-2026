@@ -70,7 +70,7 @@ export const FEATURED_POLICIES = [
   "Combate à violência contra a mulher",
   "Proteção dos direitos trabalhistas",
   "Conservação da biodiversidade",
-  "Mais investimento na educação",
+  "Investimento na educação pública",
 ];
 
 export function featuredRank(name: string): number {
