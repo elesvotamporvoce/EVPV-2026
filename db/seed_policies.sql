@@ -189,35 +189,35 @@ JOIN (VALUES
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Demarcação de terras indígenas
+--  Marco temporal para terras indígenas (ex-"Demarcação de terras indígenas")
 --
---  30/07/2026: o PL 4497/2024 ("PL da Grilagem") FOI RETIRADO desta politica.
---  Ele trata de ratificacao de registros imobiliarios em faixa de fronteira —
---  titulacao de terra, nao demarcacao indigena — e estava vinculado tambem a
---  politica "Reforma agraria e acesso a terra", com a mesma direcao. Era a unica
---  proposicao servindo duas politicas, e aqui parecia preenchimento. Segue na
---  politica de reforma agraria, onde o eixo encaixa.
---    ('camara','2471177-56','against','normal')
---    ('camara','2471177-102','against','strong')
---
---  Tambem saiu a flag provisional: a politica tem 5 votacoes, todas de marco
---  temporal, e o eixo esta fechado.
+--  18/08/2026: DES-INVERTIDA e renomeada. Era politica invertida (stances
+--  'against'); nomeando pelo que o Congresso de fato votou, SIM apoia o marco
+--  temporal e some a explicacao de inversao da pagina.
+--   * SAIU a 345311-279 ("Mantido o texto", 290x142): auditoria via
+--     descUltimaAberturaVotacao mostrou que e o DTQ 4 do bloco UNIAO sobre o
+--     par. 4 do art. 16 do substitutivo (Uniao retomar terra ja demarcada se
+--     os "tracos culturais" da comunidade mudarem). Eixo proprio, nao e marco
+--     temporal. Candidata a politica futura.
+--  30/07/2026: o PL 4497/2024 ("PL da Grilagem") ja havia sido retirado: e
+--  titulacao de terra em faixa de fronteira, nao demarcacao indigena. Segue na
+--  politica de reforma agraria ('2471177-56' e '2471177-102').
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Demarcação de terras indígenas';
+DELETE FROM policy WHERE name = 'Marco temporal para terras indígenas';
+DELETE FROM policy WHERE name = 'Demarcação de terras indígenas';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Demarcação de terras indígenas',
-    'Defesa dos direitos territoriais dos povos indígenas: CONTRA o Marco Temporal, a tese de que só há direito à terra ocupada em 5 de outubro de 1988. Score alto = defende os direitos indígenas. Cobre as duas casas: PL 490/2007 (Câmara), PL 2903/2023 e PEC 48/2023 (Senado).',
+    'Marco temporal para terras indígenas',
+    'Instituir o marco temporal: só tem direito à terra indígena quem a ocupava em 5 de outubro de 1988. A FAVOR do PL 490/2007 (Câmara), do PL 2903/2023 e da PEC 48/2023 (Senado). Votar SIM apoia o marco temporal.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('camara','345311-270','against','strong'),  -- PL 490/2007 Marco Temporal (Câmara)
-  ('camara','345311-279','against','normal'),  -- PL 490/2007 destaque
-  ('senado','6756','against','strong'),        -- PL 2903/2023 Marco Temporal (Senado, 43x21)
-  ('senado','7032','against','strong'),        -- PEC 48/2023 1º turno (52x14)
-  ('senado','7033','against','normal')         -- PEC 48/2023 2º turno (52x15)
+  ('camara','345311-270','for','strong'),  -- PL 490/2007: merito do substitutivo (283x155)
+  ('senado','6756','for','strong'),        -- PL 2903/2023: merito (43x21)
+  ('senado','7032','for','strong'),        -- PEC 48/2023: 1º turno (52x14)
+  ('senado','7033','for','normal')         -- PEC 48/2023: 2º turno (52x15)
 ) AS v(house, ext, stance, strength) ON TRUE
 JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
@@ -521,7 +521,7 @@ UPDATE policy SET quiz_hook = CASE name
  WHEN 'Investimento na educação pública' THEN 'Define quanto dinheiro chega à escola pública e à universidade federal, e se essa verba fica protegida quando o governo precisa cortar gastos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Define o que a empresa deve à trabalhadora: mesmo salário do colega homem na mesma função e licença nos dias de menstruação incapacitante.'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'O licenciamento é a análise que decide se uma obra pode sair do papel, e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado.'
- WHEN 'Demarcação de terras indígenas' THEN 'Decide quem fica com terras em disputa no interior do país: estabelece a regra que define se uma área vira terra indígena ou continua como está.'
+ WHEN 'Marco temporal para terras indígenas' THEN 'O marco temporal decide quem tem direito de reivindicar terra indígena: só quem já estava na área em 5 de outubro de 1988, data da nova Constituição.'
  WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana e quanto entra no seu FGTS e no INSS.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023.'
@@ -541,7 +541,7 @@ UPDATE policy SET side_a_title = CASE name
  WHEN 'Investimento na educação pública' THEN 'Priorizar a verba da educação'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Direito básico, não benefício'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'A demora também cobra caro'
- WHEN 'Demarcação de terras indígenas' THEN 'Tem que considerar quem foi expulso'
+ WHEN 'Marco temporal para terras indígenas' THEN 'Uma data encerra a disputa'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'A CLT é o piso, não o teto'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Corrigir penas desproporcionais'
@@ -561,7 +561,7 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Investimento na educação pública' THEN 'escola e universidade públicas dependem de dinheiro garantido; acredito que mais estudo vira também mais renda, mais saúde e menos violência no futuro'
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
- WHEN 'Demarcação de terras indígenas' THEN 'comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
+ WHEN 'Marco temporal para terras indígenas' THEN 'acho que com uma data definida cada um sabe o que é seu, e a disputa acaba'
  WHEN 'Políticas de igualdade racial' THEN 'séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'sem mínimo garantido em lei, a negociação vira imposição de quem tem mais poder'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
@@ -581,7 +581,7 @@ UPDATE policy SET side_b_title = CASE name
  WHEN 'Investimento na educação pública' THEN 'Gasto protegido por lei aperta todo o resto'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'Melhor demorar do que remediar'
- WHEN 'Demarcação de terras indígenas' THEN 'Uma data encerra a disputa'
+ WHEN 'Marco temporal para terras indígenas' THEN 'Tem que considerar quem foi expulso'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Deixar empresa e trabalhador negociarem'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Manter as penas como foram fixadas'
@@ -601,7 +601,7 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Investimento na educação pública' THEN 'acho que o governo eleito deve poder decidir onde o dinheiro é mais necessário'
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
- WHEN 'Demarcação de terras indígenas' THEN 'sem data, qualquer área pode ser reivindicada e ninguém tem segurança sobre o próprio título'
+ WHEN 'Marco temporal para terras indígenas' THEN 'acredito que comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
  WHEN 'Políticas de igualdade racial' THEN 'política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato'
@@ -629,9 +629,7 @@ Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais se
  WHEN 'Investimento na educação pública' THEN 'Essas votações protegeram o dinheiro da educação: o Fundeb (professor e merenda) virou permanente, universidades saíram do teto de gastos, e foi criada uma poupança para o aluno pobre terminar os estudos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Mulheres e homens que fazem o mesmo trabalho nem sempre recebem o mesmo salário. Estas votações tratam de duas obrigações que a lei pode impor à empresa: pagar igual por função igual, com transparência salarial, e dar três dias de licença por mês a quem comprove sintomas graves de menstruação. Para quem defende, salário igual e afastamento por saúde não são favor; para quem critica, empresa e empregada resolvem melhor caso a caso.'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado. Esta política simplificou essa análise: criou a licença por autodeclaração, em que o empreendedor diz que cumpre as exigências, tirou regras mais duras de mineração de grande porte e abriu um caminho acelerado para obras estratégicas. Quem votou a favor diz que obra parada também cobra um preço; quem votou contra lembra que as barragens de Mariana e Brumadinho não eram classificadas como de grande impacto.'
- WHEN 'Demarcação de terras indígenas' THEN 'A Constituição garante aos indígenas as terras que ocupam tradicionalmente, mas a disputa é sobre o que “tradicionalmente” quer dizer.
-A tese em jogo é o marco temporal: só teria direito à terra quem estivesse nela em 5 de outubro de 1988. O Congresso aprovou essa tese por lei e depois a escreveu na Constituição. Como as propostas caminham contra a demarcação, aqui apoiar a política é votar NÃO.
-Para quem defende, comunidade removida à força antes de 1988 não deveria perder o direito; para quem critica, sem data qualquer área pode ser reivindicada e ninguém tem segurança sobre o próprio título.'
+ WHEN 'Marco temporal para terras indígenas' THEN 'A Constituição garante aos indígenas as terras que ocupam tradicionalmente, mas a disputa é sobre o que “tradicionalmente” quer dizer. O marco temporal fixa uma data: só teria direito quem estivesse na terra em 5 de outubro de 1988. Para quem defende, uma data acaba com a insegurança sobre quem tem direito a quê; para quem critica, ignora que muitas comunidades foram expulsas à força antes de 1988.'
  WHEN 'Políticas de igualdade racial' THEN 'Esta política reúne cinco decisões sobre desigualdade racial: injúria racial tratada como crime de racismo, cadastro de clubes de futebol punidos, 30% das vagas em concursos federais reservadas a pessoas negras, indígenas e quilombolas, e o 20 de novembro como feriado nacional. A quinta funciona ao contrário: a PEC 9/2023 afrouxou a punição a partidos que não bancaram candidaturas negras, e nessa apoiar é votar NÃO.
 Para quem defende, séculos de desigualdade não acabam sozinhos; para quem critica, política que classifica por raça oficializa uma divisão que não deveria existir.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Carteira assinada significa ter direitos garantidos por lei, que não dependem de negociação, e estas votações tratam de quanto esse piso vale.
@@ -702,11 +700,12 @@ Seis são do PL 2159/2021, que reescreveu a lei geral do licenciamento e ficou c
 A sétima é da MPV 1308/2025, que criou o licenciamento especial para empreendimentos estratégicos. A votação registrada é o destaque em que o plenário decidiu manter o artigo sobre obras de rodovia. Foi a única votação nominal daquela medida provisória, porque o mérito foi aprovado de forma simbólica.
 Ficaram de fora a redação final e os requerimentos de procedimento, que não decidem o conteúdo, e as votações de 2021, da legislatura anterior.
 O PL 2159/2021 virou a Lei 15.190/2025 e a MPV 1308/2025 virou a Lei 15.300/2025. Em novembro de 2025 o Congresso derrubou a maior parte dos vetos que o governo tinha posto no texto; essa votação ainda não está no site.'
- WHEN 'Demarcação de terras indígenas' THEN 'São cinco votações, duas na Câmara e três no Senado, e esta é uma política invertida: votar NÃO é que apoia os direitos territoriais indígenas, porque todas as propostas instituem o marco temporal.
-O PL 490/2007 foi o primeiro. Regulamenta o artigo 231 da Constituição, que trata das terras indígenas, e fixa o marco temporal. A Câmara o aprovou em maio de 2023 por 283 a 155.
-No Senado, a mesma matéria tramitou como PL 2903/2023 e foi aprovada em setembro de 2023 por 43 a 21. Pouco antes, o Supremo Tribunal Federal havia rejeitado a tese do marco temporal.
-A resposta do Congresso foi a PEC 48/2023, que escreve o marco temporal diretamente na Constituição, e não mais em lei ordinária. O Senado a aprovou nos dois turnos em dezembro de 2025.
-Nenhuma das cinco votações foi quase unânime: todas separam bem os parlamentares, com maiorias entre 65% e 79%.'
+ WHEN 'Marco temporal para terras indígenas' THEN 'São quatro votações: uma na Câmara e três no Senado. Votar SIM apoia o marco temporal.
+O PL 490/2007 regulamenta o artigo 231 da Constituição, que trata das terras indígenas, e fixa o marco temporal. A Câmara aprovou o substitutivo em maio de 2023 por 283 a 155; é a votação decisiva desta política.
+No Senado, a mesma tese tramitou como PL 2903/2023 e foi aprovada em setembro de 2023 por 43 a 21, poucos dias depois de o Supremo Tribunal Federal rejeitar essa mesma tese em julgamento.
+A resposta do Congresso foi a PEC 48/2023, que escreve o marco temporal direto na Constituição, e não mais em lei ordinária. O Senado aprovou os dois turnos em dezembro de 2025.
+Ficou de fora um destaque da Câmara sobre outro trecho do mesmo substitutivo, que permite à União retomar terra indígena já demarcada se os “traços culturais” da comunidade mudarem com o tempo: é um mecanismo diferente do marco temporal, tratado à parte.
+Nenhuma das quatro votações foi quase unânime: as maiorias ficaram entre 65% e 79%.'
  WHEN 'Políticas de igualdade racial' THEN 'São cinco votações, todas na Câmara. Em quatro delas votar SIM apoia a política; em uma, votar NÃO.
 O PL 4566/2021 equiparou a injúria racial ao crime de racismo, com pena maior, e previu suspensão de direitos quando o racismo ocorre em atividade esportiva. Foi aprovado por 358 a 17: quase unânime, e por isso entra com peso reduzido.
 O PL 3268/2021 declarou o 20 de novembro feriado nacional de Zumbi e da Consciência Negra. O PL 1958/2021 reservou 30% das vagas em concursos públicos federais a pessoas pretas, pardas, indígenas e quilombolas, e é a votação decisiva desta política. O PL 1069/2025 cria a “Lista Suja do Racismo no Futebol”, cadastro de clubes e entidades punidos por racismo.
