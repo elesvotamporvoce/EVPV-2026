@@ -223,22 +223,37 @@ JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
 --  Políticas de igualdade racial
+--
+--  18/08/2026: revisada. Auditoria via descUltimaAberturaVotacao:
+--   * SAIU a PEC 9/2023 ('2352476-149','against','normal'): sinal CRUZADO.
+--     A federacao PT-PCdoB-PV e o PSB orientaram SIM (o substitutivo tambem
+--     impoe aos partidos financiar candidaturas negras); os NAOs misturam
+--     PSOL-REDE (contra a anistia) com NOVO/Oposicao (outros motivos).
+--     Voto com os dois polos trocados nao mede o eixo. Os 2 DVS do PSOL
+--     (2352476-155 e -171) foram 404x23 e 379x23, quase unanimes, nao entram.
+--   * ENTROU a urgencia do PL 1958/2021 ('2462049-9', 272x140): orientacao
+--     limpa no eixo (Governo/PT/PSOL/PSB Sim; PL/NOVO/Oposicao Nao).
+--   * 2487399-57 conferida: DTQ 1 (NOVO) para suprimir "torcedores" do
+--     art. 1 do substitutivo da Lista Suja; manter o texto = alcance maior.
+--   * 1301128-43 (injuria racial): unica nominal da proposicao, 358x17
+--     (vira weak), legislatura anterior (nov/2021), mantida com esse aviso.
+--  Sem inversao: as 5 votacoes sao 'for'.
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Políticas de igualdade racial';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Políticas de igualdade racial',
-    'Promoção da igualdade racial: cota de 30% em concursos públicos para pretos, pardos, indígenas e quilombolas; equiparação da injúria racial ao crime de racismo; feriado nacional da Consciência Negra; "Lista Suja" do racismo no futebol; e CONTRA a anistia aos partidos que descumpriram as cotas de financiamento de candidaturas negras (PEC 9/2023). Score alto = apoia a igualdade racial.',
+    'Promoção da igualdade racial: cota de 30% em concursos públicos para pretos, pardos, indígenas e quilombolas; equiparação da injúria racial ao crime de racismo; feriado nacional da Consciência Negra; e "Lista Suja" do racismo no futebol. Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2439779-55','for','strong'),
-  ('1301128-43','for','strong'),
-  ('2299903-53','for','normal'),
-  ('2487399-57','for','normal'),
-  ('2352476-149','against','normal')
+  ('2462049-9','for','normal'),    -- PL 1958/2021: urgencia das cotas em concursos (272x140)
+  ('2439779-55','for','strong'),   -- PL 1958/2021: substitutivo, cotas 30% (241x94, decisiva)
+  ('1301128-43','for','strong'),   -- injuria racial = racismo (358x17, vira weak; nov/2021)
+  ('2299903-53','for','normal'),   -- PL 3268/2021: feriado Consciencia Negra (286x121)
+  ('2487399-57','for','normal')    -- PL 1069/2025: Lista Suja, DVS "torcedores" mantido (295x120)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -562,7 +577,7 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
  WHEN 'Marco temporal para terras indígenas' THEN 'acho que com uma data definida cada um sabe o que é seu, e a disputa acaba'
- WHEN 'Políticas de igualdade racial' THEN 'séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
+ WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'sem mínimo garantido em lei, a negociação vira imposição de quem tem mais poder'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
  WHEN 'Distribuição e acesso à terra' THEN 'fazenda que desmata ilegalmente ou usa trabalho escravo deveria poder ser desapropriada e virar assentamento'
@@ -602,7 +617,7 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
  WHEN 'Marco temporal para terras indígenas' THEN 'acredito que comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
- WHEN 'Políticas de igualdade racial' THEN 'política que classifica por raça oficializa uma divisão que não deveria existir'
+ WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato'
  WHEN 'Distribuição e acesso à terra' THEN 'propriedade que gera safra e emprego não deveria viver sob risco de desapropriação'
@@ -630,8 +645,7 @@ Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais se
  WHEN 'Igualdade de gênero no trabalho' THEN 'Mulheres e homens que fazem o mesmo trabalho nem sempre recebem o mesmo salário. Estas votações tratam de duas obrigações que a lei pode impor à empresa: pagar igual por função igual, com transparência salarial, e dar três dias de licença por mês a quem comprove sintomas graves de menstruação. Para quem defende, salário igual e afastamento por saúde não são favor; para quem critica, empresa e empregada resolvem melhor caso a caso.'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado. Esta política simplificou essa análise: criou a licença por autodeclaração, em que o empreendedor diz que cumpre as exigências, tirou regras mais duras de mineração de grande porte e abriu um caminho acelerado para obras estratégicas. Quem votou a favor diz que obra parada também cobra um preço; quem votou contra lembra que as barragens de Mariana e Brumadinho não eram classificadas como de grande impacto.'
  WHEN 'Marco temporal para terras indígenas' THEN 'A Constituição garante aos indígenas as terras que ocupam tradicionalmente, mas a disputa é sobre o que “tradicionalmente” quer dizer. O marco temporal fixa uma data: só teria direito quem estivesse na terra em 5 de outubro de 1988. Para quem defende, uma data acaba com a insegurança sobre quem tem direito a quê; para quem critica, ignora que muitas comunidades foram expulsas à força antes de 1988.'
- WHEN 'Políticas de igualdade racial' THEN 'Esta política reúne cinco decisões sobre desigualdade racial: injúria racial tratada como crime de racismo, cadastro de clubes de futebol punidos, 30% das vagas em concursos federais reservadas a pessoas negras, indígenas e quilombolas, e o 20 de novembro como feriado nacional. A quinta funciona ao contrário: a PEC 9/2023 afrouxou a punição a partidos que não bancaram candidaturas negras, e nessa apoiar é votar NÃO.
-Para quem defende, séculos de desigualdade não acabam sozinhos; para quem critica, política que classifica por raça oficializa uma divisão que não deveria existir.'
+ WHEN 'Políticas de igualdade racial' THEN 'Esta política reúne decisões sobre desigualdade racial: injúria racial punida como crime de racismo, 30% das vagas de concursos federais reservadas a pessoas negras, indígenas e quilombolas, o 20 de novembro como feriado nacional e a lista suja de clubes punidos por racismo no futebol. Para quem defende, séculos de desigualdade racial não se corrigem sozinhos; para quem critica, lei que classifica por raça oficializa uma divisão que não deveria existir.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Carteira assinada significa ter direitos garantidos por lei, que não dependem de negociação, e estas votações tratam de quanto esse piso vale.
 De um lado, a redução da jornada máxima na Constituição, ligada ao fim da escala 6x1. Do outro, contratos com FGTS e INSS reduzidos para jovens: custam menos ao empregador, mas o trabalhador acumula menos fundo de garantia e menos aposentadoria. Por isso apoiar é votar SIM na jornada e NÃO nos contratos.
 Para quem defende, sem mínimo em lei a negociação vira imposição de quem tem mais poder; para quem critica, acordo entre as partes se ajusta ao setor e ao porte.'
@@ -706,10 +720,12 @@ No Senado, a mesma tese tramitou como PL 2903/2023 e foi aprovada em setembro de
 A resposta do Congresso foi a PEC 48/2023, que escreve o marco temporal direto na Constituição, e não mais em lei ordinária. O Senado aprovou os dois turnos em dezembro de 2025.
 Ficou de fora um destaque da Câmara sobre outro trecho do mesmo substitutivo, que permite à União retomar terra indígena já demarcada se os “traços culturais” da comunidade mudarem com o tempo: é um mecanismo diferente do marco temporal, tratado à parte.
 Nenhuma das quatro votações foi quase unânime: as maiorias ficaram entre 65% e 79%.'
- WHEN 'Políticas de igualdade racial' THEN 'São cinco votações, todas na Câmara. Em quatro delas votar SIM apoia a política; em uma, votar NÃO.
-O PL 4566/2021 equiparou a injúria racial ao crime de racismo, com pena maior, e previu suspensão de direitos quando o racismo ocorre em atividade esportiva. Foi aprovado por 358 a 17: quase unânime, e por isso entra com peso reduzido.
-O PL 3268/2021 declarou o 20 de novembro feriado nacional de Zumbi e da Consciência Negra. O PL 1958/2021 reservou 30% das vagas em concursos públicos federais a pessoas pretas, pardas, indígenas e quilombolas, e é a votação decisiva desta política. O PL 1069/2025 cria a “Lista Suja do Racismo no Futebol”, cadastro de clubes e entidades punidos por racismo.
-A exceção é a PEC 9/2023, que mudou as sanções aos partidos que não aplicaram o mínimo de recursos em candidaturas negras. Como ela caminha contra a política, aqui apoiar é votar NÃO. A Câmara a aprovou em primeiro turno por 344 a 89.'
+ WHEN 'Políticas de igualdade racial' THEN 'São cinco votações, todas na Câmara. Votar SIM apoia a política.
+O PL 1958/2021 reserva 30% das vagas em concursos públicos federais a pessoas pretas, pardas, indígenas e quilombolas. Aparece duas vezes: no requerimento de urgência, aprovado por 272 a 140, e na aprovação do substitutivo, por 241 a 94, que é a votação decisiva desta política.
+O PL 4566/2021 equiparou a injúria racial ao crime de racismo, com pena maior. Foi aprovado por 358 a 17: quase unânime, e por isso entra com peso reduzido. É a votação mais antiga do conjunto, de novembro de 2021, da legislatura anterior.
+O PL 3268/2021 declarou o 20 de novembro, Dia de Zumbi e da Consciência Negra, feriado nacional. Foi aprovado por 286 a 121.
+O PL 1069/2025 cria a “Lista Suja do Racismo no Futebol”, cadastro de clubes e entidades punidos por racismo. A votação registrada é o destaque que manteve os torcedores no alcance do cadastro, por 295 a 120; o mérito foi aprovado de forma simbólica.
+A PEC 9/2023, que mudou as sanções aos partidos que não aplicaram o mínimo em candidaturas negras, saiu da política: a federação PT-PCdoB-PV e o PSOL votaram em lados opostos, e uma votação com os dois polos trocados não mede este eixo.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'São três votações, todas na Câmara, e a direção muda conforme a proposta.
 A MPV 905/2019 criou o Contrato de Trabalho Verde e Amarelo, com FGTS e contribuição previdenciária reduzidos para jovens sem vínculo anterior. O PL 5496/2013 retomou a mesma ideia, com contrato por prazo determinado para jovens de 16 a 24 anos sem emprego anterior. Nas duas, apoiar os direitos trabalhistas é votar NÃO, e as duas foram aprovadas.
 A PEC 221/2019 vai na direção oposta: reduz a jornada máxima prevista na Constituição. Pela ementa original, de 44 para 36 horas semanais ao longo de dez anos. É a proposta associada ao fim da escala 6x1, e nela apoiar é votar SIM. A Câmara aprovou o primeiro turno em maio de 2026 por 472 a 22.
