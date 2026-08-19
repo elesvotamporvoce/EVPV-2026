@@ -33,14 +33,14 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Igualdade de gênero no trabalho (provisória — em crescimento)
+--  Igualdade de gênero no trabalho
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Igualdade de gênero no trabalho';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Igualdade de gênero no trabalho',
     'Igualdade entre mulheres e homens no mundo do trabalho: igualdade salarial obrigatória (PL 1085/2023) e direitos trabalhistas ligados à maternidade e ao cuidado. Votar SIM apoia a política. Política em crescimento: novas votações serão adicionadas.',
-    true) RETURNING id
+    false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p

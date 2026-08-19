@@ -21,19 +21,34 @@ async function getParties(): Promise<string[]> {
   return [...new Set(siglas)].sort();
 }
 
+// Parametros repetidos (?q=a&q=b) chegam como array; usamos so o primeiro.
+const one = (v: string | string[] | undefined): string | undefined =>
+  Array.isArray(v) ? v[0] : v;
+
+// Escapa curingas do ilike (% e _) para a busca ser literal.
+const likeSafe = (s: string) => s.replace(/[\\%_]/g, "\\$&");
+
 export default async function PessoasPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    q?: string;
-    house?: string;
-    uf?: string;
-    party?: string;
-    mandato?: string;
-    page?: string;
+    q?: string | string[];
+    house?: string | string[];
+    uf?: string | string[];
+    party?: string | string[];
+    mandato?: string | string[];
+    page?: string | string[];
   }>;
 }) {
-  const sp = await searchParams;
+  const spRaw = await searchParams;
+  const sp = {
+    q: one(spRaw.q),
+    house: one(spRaw.house),
+    uf: one(spRaw.uf),
+    party: one(spRaw.party),
+    mandato: one(spRaw.mandato),
+    page: one(spRaw.page),
+  };
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
 
@@ -43,7 +58,7 @@ export default async function PessoasPage({
     .order("name")
     .range(from, from + PAGE_SIZE - 1);
 
-  if (sp.q) query = query.ilike("name", `%${sp.q}%`);
+  if (sp.q) query = query.ilike("name", `%${likeSafe(sp.q)}%`);
   if (sp.house) query = query.eq("house", sp.house);
   if (sp.uf) query = query.eq("uf", sp.uf);
   if (sp.party) query = query.eq("party_sigla", sp.party);

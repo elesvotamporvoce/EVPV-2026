@@ -31,12 +31,22 @@ const SITUACAO_LABEL: Record<string, string> = {
 const norm = (x: string) =>
   x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+// Parametros repetidos (?q=a&q=b) chegam como array; usamos so o primeiro.
+const one = (v: string | string[] | undefined): string | undefined =>
+  Array.isArray(v) ? v[0] : v;
+
 export default async function Eleicoes2026Page({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; uf?: string; casa?: string; partido?: string }>;
+  searchParams: Promise<{
+    q?: string | string[];
+    uf?: string | string[];
+    casa?: string | string[];
+    partido?: string | string[];
+  }>;
 }) {
-  const { q, uf, casa, partido } = await searchParams;
+  const sp = await searchParams;
+  const q = one(sp.q), uf = one(sp.uf), casa = one(sp.casa), partido = one(sp.partido);
   const { data: cand } = await supabase
     .from("candidatura_2026")
     .select(
@@ -69,6 +79,11 @@ export default async function Eleicoes2026Page({
   }
   const candBy = new Map(candRows.map((c) => [c.person_id, c]));
 
+  // Opcoes dos filtros vem da lista COMPLETA (antes de filtrar), para o
+  // usuario poder trocar de partido sem precisar limpar o filtro atual.
+  const ufsDisponiveis = [...new Set(candRows.map((c) => c.uf).filter(Boolean))].sort();
+  const partidos = [...new Set(people.map((p) => p.party_sigla).filter(Boolean))].sort();
+
   // Filtros (aplicados em memoria: a lista e pequena)
   people = people.filter((p) => {
     const c = candBy.get(p.id);
@@ -78,8 +93,6 @@ export default async function Eleicoes2026Page({
     if (partido && p.party_sigla !== partido) return false;
     return true;
   });
-  const ufsDisponiveis = [...new Set(candRows.map((c) => c.uf).filter(Boolean))].sort();
-  const partidos = [...new Set(people.map((p) => p.party_sigla).filter(Boolean))].sort();
 
   // Mais procurados que concorrem
   const { data: hf } = await supabase

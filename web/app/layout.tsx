@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.elesvotamporvoce.org"),
   title: {
     default: "Eles Votam por Você: como seu deputado e senador votam",
     template: "%s · Eles Votam por Você",
