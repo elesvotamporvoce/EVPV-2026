@@ -199,6 +199,10 @@ JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 --     par. 4 do art. 16 do substitutivo (Uniao retomar terra ja demarcada se
 --     os "tracos culturais" da comunidade mudarem). Eixo proprio, nao e marco
 --     temporal. Candidata a politica futura.
+--   * 19/08/2026: ENTROU a 345311-276 (DTQ 3 PSOL-REDE, DVS do art. 4 do
+--     substitutivo, O artigo que define o marco temporal; mantido 288x148).
+--     Corrige efeito colateral da remocao da -279: com 1 so votacao na
+--     Camara, MIN_ATTENDED=2 deixava TODOS os deputados sem score.
 --  30/07/2026: o PL 4497/2024 ("PL da Grilagem") ja havia sido retirado: e
 --  titulacao de terra em faixa de fronteira, nao demarcacao indigena. Segue na
 --  politica de reforma agraria ('2471177-56' e '2471177-102').
@@ -215,6 +219,7 @@ INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('camara','345311-270','for','strong'),  -- PL 490/2007: merito do substitutivo (283x155)
+  ('camara','345311-276','for','normal'),  -- DTQ 3 PSOL: art. 4 (o marco temporal) mantido (288x148)
   ('senado','6756','for','strong'),        -- PL 2903/2023: merito (43x21)
   ('senado','7032','for','strong'),        -- PEC 48/2023: 1º turno (52x14)
   ('senado','7033','for','normal')         -- PEC 48/2023: 2º turno (52x15)
@@ -744,12 +749,12 @@ Seis são do PL 2159/2021, que reescreveu a lei geral do licenciamento e ficou c
 A sétima é da MPV 1308/2025, que criou o licenciamento especial para empreendimentos estratégicos. A votação registrada é o destaque em que o plenário decidiu manter o artigo sobre obras de rodovia. Foi a única votação nominal daquela medida provisória, porque o mérito foi aprovado de forma simbólica.
 Ficaram de fora a redação final e os requerimentos de procedimento, que não decidem o conteúdo, e as votações de 2021, da legislatura anterior.
 O PL 2159/2021 virou a Lei 15.190/2025 e a MPV 1308/2025 virou a Lei 15.300/2025. Em novembro de 2025 o Congresso derrubou a maior parte dos vetos que o governo tinha posto no texto; essa votação ainda não está no site.'
- WHEN 'Marco temporal para terras indígenas' THEN 'São quatro votações: uma na Câmara e três no Senado. Votar SIM apoia o marco temporal.
-O PL 490/2007 regulamenta o artigo 231 da Constituição, que trata das terras indígenas, e fixa o marco temporal. A Câmara aprovou o substitutivo em maio de 2023 por 283 a 155; é a votação decisiva desta política.
+ WHEN 'Marco temporal para terras indígenas' THEN 'São cinco votações: duas na Câmara e três no Senado. Votar SIM apoia o marco temporal.
+O PL 490/2007 regulamenta o artigo 231 da Constituição, que trata das terras indígenas, e fixa o marco temporal. A Câmara aprovou o substitutivo em maio de 2023 por 283 a 155, a votação decisiva desta política, e em seguida manteve, por 288 a 148, o artigo que define o próprio marco temporal, contra um destaque que queria suprimi-lo.
 No Senado, a mesma tese tramitou como PL 2903/2023 e foi aprovada em setembro de 2023 por 43 a 21, poucos dias depois de o Supremo Tribunal Federal rejeitar essa mesma tese em julgamento.
 A resposta do Congresso foi a PEC 48/2023, que escreve o marco temporal direto na Constituição, e não mais em lei ordinária. O Senado aprovou os dois turnos em dezembro de 2025.
 Ficou de fora um destaque da Câmara sobre outro trecho do mesmo substitutivo, que permite à União retomar terra indígena já demarcada se os “traços culturais” da comunidade mudarem com o tempo: é um mecanismo diferente do marco temporal, tratado à parte.
-Nenhuma das quatro votações foi quase unânime: as maiorias ficaram entre 65% e 79%.'
+Nenhuma das cinco votações foi quase unânime: as maiorias ficaram entre 65% e 79%.'
  WHEN 'Políticas de igualdade racial' THEN 'São cinco votações, todas na Câmara. Votar SIM apoia a política.
 O PL 1958/2021 reserva 30% das vagas em concursos públicos federais a pessoas pretas, pardas, indígenas e quilombolas. Aparece duas vezes: no requerimento de urgência, aprovado por 272 a 140, e na aprovação do substitutivo, por 241 a 94, que é a votação decisiva desta política.
 O PL 4566/2021 equiparou a injúria racial ao crime de racismo, com pena maior. Foi aprovado por 358 a 17: quase unânime, e por isso entra com peso reduzido. É a votação mais antiga do conjunto, de novembro de 2021, da legislatura anterior.
