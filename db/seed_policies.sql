@@ -72,7 +72,8 @@ SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('2238434-80','for','normal'),    -- PL 528/2020 Combustivel do Futuro (merito; 429x19, vira weak)
   ('2269745-84','against','normal'),-- Paten: manter gas natural = contra a politica (225x187)
-  ('1548579-194','for','strong')    -- PL 182/2024 mercado de carbono, texto final (336x38)
+  ('1548579-126','for','normal'),   -- mercado de carbono: aprovacao na Camara, dez/2023 (299x103) [auditoria 19/08/2026]
+  ('1548579-194','for','strong')    -- PL 182/2024 mercado de carbono, texto final do Senado (336x38)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -170,10 +171,13 @@ INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('camara','2194899-103','for','strong'),  -- PEC 24/2019: 1º turno do substitutivo (principal)
+  ('camara','2194899-137','for','normal'),  -- PEC 24/2019: 2º turno (331x163) [auditoria 19/08/2026]
   ('camara','2194899-125','for','normal'),  -- PEC 24/2019 educação fora do teto (destaque)
   ('camara','2541109-38','for','strong'),   -- PLP 163/2025: aprovacao principal na Camara
   ('camara','2541109-45','for','normal'),   -- PLP 163/2025 fora dos limites fiscais (destaque)
+  ('camara','2541109-88','for','normal'),   -- PLP 163/2025: Substitutivo do Senado (320x109) [auditoria 19/08/2026]
   ('camara','1198512-250','for','strong'),  -- FUNDEB permanente: 1º turno do substitutivo (principal)
+  ('camara','1198512-272','for','normal'),  -- FUNDEB: 2º turno (492x6, vira weak) [auditoria 19/08/2026]
   ('camara','1198512-279','for','normal'),  -- PEC 15/2015 FUNDEB permanente (destaque)
   -- REMOVIDA em 30/07/2026: ('camara','2208007-48','for','normal') -- PEC 96/2019
   --   Votacao da CCJC, nao do plenario: so 52 deputados podiam votar, e os outros
@@ -374,28 +378,38 @@ WITH p AS (
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2483495-52','for','strong'),   -- PL 363/2025 Aldir Blanc permanente
-  ('2157806-137','for','normal')   -- PL 8889/2017 lei do streaming (CAvD)
+  ('2483495-52','for','strong'),   -- PL 363/2025 Aldir Blanc permanente (278x111, decisiva)
+  ('2483495-56','for','normal'),   -- Aldir Blanc: DTQ 1 NOVO, texto mantido (266x113) [auditoria 19/08/2026]
+  ('2157806-137','for','normal'),  -- PL 8889/2017 lei do streaming, subemenda (330x118)
+  ('2157806-168','for','normal')   -- streaming: Emenda Aglutinativa 1 (325x94) [auditoria 19/08/2026]
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Distribuição e acesso à terra
+--  Proteção da propriedade rural (ex-"Distribuição e acesso à terra")
+--
+--  19/08/2026: DES-INVERTIDA e renomeada (era a ultima politica invertida do
+--  site). Mesma regra da P5/P6: nomear pelo que o Congresso de fato votou;
+--  as 4 votacoes viram 'for' e SIM passa a apoiar a politica.
+--  Auditoria: sinais e orientacoes conferidos (PT/Governo/PSOL orientaram Nao
+--  nos meritos; PL/NOVO/Oposicao Sim). Destaques nominais das mesmas
+--  proposicoes NAO entraram (decisao D6: empilhamento; reavaliar depois).
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Distribuição e acesso à terra';
+DELETE FROM policy WHERE name = 'Proteção da propriedade rural';
+DELETE FROM policy WHERE name = 'Distribuição e acesso à terra';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Distribuição e acesso à terra',
-    'Defesa da reforma agrária e do acesso à terra: CONTRA a proibição de desapropriar terras produtivas (PL 4357/2023), CONTRA a regularização de registros sobre terras públicas em faixa de fronteira, inclusive sobrepostos a terras indígenas em demarcação (PL 4497/2024, o "PL da Grilagem", vetado), e CONTRA a punição de famílias que ocupam terras (PL 709/2023). Score alto = defende a reforma agrária.',
+    'Proteção da propriedade rural',
+    'Proteção da propriedade rural: A FAVOR de proibir a desapropriação do imóvel produtivo (PL 4357/2023), de punir ocupações de terra (PL 709/2023) e de validar registros antigos em faixa de fronteira (PL 4497/2024, o "PL da Grilagem"). Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2386051-93','against','strong'),  -- PL 4357/2023 proibe desapropriar terra produtiva
-  ('2471177-56','against','normal'),  -- PL 4497/2024 "PL da Grilagem" (aprovacao na Camara)
-  ('2471177-102','against','strong'), -- PL 4497/2024: aprovacao final do Substitutivo do Senado (dez/2025)
-  ('2349493-82','against','normal')   -- PL 709/2023 pune ocupacoes
+  ('2349493-82','for','normal'),   -- PL 709/2023: pune ocupacoes (336x120, mai/2024)
+  ('2471177-56','for','normal'),   -- PL 4497/2024 "PL da Grilagem": aprovacao na Camara (328x100)
+  ('2386051-93','for','strong'),   -- PL 4357/2023: proibe desapropriar imovel produtivo (287x113, decisiva)
+  ('2471177-102','for','strong')   -- PL 4497/2024: Substitutivo do Senado (310x115, dez/2025)
 ) AS v(ext, stance, strength) ON TRUE
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
@@ -449,8 +463,9 @@ WITH p AS (
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
+  ('2114626-17','for','normal'),  -- urgencia do marco dos jogos, dez/2021 (293x138) [auditoria 19/08/2026]
   ('15460-165','for','strong'),   -- aprovação do substitutivo (246x202)
-  ('15460-179','for','normal')    -- texto mantido (234x175)
+  ('15460-179','for','normal')    -- DTQ 14 PCdoB: blindagem tributaria do setor mantida (234x175)
   -- NOTA: o PL 3626/2023 (Bets) foi retirado desta politica: regulamentar apostas
   -- online nao equivale a apoiar a legalizacao de cassinos e bingos, e quem e
   -- contra o jogo pode votar a favor de regular o que ja existe. Candidato a
@@ -459,13 +474,15 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Reforma tributária do consumo (PEC 45/2019 — as duas casas)
+--  Unificação dos impostos do consumo (ex-"Reforma tributária do consumo")
+--  Renomeada em 19/08/2026 na revisão de textos. PEC 45/2019, as duas casas.
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Reforma tributária do consumo';
+DELETE FROM policy WHERE name = 'Unificação dos impostos do consumo';
+DELETE FROM policy WHERE name = 'Reforma tributária do consumo';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Reforma tributária do consumo',
-    'Posição sobre a reforma tributária do consumo (PEC 45/2019, promulgada como Emenda Constitucional 132/2023): substitui PIS, Cofins, IPI, ICMS e ISS pelo IVA dual (CBS e IBS), com cashback para famílias de baixa renda e imposto seletivo. Inclui os votos da Câmara e do Senado. Score alto = a favor da reforma.',
+    'Unificação dos impostos do consumo',
+    'Posição sobre a reforma tributária do consumo (PEC 45/2019, promulgada como Emenda Constitucional 132/2023): substitui PIS, Cofins, IPI, ICMS e ISS por um imposto em duas partes (CBS e IBS), com cashback para famílias de baixa renda e imposto seletivo. Inclui os votos da Câmara e do Senado. Votar SIM apoia a reforma.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -519,7 +536,9 @@ SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
   ('2252295-120','for','strong'),    -- PL 2583/2020: aprovacao do substitutivo (352x63)
   ('2252295-130','for','normal'),    -- PL 2583/2020: DVS art. 26, licitacao exclusiva mantida (316x110)
-  ('2252295-110','against','normal'),-- PL 2583/2020: retirada de pauta rejeitada (55x212) -> SIM = obstruir
+  -- REMOVIDA em 19/08/2026: ('2252295-110','against','normal') retirada de pauta
+  --   rejeitada (55x212). Obstrucao procedimental; o site nao conta esse tipo
+  --   de votacao em nenhuma outra politica (Governo nem orientou; 267 votantes).
   ('2589628-8','for','normal'),      -- PL 424/2015: urgencia (286x111)
   ('947810-85','for','normal'),      -- PL 424/2015: DVS, palavra "publica" mantida (285x106)
   ('2601223-8','for','normal')       -- PL 68/2026: urgencia da quebra de patente (337x19) -> vira weak
@@ -577,13 +596,13 @@ UPDATE policy SET quiz_hook = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana (escala 6x1) e quanto entra no seu FGTS e no INSS.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023.'
- WHEN 'Distribuição e acesso à terra' THEN 'Trata de uma disputa antiga no campo: quem tem muita terra e não a usa direito pode perdê-la, e quem não tem nenhuma pode receber.'
+ WHEN 'Proteção da propriedade rural' THEN 'Trata de uma disputa antiga no campo: quem tem muita terra e não a usa direito pode perdê-la, e quem não tem nenhuma pode receber.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Define se deputado e senador respondem a processo criminal como qualquer cidadão, ou se dependem da autorização dos colegas para serem julgados.'
  WHEN 'Política nacional de cultura' THEN 'Decide se shows, cinema, teatro e ponto de cultura da sua cidade têm verba previsível, e se o streaming paga uma contribuição que financia produção brasileira.'
  WHEN 'Isenção de impostos para igrejas' THEN 'Igreja já não paga imposto sobre templo, patrimônio e renda. A proposta estende a isenção para tudo que ela compra.'
  WHEN 'Legalização dos jogos de azar' THEN 'Decide se cassino, bingo e jogo do bicho passam a funcionar dentro da lei, com regra e imposto, em vez de na clandestinidade.'
- WHEN 'Reforma tributária do consumo' THEN 'Muda o imposto embutido no preço de tudo que você compra: cinco tributos viram um só, e quem ganha pouco recebe parte de volta do valor.'
- WHEN 'Conservação da biodiversidade' THEN 'Define o que pode e o que não pode em área de natureza protegida, do bioma marinho às rotas de aves migratórias.'
+ WHEN 'Unificação dos impostos do consumo' THEN 'Cinco impostos escondidos no preço de tudo viram um só, com devolução de parte do valor para quem ganha pouco. É a maior mudança de impostos em décadas.'
+ WHEN 'Conservação da biodiversidade' THEN 'O peixe do mercado, a água da torneira e o turismo da praia dependem da natureza em pé. Estas votações decidem o quanto ela fica protegida.'
  WHEN 'Abastecimento público de medicamentos' THEN 'Mexe no preço e na falta de remédio no posto: produção nacional, compra direta do produtor público e quebra de patente.'
  ELSE quiz_hook END;
 
@@ -597,19 +616,19 @@ UPDATE policy SET side_a_title = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Direito não se negocia para baixo'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Corrigir penas desproporcionais'
- WHEN 'Distribuição e acesso à terra' THEN 'Terra tem que cumprir função social'
+ WHEN 'Proteção da propriedade rural' THEN 'Quem produz não pode perder a terra'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político também é perseguido'
- WHEN 'Política nacional de cultura' THEN 'Cultura precisa de verba previsível'
- WHEN 'Isenção de impostos para igrejas' THEN 'Igreja faz o que o Estado não faz'
+ WHEN 'Política nacional de cultura' THEN 'Sem verba fixa, a cultura some do interior'
+ WHEN 'Isenção de impostos para igrejas' THEN 'Menos imposto, mais ação social'
  WHEN 'Legalização dos jogos de azar' THEN 'Já existe, melhor regular'
- WHEN 'Reforma tributária do consumo' THEN 'Um imposto só é mais simples'
+ WHEN 'Unificação dos impostos do consumo' THEN 'Chega de imposto escondido'
  WHEN 'Conservação da biodiversidade' THEN 'Sem conservar não há do que viver'
  WHEN 'Abastecimento público de medicamentos' THEN 'Remédio caro demais é remédio que falta'
  ELSE side_a_title END;
 
 UPDATE policy SET side_a_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
- WHEN 'Redução das emissões de carbono' THEN 'poluir de graça sai caro para todo mundo: o risco é mais seca, enchente e mudança do clima'
+ WHEN 'Redução das emissões de carbono' THEN 'acho que poluir de graça sai caro para todo mundo: o risco é mais seca, enchente e mudança do clima'
  WHEN 'Investimento na educação pública' THEN 'escola e universidade públicas dependem de dinheiro garantido; acredito que mais estudo vira também mais renda, mais saúde e menos violência no futuro'
  WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
@@ -617,13 +636,13 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que jornada e aposentadoria são garantias mínimas, não moeda de troca'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
- WHEN 'Distribuição e acesso à terra' THEN 'fazenda que desmata ilegalmente ou usa trabalho escravo deveria poder ser desapropriada e virar assentamento'
- WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'o processo pode ser usado só para tirar do caminho quem incomoda'
- WHEN 'Política nacional de cultura' THEN 'repasse garantido em lei chega a quase todos os municípios, não só aos grandes centros'
- WHEN 'Isenção de impostos para igrejas' THEN 'creche, asilo e comunidade terapêutica atendem gente que o poder público não alcança'
- WHEN 'Legalização dos jogos de azar' THEN 'proibir não acabou com o jogo; só tirou o imposto e a fiscalização'
- WHEN 'Reforma tributária do consumo' THEN 'cinco tributos com regras diferentes viram um, e dá para ver quanto se paga em cada compra'
- WHEN 'Conservação da biodiversidade' THEN 'pesca, água e turismo dependem do que ainda está em pé'
+ WHEN 'Proteção da propriedade rural' THEN 'acredito que propriedade que gera safra e emprego não pode viver sob ameaça de desapropriação'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'acho que o processo pode ser usado só para tirar do caminho quem incomoda'
+ WHEN 'Política nacional de cultura' THEN 'acredito que sem repasse garantido só os grandes centros continuam tendo cultura'
+ WHEN 'Isenção de impostos para igrejas' THEN 'acho que cada real que a igreja não paga em imposto vira atendimento a quem precisa'
+ WHEN 'Legalização dos jogos de azar' THEN 'acho que proibir não acabou com o jogo; só tirou o imposto e a fiscalização'
+ WHEN 'Unificação dos impostos do consumo' THEN 'acredito que ver quanto se paga em cada compra é o primeiro passo para cobrar melhor o governo'
+ WHEN 'Conservação da biodiversidade' THEN 'acredito que pesca, água e turismo dependem do que ainda está em pé'
  WHEN 'Abastecimento público de medicamentos' THEN 'produzir aqui e quebrar patente derruba o preço para quem depende do SUS'
  ELSE side_a_note END;
 
@@ -637,19 +656,19 @@ UPDATE policy SET side_b_title = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Deixar empresa e trabalhador negociarem'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'O recado importa mais que o desconto'
- WHEN 'Distribuição e acesso à terra' THEN 'Quem produz não pode perder a terra'
+ WHEN 'Proteção da propriedade rural' THEN 'Terra tem que cumprir função social'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político não pode ter regra própria'
- WHEN 'Política nacional de cultura' THEN 'Despesa carimbada engessa o orçamento'
+ WHEN 'Política nacional de cultura' THEN 'Cultura se financia com público'
  WHEN 'Isenção de impostos para igrejas' THEN 'Quem não paga joga a conta no resto'
  WHEN 'Legalização dos jogos de azar' THEN 'Legalizar é facilitar o vício'
- WHEN 'Reforma tributária do consumo' THEN 'Alguém vai pagar a diferença'
+ WHEN 'Unificação dos impostos do consumo' THEN 'Alguém vai pagar a diferença'
  WHEN 'Conservação da biodiversidade' THEN 'Regra demais trava quem produz'
  WHEN 'Abastecimento público de medicamentos' THEN 'Sem patente ninguém pesquisa'
  ELSE side_b_title END;
 
 UPDATE policy SET side_b_note = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'não deveria haver medida extra para um gênero e não para o outro'
- WHEN 'Redução das emissões de carbono' THEN 'o custo do carbono entra no preço do combustível, da energia e do frete'
+ WHEN 'Redução das emissões de carbono' THEN 'acredito que o custo do carbono entra no preço do combustível, da energia e do frete'
  WHEN 'Investimento na educação pública' THEN 'acho que o governo eleito deve poder decidir onde o dinheiro é mais necessário'
  WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
@@ -657,13 +676,13 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que reduzir pena de ataque às instituições sinaliza que agir contra a democracia sai barato'
- WHEN 'Distribuição e acesso à terra' THEN 'propriedade que gera safra e emprego não deveria viver sob risco de desapropriação'
- WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'se cometeu crime, responde como qualquer pessoa'
- WHEN 'Política nacional de cultura' THEN 'dinheiro fixado em lei disputa espaço com saúde, segurança e educação a cada ano'
- WHEN 'Isenção de impostos para igrejas' THEN 'cada isenção nova empurra para cima a alíquota que todo mundo paga no mercado'
- WHEN 'Legalização dos jogos de azar' THEN 'quanto mais fácil apostar, mais gente se endivida e mais dinheiro sujo circula'
- WHEN 'Reforma tributária do consumo' THEN 'o setor de serviços tende a pagar mais, e a alíquota final ainda não está fechada'
- WHEN 'Conservação da biodiversidade' THEN 'mais restrição no litoral e em área sensível atinge quem vive de produzir ali'
+ WHEN 'Proteção da propriedade rural' THEN 'acho que fazenda que desmata ilegalmente ou usa trabalho escravo deveria poder virar assentamento'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'acredito que quem cometeu crime deve responder como qualquer pessoa'
+ WHEN 'Política nacional de cultura' THEN 'acho que show, filme e festival devem viver de ingresso pago e patrocínio, não de imposto'
+ WHEN 'Isenção de impostos para igrejas' THEN 'acredito que o imposto que a igreja deixa de pagar aparece no preço que todo mundo paga'
+ WHEN 'Legalização dos jogos de azar' THEN 'acredito que quanto mais fácil apostar, mais gente se endivida e mais dinheiro sujo circula'
+ WHEN 'Unificação dos impostos do consumo' THEN 'acredito que o setor de serviços vai subir os preços, e é o consumidor que paga a conta'
+ WHEN 'Conservação da biodiversidade' THEN 'acho que mais restrição no litoral e em área sensível atinge quem vive de produzir ali'
  WHEN 'Abastecimento público de medicamentos' THEN 'enfraquecer a patente afugenta o investimento que cria o remédio novo'
  ELSE side_b_note END;
 
@@ -675,9 +694,8 @@ UPDATE policy SET side_b_note = CASE name
 UPDATE policy SET impact = CASE name
  WHEN 'Combate à violência contra a mulher' THEN 'A maior parte da violência contra a mulher acontece dentro de casa, e o agressor quase sempre é conhecido. Estas votações tratam do que o Estado faz depois da denúncia: tornozeleira e arma proibida para quem responde por agressão, violência vicária na Lei Maria da Penha, atendimento à mulher indígena na delegacia e um sistema nacional com recursos. Nada cria crime novo: muda a chance de a proteção chegar antes do pior.
 Para quem defende, o período mais perigoso é logo após a denúncia; para quem critica, a lei deveria valer igual para qualquer agressor.'
- WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa, e estas votações decidem se isso passa a ter preço.
-O mecanismo principal é o mercado de carbono: quem emite acima de um limite compra crédito de quem emite menos, e poluir vira custo, que pode chegar ao preço final. O outro pacote trata de combustível: diesel verde, aviação e captura de carbono.
-Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais seca, enchente e mudança do clima; para quem critica, esse custo cai no preço do combustível, da energia e do frete.'
+ WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa, e estas votações decidem se isso passa a ter preço. O mecanismo central é o mercado de carbono: quem emite acima do limite compra crédito de quem emite menos, e poluir vira custo. O outro pacote incentiva combustíveis mais limpos: diesel verde, aviação e captura de carbono.
+Para quem defende, poluir de graça sai caro para todos: mais seca, enchente e mudança do clima; para quem critica, esse custo cai no combustível, na energia e no frete.'
  WHEN 'Investimento na educação pública' THEN 'Essas votações protegeram o dinheiro da educação: o Fundeb (professor e merenda) virou permanente, universidades saíram do teto de gastos, e foi criada uma poupança para o aluno pobre terminar os estudos.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Mulheres e homens que fazem o mesmo trabalho nem sempre recebem o mesmo salário. Estas votações tratam de duas obrigações que a lei pode impor à empresa: pagar igual por função igual, com transparência salarial, e dar três dias de licença por mês a quem comprove sintomas graves de menstruação. Para quem defende, salário igual e afastamento por saúde não são favor; para quem critica, empresa e empregada resolvem melhor caso a caso.'
  WHEN 'Flexibilização do licenciamento ambiental' THEN 'Licenciamento é a análise que decide se uma obra pode sair do papel e o que ela precisa fazer para não poluir o rio, o ar e o bairro ao lado. Esta política simplificou essa análise: criou a licença por autodeclaração, em que o empreendedor diz que cumpre as exigências, tirou regras mais duras de mineração de grande porte e abriu um caminho acelerado para obras estratégicas. Quem votou a favor diz que obra parada também cobra um preço; quem votou contra lembra que as barragens de Mariana e Brumadinho não eram classificadas como de grande impacto.'
@@ -687,30 +705,22 @@ Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais se
 Para quem defende, sem mínimo em lei a negociação vira imposição; para quem critica, acordo entre as partes se ajusta melhor a cada setor.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Em 8 de janeiro de 2023, milhares de pessoas invadiram e depredaram as sedes dos três poderes, e centenas foram condenadas. O projeto nasceu como anistia e mudou no caminho: o texto aprovado não perdoa ninguém, mas reduz penas, proibindo somar as condenações por golpe e por abolição do Estado Democrático e cortando de um a dois terços a pena de quem não liderou nem financiou.
 Para quem defende, mais de quinze anos para quem só entrou na multidão é excessivo; para quem critica, reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato.'
- WHEN 'Política nacional de cultura' THEN 'Boa parte da cultura fora dos grandes centros depende de dinheiro público: o festival da cidade, o grupo de teatro, o ponto de cultura.
-Uma votação torna permanente a Política Aldir Blanc, que repassa recursos federais a estados e municípios: o município pequeno passa a planejar, em vez de depender de edital que aparece ou não. A outra faz o streaming pagar uma contribuição para financiar produção brasileira.
-Para quem defende, repasse garantido em lei chega a quase todos os municípios; para quem critica, dinheiro fixado em lei disputa espaço com saúde, segurança e educação a cada ano.'
- WHEN 'Distribuição e acesso à terra' THEN 'A Constituição diz que a propriedade precisa cumprir função social: quando não cumpre, pode ser desapropriada e destinada a famílias sem terra.
-As quatro votações aqui estreitam esse caminho: uma proíbe desapropriar imóvel produtivo, outra pune quem ocupa propriedade, e duas validam registros sobre terras públicas em faixa de fronteira. Como caminham contra o acesso à terra, aqui apoiar a política é votar NÃO.
-Para quem defende, fazenda que desmata ou usa trabalho escravo deveria poder virar assentamento; para quem critica, propriedade que gera safra e emprego não deveria viver sob risco de desapropriação.'
- WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Hoje é o Supremo que decide se abre processo criminal contra um deputado ou senador, sem pedir licença a ninguém.
-A PEC 3/2021 muda isso: o processo só começaria com autorização da própria Casa, em votação secreta, e o acusado passaria a depender do voto dos colegas para ser julgado. A Câmara aprovou em setembro de 2025; após protestos pelo país, o Senado rejeitou.
-Para quem defende, o processo pode ser usado só para tirar do caminho quem incomoda; para quem critica, quem cometeu crime deve responder como qualquer pessoa.'
- WHEN 'Isenção de impostos para igrejas' THEN 'Igrejas já não pagam imposto sobre templo, patrimônio e renda. A PEC 5/2023 estende essa isenção ao consumo: os tributos embutidos em tudo que compram, de cadeira a obra e serviço. Alcança também creches, comunidades terapêuticas, seminários e conventos ligados a elas.
-O imposto não desaparece, muda de lugar: o que um grupo deixa de pagar tende a aparecer na alíquota dos outros.
-Para quem defende, o dinheiro do fiel já foi tributado e a igreja sustenta creche e asilo que o poder público não alcança; para quem critica, cada isenção nova empurra para cima a alíquota de todo mundo.'
- WHEN 'Legalização dos jogos de azar' THEN 'Cassino, bingo e jogo do bicho são proibidos desde os anos 1940, mas continuam existindo na clandestinidade, sem imposto e sem fiscalização. O PL 442/1991 traz essa atividade para dentro da lei, com regras e cobrança de tributos.
-Na prática nada mudou: a Câmara aprovou em 2022, por margem apertada, e o projeto segue parado no Senado.
-Para quem defende, a atividade já existe e, regulada, gera emprego, turismo e imposto; para quem critica, legalizar amplia o vício e abre porta para lavagem de dinheiro.'
- WHEN 'Reforma tributária do consumo' THEN 'Quase tudo que você compra tem imposto no preço. Até 2023 esse imposto vinha de cinco tributos diferentes, cada um com regra própria.
-A PEC 45/2019 substitui os cinco por um imposto em duas partes, federal e de estados e municípios, cria o cashback, que devolve parte do imposto a famílias de baixa renda, e cobra mais de bebida e cigarro. Produtos tendem a ficar mais baratos; serviços, mais caros.
-Para quem defende, cinco impostos viram um só e a cobrança fica mais simples; para quem critica, serviços tendem a pagar mais e a alíquota final ainda não está fechada.'
- WHEN 'Conservação da biodiversidade' THEN 'Biodiversidade parece assunto distante, mas sustenta o peixe que chega ao mercado, a água da cidade, o inseto que poliniza a lavoura e o turismo do litoral.
-As cinco votações protegem ecossistemas e espécies: a principal é a Lei do Mar, primeira política nacional para o bioma marinho brasileiro; há também um acordo sobre espécies migratórias, uma política de consumo sustentável e o direito de crianças ao contato com a natureza.
-Para quem defende, sem conservar não há pesca, água nem turismo no futuro; para quem critica, regra demais em área sensível trava quem produz ali.'
- WHEN 'Abastecimento público de medicamentos' THEN 'Quando falta remédio no posto, a causa costuma estar longe do balcão: no preço do fabricante, na dependência de fornecedor estrangeiro, ou numa regra de compra que trava o SUS.
-Estas votações tratam disso: incentivo à indústria nacional, compra de hemoderivados direto do produtor público, e a declaração de interesse público do Mounjaro e do Zepbound, passo previsto em lei antes de quebrar a patente.
-Para quem defende, produção nacional e quebra de patente baratearia o remédio; para quem critica, enfraquecer a patente afugenta o investimento em pesquisa.'
+ WHEN 'Política nacional de cultura' THEN 'Os shows da sua cidade, o cinema nacional e os festivais do seu bairro dependem de verba pública para existir. Parte das votações tornou permanente o repasse federal da cultura a estados e municípios; parte obrigou o streaming a contribuir para o cinema brasileiro.
+Quem defende diz que verba previsível leva cultura para além dos grandes centros; quem critica diz que despesa fixada em lei tira espaço de outras prioridades.'
+ WHEN 'Proteção da propriedade rural' THEN 'Pela Constituição, terra mal usada pode ser desapropriada para reforma agrária. O Congresso apertou essa porta: se a fazenda produz, ninguém tira; se tem crime ambiental ou trabalho escravo, só vale depois de condenação final na Justiça; quem ocupa terra perde direitos; e registros antigos de terra pública ficam valendo.
+Um lado diz que quem produz não pode viver com medo de perder a terra; o outro, que a reforma agrária ficou sem caminho e a grilagem foi premiada.'
+ WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Hoje é o Supremo que decide se abre processo criminal contra deputado ou senador, sem pedir licença a ninguém. A PEC 3/2021 mudava isso: o processo só começaria se a própria Câmara ou o próprio Senado autorizasse, em votação secreta. A Câmara aprovou em setembro de 2025; depois de protestos pelo país, o Senado rejeitou.
+Para quem defende, o processo pode ser usado para tirar do caminho quem incomoda; para quem critica, quem cometeu crime responde como qualquer pessoa.'
+ WHEN 'Isenção de impostos para igrejas' THEN 'Igreja não paga imposto sobre o templo, o patrimônio e a renda: isso já é assim desde sempre. A PEC 5/2023 amplia: tira também o imposto de tudo que a igreja compra, da cadeira à obra, incluindo creches, comunidades terapêuticas e seminários ligados a ela. Esse imposto não desaparece: o que a igreja deixa de pagar acaba na conta dos outros.
+Um lado diz que a igreja cuida de quem o Estado esquece; o outro, que isenção de um grupo encarece a vida de todos.'
+ WHEN 'Legalização dos jogos de azar' THEN 'Cassino, bingo e jogo do bicho são proibidos desde os anos 1940, mas nunca deixaram de existir: seguem na clandestinidade, sem imposto e sem fiscalização. O PL 442/1991 traz a atividade para dentro da lei, com regras e tributos. A Câmara aprovou em 2022, pela margem mais apertada de todo o site; o projeto está parado no Senado desde então.
+Para quem defende, regulado, o jogo gera emprego, turismo e imposto; para quem critica, legalizar amplia o vício e abre porta para lavagem de dinheiro.'
+ WHEN 'Unificação dos impostos do consumo' THEN 'O imposto que você paga está escondido no preço de cada compra, espalhado em cinco tributos com regras diferentes. A reforma junta tudo num imposto só, devolve parte do valor para famílias de baixa renda e cobra mais de produtos que fazem mal, como bebida e cigarro.
+Um lado diz que ficou mais simples e transparente; o outro, que serviços vão encarecer e ninguém sabe ainda o tamanho final da conta.'
+ WHEN 'Conservação da biodiversidade' THEN 'Biodiversidade parece assunto distante, mas é o peixe no mercado, a água da cidade, o inseto que poliniza a lavoura e o turismo do litoral. Estas votações protegem ecossistemas: a principal é a Lei do Mar, primeira política nacional para a costa brasileira; há também o acordo de espécies migratórias, o consumo sustentável e o direito das crianças ao contato com a natureza.
+Para quem defende, sem conservar não há pesca, água nem turismo amanhã; para quem critica, regra demais em área sensível trava quem produz.'
+ WHEN 'Abastecimento público de medicamentos' THEN 'Remédio que falta no posto quase sempre tem uma causa distante: o país não produz, a compra trava na burocracia ou a patente segura o preço lá em cima. O Congresso atacou as três frentes: incentivo à fábrica nacional, compra direta do produtor público e o primeiro passo para quebrar a patente do Mounjaro e do Zepbound.
+Para quem defende, produção nacional e quebra de patente barateiam o remédio; para quem critica, enfraquecer a patente afugenta a pesquisa que cria o remédio novo.'
  ELSE impact END;
 
 
@@ -731,15 +741,15 @@ Três decidiram a pressa, não o conteúdo: os requerimentos de urgência do PL 
 Duas foram votações de destaque, quando o plenário decide se mantém um trecho do texto: o PL 2942/2024, que determina o monitoramento eletrônico de agressores, e o PL 3880/2024, que inclui a violência vicária (usar os filhos para atingir a mãe) entre as formas de violência doméstica da Lei Maria da Penha.
 A sexta é o PLP 41/2026, que cria o Sistema Nacional de Enfrentamento da Violência contra Meninas e Mulheres e destina recursos ao combate ao feminicídio. Foi aprovado por 470 a 1.
 Duas dessas votações entram com peso reduzido por terem sido quase unânimes: o PLP 41/2026 e o PL 2942/2024, aprovado por 408 a 13. Quando quase todo mundo vota igual, o voto distingue pouco um parlamentar do outro.'
- WHEN 'Redução das emissões de carbono' THEN 'São quatro votações, todas na Câmara. Votar SIM apoia a política.
-Duas são do PL 182/2024, que instituiu o Sistema Brasileiro de Comércio de Emissões de Gases de Efeito Estufa, o mercado regulado de carbono, hoje Lei 15.042/2024. Ele fixa limites de emissão para grandes emissores e permite que quem fica abaixo do limite venda o excedente a quem passa. A votação de novembro de 2024, que aprovou o texto vindo do Senado, é a decisiva desta política.
-As outras duas são do PL 528/2020, o pacote Combustível do Futuro: mobilidade de baixo carbono, programa nacional de combustível sustentável de aviação, programa de diesel verde e captura e estocagem geológica de dióxido de carbono.
-Uma das votações do PL 528/2020 foi quase unânime, 429 a 19, e por isso entra com peso reduzido.'
- WHEN 'Investimento na educação pública' THEN 'É a política com mais votações: onze, sendo oito na Câmara e três no Senado. Votar SIM apoia mais investimento em todas.
-A PEC 15/2015 tornou o Fundeb permanente na Constituição; antes ele tinha prazo e precisava ser renovado. A PEC 24/2019 excluiu as despesas das instituições federais de ensino dos limites de gasto primário.
-O PLP 243/2023 criou o programa de incentivo à permanência no ensino médio, que deu origem ao Pé-de-Meia, e foi votado nas duas casas. O PLP 153/2024, no Senado, tratou da transferência de saldos do Fundo Nacional de Desenvolvimento da Educação para estados e municípios. O PL 3118/2024 incluiu a assistência estudantil entre as prioridades do Fundo Social.
-O PLP 163/2025 é o mais recente e o mais disputado: exclui despesas com educação e saúde dos limites do arcabouço fiscal. Foi aprovado na Câmara por 296 a 145 e no Senado por 47 a 16.
-Três votações entram com peso reduzido por quase-unanimidade: o primeiro turno da PEC 15/2015, aprovado por 499 a 7, e as duas do Senado que passaram sem nenhum voto contrário.'
+ WHEN 'Redução das emissões de carbono' THEN 'São quatro votações, todas na Câmara, e a direção muda numa delas.
+Duas são do mercado regulado de carbono (PL 2148/2015, aprovado como PL 182/2024 e hoje Lei 15.042/2024), que fixa limites de emissão para grandes emissores e permite vender o excedente a quem emite menos: a aprovação do texto pela Câmara em dezembro de 2023, por 299 a 103, e a votação do texto vindo do Senado em novembro de 2024, por 336 a 38, que é a decisiva desta política.
+A terceira é do PL 528/2020, o pacote Combustível do Futuro: diesel verde, combustível sustentável de aviação e captura de carbono. Foi quase unânime, 429 a 19, e por isso entra com peso reduzido.
+A quarta é invertida: o destaque do PSOL que tentou tirar o gás natural do programa de transição energética (Paten, PL 327/2021). O plenário manteve o gás natural por 225 a 187, e aqui apoiar a política é votar NÃO.'
+ WHEN 'Investimento na educação pública' THEN 'É a política com mais votações: quatorze, sendo onze na Câmara e três no Senado. Votar SIM apoia mais investimento em todas.
+A PEC 15/2015 tornou o Fundeb permanente na Constituição; antes ele tinha prazo e precisava ser renovado. Entram os dois turnos, de julho de 2020, e um destaque. A PEC 24/2019 excluiu as despesas das instituições federais de ensino dos limites de gasto primário, também com dois turnos e um destaque, em dezembro de 2022.
+O PLP 243/2023 criou o programa que deu origem ao Pé-de-Meia e foi votado nas duas casas. O PLP 153/2024, no Senado, tratou da transferência de saldos do Fundo Nacional de Desenvolvimento da Educação para estados e municípios. O PL 3118/2024 incluiu a assistência estudantil entre as prioridades do Fundo Social.
+O PLP 163/2025 é o mais recente e o mais disputado: exclui despesas com educação e saúde dos limites do arcabouço fiscal. Entram a aprovação na Câmara por 296 a 145, um destaque, a votação do texto que voltou do Senado, por 320 a 109, e a aprovação no Senado por 47 a 16.
+Quatro votações entram com peso reduzido por quase-unanimidade: os dois turnos da PEC 15/2015, aprovados por 499 a 7 e 492 a 6, e as duas do Senado que passaram sem nenhum voto contrário.'
  WHEN 'Igualdade de gênero no trabalho' THEN 'São duas votações, ambas na Câmara. Votar SIM apoia a política.
 O PL 1085/2023 é a Lei da Igualdade Salarial: obriga a pagar o mesmo salário a mulheres e homens na mesma função e cria a obrigação de publicar relatórios de transparência salarial. Foi aprovado por 325 a 36 e é a votação decisiva desta política. Virou a Lei 14.611/2023, declarada constitucional por unanimidade pelo STF em maio de 2026.
 A segunda é o requerimento de urgência do PL 1249/2022, que garante três dias consecutivos de licença por mês às trabalhadoras que comprovem sintomas graves associados ao fluxo menstrual. Urgência decide se a matéria vai direto ao plenário: mede disposição de pautar, não posição sobre o conteúdo. No dia seguinte a Câmara aprovou o substitutivo, que reduziu a licença para até dois dias mediante laudo médico, mas essa votação foi simbólica e por isso não entra aqui.
@@ -771,15 +781,15 @@ No Senado, o projeto foi aprovado em 17 de dezembro de 2025, por 48 a 25. Como �
 O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria: a anistia caiu no substitutivo, e o texto aprovado passou a apenas reduzir penas. Foi vetado integralmente pela Presidência e promulgado como Lei 15.402/2026 quando o Congresso derrubou o veto; a votação da derrubada é de sessão conjunta e não está na base.
 Ficaram de fora três destaques votados de madrugada com o plenário esvaziado, cujos placares não refletem a disputa real, além da redação final e dos requerimentos de procedimento.
 Nenhuma das cinco votações foi quase unânime: as maiorias ficaram entre 62% e 66%.'
- WHEN 'Política nacional de cultura' THEN 'São duas votações, ambas na Câmara. Votar SIM apoia a política.
-O PL 363/2025 altera a lei que instituiu a Política Nacional Aldir Blanc de Fomento à Cultura, tornando permanente o repasse de recursos federais a estados e municípios. É a votação decisiva desta política, aprovada por 278 a 111.
-O PL 8889/2017 regulamenta a provisão de conteúdo audiovisual por demanda, o streaming. Cria obrigações para as plataformas que operam no país, incluindo contribuição destinada ao financiamento do audiovisual brasileiro. Foi aprovado por 330 a 118.
-A base é estreita, com apenas duas votações, mas as duas decidiram o mérito da matéria e nenhuma foi quase unânime.'
- WHEN 'Distribuição e acesso à terra' THEN 'São quatro votações, todas na Câmara, e esta é uma política invertida: votar NÃO é que apoia a distribuição e o acesso à terra, porque as quatro propostas caminham no sentido oposto. Todas foram aprovadas.
-O PL 709/2023 altera a Lei 8.629/1993, a lei da reforma agrária, para criar impedimentos a quem ocupa ou invade propriedades.
-O PL 4357/2023 altera o artigo 2º da mesma lei, que define o que pode ser desapropriado, para proteger o imóvel produtivo da desapropriação por interesse social. É a votação de maior peso desta política.
-O PL 4497/2024 aparece duas vezes: na aprovação pela Câmara, em junho de 2025, e na aprovação do texto que voltou do Senado, em dezembro de 2025. Ele ratifica registros imobiliários decorrentes de alienações e concessões de terras públicas em faixa de fronteira, e ficou conhecido como “PL da Grilagem”.
-Nenhuma das quatro foi quase unânime: as maiorias ficaram entre 72% e 77%.'
+ WHEN 'Política nacional de cultura' THEN 'São quatro votações, todas na Câmara. Votar SIM apoia a política.
+Duas são do PL 363/2025, que torna permanente o repasse da Política Nacional Aldir Blanc de Fomento à Cultura a estados e municípios: a aprovação do substitutivo, por 278 a 111, que é a votação decisiva desta política, e o destaque que manteve o texto contra uma supressão pedida pelo NOVO, por 266 a 113.
+As outras duas são do PL 8889/2017, que regulamenta o streaming e cria a contribuição destinada ao financiamento do audiovisual brasileiro: a aprovação da subemenda substitutiva, por 330 a 118, e a emenda aglutinativa que fechou o texto, por 325 a 94.
+Nenhuma das quatro foi quase unânime.'
+ WHEN 'Proteção da propriedade rural' THEN 'São quatro votações, todas na Câmara. Votar SIM apoia a política.
+O PL 4357/2023 é a votação de maior peso: proíbe desapropriar o imóvel produtivo para reforma agrária e exige condenação criminal definitiva nos casos de crime ambiental ou trabalhista. Foi aprovado em novembro de 2025, por 287 a 113.
+O PL 709/2023 pune quem ocupa ou invade propriedades: quem participa de ocupação fica impedido de ser beneficiário da reforma agrária. Foi aprovado em maio de 2024, por 336 a 120.
+O PL 4497/2024, que ficou conhecido como PL da Grilagem, valida registros antigos sobre terras públicas em faixa de fronteira, os 150 quilômetros ao longo das fronteiras do país. Aparece duas vezes: na aprovação pela Câmara, em junho de 2025, por 328 a 100, e na aprovação do texto que voltou do Senado, em dezembro de 2025, por 310 a 115.
+Nenhuma das quatro votações foi quase unânime: as maiorias ficaram entre 72% e 77%.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'São três votações, todas na Câmara e todas sobre a PEC 3/2021. Votar SIM apoia a blindagem.
 Como toda proposta de emenda à Constituição, ela precisa passar em dois turnos. O primeiro turno, em 16 de setembro de 2025, aprovou o substitutivo por 353 a 134 e é a votação decisiva. O segundo turno, no mesmo dia, confirmou por 344 a 133. No dia seguinte, o plenário aprovou ainda uma emenda aglutinativa, por 314 a 168.
 A PEC altera os artigos 14, 27, 53, 102 e 105 da Constituição, ou seja, alcança também as regras aplicáveis a deputados estaduais e a competência do Supremo Tribunal Federal e do Superior Tribunal de Justiça.
@@ -789,13 +799,13 @@ A PEC 5/2023 acrescenta um parágrafo ao artigo 150 da Constituição, que trata
 Por ser emenda constitucional, precisou de dois turnos: 385 a 93 no primeiro, que é a votação decisiva, e 368 a 96 no segundo.
 A imunidade ampliada não passa a valer sozinha: depende de lei complementar que defina critérios de habilitação uniformes em todo o país.
 Depois da Câmara, a proposta foi enviada ao Senado, onde ainda não foi votada. Por isso nenhum senador recebe índice nesta política.'
- WHEN 'Legalização dos jogos de azar' THEN 'São duas votações, ambas na Câmara e ambas em 24 de fevereiro de 2022. Votar SIM apoia a legalização.
-O PL 442/1991 nasceu tratando apenas do jogo do bicho e cresceu até virar o chamado “marco dos jogos”. O texto aprovado dispõe sobre a exploração de jogos e apostas em todo o território nacional, revoga o Decreto-Lei 9.215/1946, que proibiu os cassinos, e dispositivos do Decreto-Lei 3.688/1941, a Lei das Contravenções Penais.
-A votação do mérito foi a mais apertada de todo o conjunto de políticas do site: 246 a 202, ou 55% de maioria. Logo depois, um destaque foi decidido por 234 a 175.
-O projeto está no Senado desde 2022 e não foi votado lá. Por isso nenhum senador recebe índice nesta política, e o índice dos deputados reflete uma posição tomada há mais de quatro anos, numa legislatura anterior.'
- WHEN 'Reforma tributária do consumo' THEN 'São quatro votações, duas na Câmara e duas no Senado. É uma das três políticas do site com votos das duas casas. Votar SIM apoia a reforma.
+ WHEN 'Legalização dos jogos de azar' THEN 'São três votações, todas na Câmara e da legislatura anterior. Votar SIM apoia a legalização.
+O PL 442/1991 nasceu tratando do jogo do bicho e cresceu até virar o chamado “marco dos jogos”: legaliza cassinos, bingos e outros jogos, revogando a proibição em vigor desde os anos 1940. A urgência foi aprovada em dezembro de 2021, por 293 a 138. O mérito, em 24 de fevereiro de 2022, é a votação mais apertada de todo o conjunto de políticas do site: 246 a 202, ou 55% de maioria.
+A terceira é o destaque que manteve, por 234 a 175, o trecho que impede a cobrança de outros tributos sobre o setor além dos criados pelo próprio projeto. Ele decide o regime tributário da atividade legalizada, não a legalização em si, mas o padrão de votos espelhou o do mérito e por isso foi mantido na política.
+O projeto está no Senado desde 2022 e não foi votado lá. Nenhum senador recebe índice nesta política, e o índice dos deputados reflete posições tomadas há mais de quatro anos, na legislatura anterior.'
+ WHEN 'Unificação dos impostos do consumo' THEN 'São quatro votações, duas na Câmara e duas no Senado: é uma das quatro políticas do site com votos das duas casas. Votar SIM apoia a reforma.
 Por ser emenda constitucional, a PEC 45/2019 precisou de dois turnos em cada casa. Na Câmara, em julho de 2023: 382 a 118 no primeiro turno, que é a votação decisiva, e 375 a 113 no segundo. No Senado, em novembro de 2023: 53 a 24 nos dois turnos.
-O texto substitui PIS, Cofins, IPI, ICMS e ISS por um IVA dual (a CBS federal e o IBS de estados e municípios), cria o cashback para famílias de baixa renda e o imposto seletivo sobre produtos nocivos à saúde e ao meio ambiente.
+O texto substitui PIS, Cofins, IPI, ICMS e ISS por um imposto em duas partes, a CBS federal e o IBS de estados e municípios, cria o cashback para famílias de baixa renda e o imposto seletivo sobre produtos nocivos à saúde e ao meio ambiente.
 Foi promulgada como Emenda Constitucional 132/2023. As regras concretas vêm por leis complementares posteriores, que não fazem parte desta política.'
  WHEN 'Conservação da biodiversidade' THEN 'São cinco votações, todas na Câmara. Votar SIM apoia a política.
 O PL 6969/2013 institui a Política Nacional para a Conservação e o Uso Sustentável do Bioma Marinho Brasileiro, a Lei do Mar. Aparece duas vezes: na aprovação do texto, por 378 a 66, e num destaque logo em seguida.
@@ -803,8 +813,9 @@ O PL 2225/2024 estabelece diretrizes para o direito de crianças e adolescentes 
 O PL 3899/2012 institui a Política Nacional de Estímulo à Produção e ao Consumo Sustentáveis.
 A MSC 112/2026 levou ao Congresso o acordo firmado na 15ª Conferência das Partes da Convenção sobre Espécies Migratórias, assinado em Nairóbi em dezembro de 2025.
 As cinco entram com peso normal: nenhuma foi marcada como decisiva na curadoria e nenhuma foi quase unânime.'
- WHEN 'Abastecimento público de medicamentos' THEN 'São seis votações, todas na Câmara. Em cinco delas votar SIM apoia a política; em uma, votar NÃO.
-Três são do PL 2583/2020, que institui a Estratégia Nacional de Saúde para incentivar a produção nacional de insumos, medicamentos e materiais. A primeira é um requerimento rejeitado por 55 a 212, e nessa apoiar a política era votar NÃO. Em seguida vieram a aprovação do mérito, por 352 a 63, e um destaque.
-O PL 424/2015 permite dispensa de licitação para a compra de hemoderivados pelo SUS, o que viabiliza a compra direta de produtores públicos como a Hemobrás. Aparece duas vezes: no requerimento de urgência e num destaque posterior.
-O PL 68/2026 declara de interesse público os medicamentos Mounjaro e Zepbound, para os fins do artigo 71 da Lei de Propriedade Industrial, o dispositivo que permite o licenciamento compulsório de patente. Seu requerimento de urgência foi aprovado por 337 a 19, 94,7% de maioria, pouco abaixo do limiar de 95%, e por isso a votação manteve o peso normal.'
+ WHEN 'Abastecimento público de medicamentos' THEN 'São cinco votações, todas na Câmara. Votar SIM apoia a política.
+Duas são do PL 2583/2020, que institui a Estratégia Nacional de Saúde para incentivar a produção nacional de insumos, medicamentos e materiais: a aprovação do mérito, por 352 a 63, e o destaque que manteve a licitação exclusiva para a Empresa Estratégica de Saúde, por 316 a 110.
+O PL 424/2015 permite dispensa de licitação para a compra de hemoderivados pelo SUS, o que viabiliza a compra direta de produtores públicos como a Hemobrás. Aparece duas vezes: no requerimento de urgência, aprovado por 286 a 111, e no destaque que manteve a palavra “pública”, por 285 a 106.
+O PL 68/2026 declara de interesse público os medicamentos Mounjaro e Zepbound, para os fins do artigo 71 da Lei de Propriedade Industrial, o dispositivo que permite o licenciamento compulsório de patente. Seu requerimento de urgência foi aprovado por 337 a 19, 94,7% de maioria, pouco abaixo do limiar de 95%, e por isso manteve o peso normal.
+Um requerimento de retirada de pauta rejeitado, que já esteve nesta política, saiu na revisão de agosto de 2026: é obstrução procedimental, e o site não conta esse tipo de votação em nenhuma outra política.'
  ELSE description END;
