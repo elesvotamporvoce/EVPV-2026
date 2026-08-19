@@ -292,24 +292,41 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Redução de penas do 8 de Janeiro (política de um projeto só)
+--  Redução de penas do 8 de Janeiro (um projeto só, PL 2162/2023, duas casas)
+--
+--  18/08/2026: revisada e ampliada de 4 para 5 votacoes.
+--  Auditoria via descUltimaAberturaVotacao:
+--   * -81 e o DTQ 6 (PSB), DVS do art. 112 da LEP (progressao de regime);
+--     -86 e o DTQ 4 (Fdr PT-PCdoB-PV), DVS de trecho do mesmo art. 112.
+--     "Mantido o texto" = manter o beneficio = for. Sinais conferidos.
+--   * ENTROU a votacao do SENADO (7041, 17/12/2025, 48x25, "nos termos do
+--     parecer"): senadores nao pontuam (MIN_ATTENDED=2 e e a unica do
+--     Senado aqui), mas o voto individual aparece na pagina de cada um.
+--   * FORA: 3 DVS do PT de madrugada com quorum desabado (2358548-90 230x34,
+--     -93 229x26, -96 231x23: a propria federacao autora teve <40 Naos, o
+--     placar nao reflete a disputa real), encerramento de discussao -67
+--     (271x124, procedimental), redacao final -98 e requerimentos de
+--     obstrucao -51/-55.
+--  PENDENTE: a derrubada do veto (Lei 15.402/2026) e sessao conjunta do
+--  Congresso e nao esta na API; mesmo caso do VET 29/2025 da P5.
 -- ---------------------------------------------------------------------------
 DELETE FROM policy WHERE name = 'Redução de penas do 8 de Janeiro';
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
     'Redução de penas do 8 de Janeiro',
-    'O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A anistia caiu no substitutivo: o texto aprovado não perdoa ninguém, mas reduz penas de quem participou dos atos de 8 de janeiro de 2023. Proíbe somar as penas de golpe e de abolição violenta do Estado Democrático de Direito quando praticadas no mesmo contexto, cria redução de um a dois terços para quem agiu em meio à multidão sem financiar nem liderar, e devolve a progressão de regime a um sexto da pena. Aprovado pela Câmara e pelo Senado, vetado integralmente e promulgado como Lei 15.402/2026 depois de o Congresso derrubar o veto. Score alto = a favor da redução das penas.',
+    'O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A anistia caiu no substitutivo: o texto aprovado não perdoa ninguém, mas reduz penas de quem participou dos atos de 8 de janeiro de 2023. Aprovado pela Câmara e pelo Senado, vetado integralmente e promulgado como Lei 15.402/2026 depois de o Congresso derrubar o veto. Score alto = a favor da redução das penas.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
 SELECT p.id, d.id, v.stance, v.strength FROM p
 JOIN (VALUES
-  ('2562149-7','for','normal'),   -- urgencia da anistia (311x163, set/2025)
-  ('2358548-89','for','strong'),  -- aprovação do substitutivo (291x148)
-  ('2358548-81','for','normal'),  -- texto mantido (destaque)
-  ('2358548-86','for','normal')   -- texto mantido (destaque)
-) AS v(ext, stance, strength) ON TRUE
-JOIN division d ON d.house='camara' AND d.external_id = v.ext;
+  ('camara','2562149-7','for','normal'),   -- urgencia (311x163, set/2025)
+  ('camara','2358548-81','for','normal'),  -- DTQ 6 PSB: art. 112 LEP mantido (218x136)
+  ('camara','2358548-86','for','normal'),  -- DTQ 4 PT: trecho do art. 112 mantido (208x121)
+  ('camara','2358548-89','for','strong'),  -- substitutivo aprovado (291x148, decisiva)
+  ('senado','7041','for','strong')         -- Senado: PL 2162 nos termos do parecer (48x25)
+) AS v(house, ext, stance, strength) ON TRUE
+JOIN division d ON d.house=v.house AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
 --  ON HOLD: politica de aumento de penas (ex-"Endurecimento das penas")
@@ -594,7 +611,7 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Marco temporal para terras indígenas' THEN 'acho que com uma data definida cada um sabe o que é seu, e a disputa acaba'
  WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que jornada e aposentadoria são garantias mínimas, não moeda de troca'
- WHEN 'Redução de penas do 8 de Janeiro' THEN 'mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
  WHEN 'Distribuição e acesso à terra' THEN 'fazenda que desmata ilegalmente ou usa trabalho escravo deveria poder ser desapropriada e virar assentamento'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'o processo pode ser usado só para tirar do caminho quem incomoda'
  WHEN 'Política nacional de cultura' THEN 'repasse garantido em lei chega a quase todos os municípios, não só aos grandes centros'
@@ -614,7 +631,7 @@ UPDATE policy SET side_b_title = CASE name
  WHEN 'Marco temporal para terras indígenas' THEN 'Tem que considerar quem foi expulso'
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Deixar empresa e trabalhador negociarem'
- WHEN 'Redução de penas do 8 de Janeiro' THEN 'Manter as penas como foram fixadas'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'O recado importa mais que o desconto'
  WHEN 'Distribuição e acesso à terra' THEN 'Quem produz não pode perder a terra'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político não pode ter regra própria'
  WHEN 'Política nacional de cultura' THEN 'Despesa carimbada engessa o orçamento'
@@ -634,7 +651,7 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Marco temporal para terras indígenas' THEN 'acredito que comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
  WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
- WHEN 'Redução de penas do 8 de Janeiro' THEN 'reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que reduzir pena de ataque às instituições sinaliza que agir contra a democracia sai barato'
  WHEN 'Distribuição e acesso à terra' THEN 'propriedade que gera safra e emprego não deveria viver sob risco de desapropriação'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'se cometeu crime, responde como qualquer pessoa'
  WHEN 'Política nacional de cultura' THEN 'dinheiro fixado em lei disputa espaço com saúde, segurança e educação a cada ano'
@@ -663,9 +680,8 @@ Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais se
  WHEN 'Políticas de igualdade racial' THEN 'Esta política reúne decisões sobre desigualdade racial: injúria racial punida como crime de racismo, 30% das vagas de concursos federais reservadas a pessoas negras, indígenas e quilombolas, o 20 de novembro como feriado nacional e a lista suja de clubes punidos por racismo no futebol. Para quem defende, séculos de desigualdade racial não se corrigem sozinhos; para quem critica, lei que classifica por raça oficializa uma divisão que não deveria existir.'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'Carteira assinada é o piso de direitos que não depende de negociação, e estas votações mexem nesse piso. De um lado, a redução da jornada máxima na Constituição, ligada ao fim da escala 6x1. Do outro, contratos para jovens com FGTS e INSS reduzidos: custam menos ao empregador, mas rendem menos fundo de garantia e aposentadoria. Por isso apoiar é votar SIM na jornada e NÃO nos contratos.
 Para quem defende, sem mínimo em lei a negociação vira imposição; para quem critica, acordo entre as partes se ajusta melhor a cada setor.'
- WHEN 'Redução de penas do 8 de Janeiro' THEN 'Em 8 de janeiro de 2023, milhares de pessoas invadiram e depredaram as sedes dos três poderes, e centenas foram condenadas.
-O projeto nasceu como anistia e mudou no caminho: o texto aprovado não perdoa ninguém, mas reduz penas. Proíbe somar as condenações por golpe e por abolição do Estado Democrático no mesmo episódio, e corta de um a dois terços a pena de quem participou sem liderar nem financiar.
-Para quem defende, mais de quinze anos para quem só entrou na multidão é punição excessiva; para quem critica, reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato.'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'Em 8 de janeiro de 2023, milhares de pessoas invadiram e depredaram as sedes dos três poderes, e centenas foram condenadas. O projeto nasceu como anistia e mudou no caminho: o texto aprovado não perdoa ninguém, mas reduz penas, proibindo somar as condenações por golpe e por abolição do Estado Democrático e cortando de um a dois terços a pena de quem não liderou nem financiou.
+Para quem defende, mais de quinze anos para quem só entrou na multidão é excessivo; para quem critica, reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato.'
  WHEN 'Política nacional de cultura' THEN 'Boa parte da cultura fora dos grandes centros depende de dinheiro público: o festival da cidade, o grupo de teatro, o ponto de cultura.
 Uma votação torna permanente a Política Aldir Blanc, que repassa recursos federais a estados e municípios: o município pequeno passa a planejar, em vez de depender de edital que aparece ou não. A outra faz o streaming pagar uma contribuição para financiar produção brasileira.
 Para quem defende, repasse garantido em lei chega a quase todos os municípios; para quem critica, dinheiro fixado em lei disputa espaço com saúde, segurança e educação a cada ano.'
@@ -744,11 +760,12 @@ A PEC 9/2023, que mudou as sanções aos partidos que não aplicaram o mínimo e
 A MPV 905/2019 criou o Contrato de Trabalho Verde e Amarelo, com FGTS e contribuição previdenciária reduzidos para jovens sem vínculo anterior. Foi aprovada por 322 a 153 em abril de 2020, na legislatura anterior. O PL 5496/2013 retomou a mesma ideia em 2023, com contrato por prazo determinado para jovens de 16 a 24 anos: aparece no mérito, aprovado por 286 a 91, e no destaque que manteve o corte da contribuição previdenciária patronal, por 312 a 104. Nessas três, apoiar os direitos trabalhistas é votar NÃO.
 A PEC 221/2019 vai na direção oposta: reduz a jornada máxima prevista na Constituição, de 44 para 36 horas semanais ao longo de dez anos. É a proposta associada ao fim da escala 6x1, e nela apoiar é votar SIM. A Câmara aprovou os dois turnos em 27 de maio de 2026: 472 a 22 e 461 a 19.
 Justamente por serem quase unânimes, as duas votações da PEC entram com peso reduzido: com mais de 95% dos votos de um lado, elas distinguem pouco um parlamentar do outro.'
- WHEN 'Redução de penas do 8 de Janeiro' THEN 'São quatro votações, todas na Câmara e todas sobre o mesmo projeto, o PL 2162/2023. Votar SIM apoia a redução das penas.
-A primeira, em setembro de 2025, foi o requerimento de urgência, que mandou o texto direto ao plenário. As três seguintes ocorreram na madrugada de 10 de dezembro de 2025: dois destaques e a votação do mérito, aprovada por 291 a 148.
-O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria. A ementa original concedia anistia aos participantes de manifestações políticas desde outubro de 2022; a anistia caiu no substitutivo, e o texto aprovado passou a apenas reduzir penas.
-Depois da Câmara, o projeto foi aprovado pelo Senado, vetado integralmente pela Presidência e promulgado como Lei 15.402/2026 quando o Congresso derrubou o veto. Esta política reúne apenas as votações da Câmara.
-Nenhuma das quatro foi quase unânime: as maiorias ficaram entre 62% e 66%.'
+ WHEN 'Redução de penas do 8 de Janeiro' THEN 'São cinco votações: quatro na Câmara e uma no Senado, todas sobre o PL 2162/2023. Votar SIM apoia a redução das penas.
+A primeira, em setembro de 2025, foi o requerimento de urgência na Câmara, que mandou o texto direto ao plenário, aprovado por 311 a 163. As três seguintes ocorreram na madrugada de 10 de dezembro de 2025: dois destaques que mantiveram no texto as novas regras de execução penal, por 218 a 136 e 208 a 121, e a votação do mérito, que aprovou o substitutivo por 291 a 148.
+No Senado, o projeto foi aprovado em 17 de dezembro de 2025, por 48 a 25. Como é a única votação do Senado nesta política e são precisas ao menos duas para pontuar, os senadores não recebem índice, mas o voto de cada um fica registrado na sua página.
+O projeto ficou conhecido primeiro como PL da Anistia e depois como PL da Dosimetria: a anistia caiu no substitutivo, e o texto aprovado passou a apenas reduzir penas. Foi vetado integralmente pela Presidência e promulgado como Lei 15.402/2026 quando o Congresso derrubou o veto; a votação da derrubada é de sessão conjunta e não está na base.
+Ficaram de fora três destaques votados de madrugada com o plenário esvaziado, cujos placares não refletem a disputa real, além da redação final e dos requerimentos de procedimento.
+Nenhuma das cinco votações foi quase unânime: as maiorias ficaram entre 62% e 66%.'
  WHEN 'Política nacional de cultura' THEN 'São duas votações, ambas na Câmara. Votar SIM apoia a política.
 O PL 363/2025 altera a lei que instituiu a Política Nacional Aldir Blanc de Fomento à Cultura, tornando permanente o repasse de recursos federais a estados e municípios. É a votação decisiva desta política, aprovada por 278 a 111.
 O PL 8889/2017 regulamenta a provisão de conteúdo audiovisual por demanda, o streaming. Cria obrigações para as plataformas que operam no país, incluindo contribuição destinada ao financiamento do audiovisual brasileiro. Foi aprovado por 330 a 118.
