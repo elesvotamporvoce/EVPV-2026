@@ -627,11 +627,11 @@ UPDATE policy SET side_a_title = CASE name
  ELSE side_a_title END;
 
 UPDATE policy SET side_a_note = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
+ WHEN 'Combate à violência contra a mulher' THEN 'acredito que o momento mais perigoso para a mulher é entre a denúncia e a prisão, e ali faltava proteção'
  WHEN 'Redução das emissões de carbono' THEN 'acho que poluir de graça sai caro para todo mundo: o risco é mais seca, enchente e mudança do clima'
  WHEN 'Investimento na educação pública' THEN 'escola e universidade públicas dependem de dinheiro garantido; acredito que mais estudo vira também mais renda, mais saúde e menos violência no futuro'
- WHEN 'Igualdade de gênero no trabalho' THEN 'salário igual por trabalho igual e afastamento em condição de saúde não são favor'
- WHEN 'Flexibilização do licenciamento ambiental' THEN 'obra parada por anos trava saneamento, energia e emprego em região que precisa'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'acredito que salário igual por trabalho igual e afastamento em condição de saúde não são favor'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'acho que obra parada por anos trava saneamento, energia e emprego em região que precisa'
  WHEN 'Marco temporal para terras indígenas' THEN 'acho que com uma data definida cada um sabe o que é seu, e a disputa acaba'
  WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que jornada e aposentadoria são garantias mínimas, não moeda de troca'
@@ -667,11 +667,11 @@ UPDATE policy SET side_b_title = CASE name
  ELSE side_b_title END;
 
 UPDATE policy SET side_b_note = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'não deveria haver medida extra para um gênero e não para o outro'
+ WHEN 'Combate à violência contra a mulher' THEN 'acho que não deveria haver medida extra para um gênero e não para o outro'
  WHEN 'Redução das emissões de carbono' THEN 'acredito que o custo do carbono entra no preço do combustível, da energia e do frete'
  WHEN 'Investimento na educação pública' THEN 'acho que o governo eleito deve poder decidir onde o dinheiro é mais necessário'
- WHEN 'Igualdade de gênero no trabalho' THEN 'empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
- WHEN 'Flexibilização do licenciamento ambiental' THEN 'as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
+ WHEN 'Igualdade de gênero no trabalho' THEN 'acho que empresa e empregada resolvem melhor caso a caso do que uma regra igual para todas'
+ WHEN 'Flexibilização do licenciamento ambiental' THEN 'acredito que as barragens que romperam em Mariana e Brumadinho eram de impacto médio, e são elas que agora têm menos análise'
  WHEN 'Marco temporal para terras indígenas' THEN 'acredito que comunidade removida à força antes de 1988 não deveria perder o direito por não estar lá naquela data'
  WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Proteção dos direitos trabalhistas' THEN 'acredito que acordo entre as partes se ajusta ao setor e ao porte; regra única, não'
