@@ -1,0 +1,67 @@
+name: Recalcular scores — sob demanda e no push do seed
+
+# Fecha o buraco entre a curadoria e o daily-ingest: quando o seed de politicas
+# muda (todo ciclo de curadoria termina com um push dele), recalcula os
+# agreement scores na hora e derruba o cache do site. Tambem roda por botao
+# (Run workflow), com policy_id opcional para recalcular so uma politica.
+#
+# Requer os secrets:
+#   DATABASE_URL       (ja existe, usado pelo daily-ingest)
+#   REVALIDATE_SECRET  (mesmo valor da env var da Vercel; se faltar, o passo
+#                       de revalidate e pulado com aviso, sem falhar o job)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "db/seed_policies.sql"
+  workflow_dispatch:
+    inputs:
+      policy_id:
+        description: "Recalcular só esta política (id numérico; vazio = todas)"
+        required: false
+
+concurrency:
+  group: score-recalc
+  cancel-in-progress: false
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      # NAO aplicamos o seed aqui de proposito: ele e DELETE+INSERT por nome,
+      # entao reaplica-lo trocaria os ids das politicas (quebrando as URLs
+      # /politicas/{id}). O banco ja e atualizado na curadoria; o seed e o
+      # espelho versionado, conferido por md5.
+      - name: Recalcular agreement scores
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POLICY_ID: ${{ github.event.inputs.policy_id }}
+        run: |
+          set -euo pipefail
+          if [ -n "${POLICY_ID:-}" ]; then
+            echo "== score.py --policy $POLICY_ID =="
+            python scoring/score.py --policy "$POLICY_ID"
+          else
+            echo "== score.py (todas as politicas) =="
+            python scoring/score.py
+          fi
+
+      - name: Revalidar cache do site
+        env:
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+        run: |
+          if [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "::warning::REVALIDATE_SECRET nao configurado; cache expira sozinho em ate 15 min nas paginas principais."
+            exit 0
+          fi
+          curl -fsS "https://www.elesvotamporvoce.org/api/revalidate?secret=${REVALIDATE_SECRET}" \
+            && echo "" && echo "Cache revalidado."

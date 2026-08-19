@@ -47,7 +47,10 @@ def get(url, tries=3):
 
 def norm(s):
     s = unicodedata.normalize("NFD", s or "")
-    return re.sub(r"[^A-Z ]", "", s.upper().encode("ascii", "ignore").decode())
+    s = re.sub(r"[^A-Z ]", "", s.upper().encode("ascii", "ignore").decode())
+    # espacos multiplos viram um so (o TSE tem nomes de urna com espaco duplo,
+    # ex.: "ENFERMEIRA  ANA PAULA" — sem isso o casamento falha)
+    return re.sub(r" +", " ", s).strip()
 
 def eleicao_id():
     for e in get(f"{BASE}/eleicao/ordinarias"):
