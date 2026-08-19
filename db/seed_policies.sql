@@ -673,8 +673,8 @@ UPDATE policy SET side_b_note = CASE name
 -- mais (cerca de 100 palavras) e fecha apresentando os dois lados. Nao derive um
 -- do outro; se mudar um, revise o outro.
 UPDATE policy SET impact = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'A maior parte da violência contra a mulher acontece dentro de casa, e o agressor quase sempre é conhecido. Estas votações tratam do que o Estado faz depois da denúncia: tornozeleira no agressor, arma proibida para quem responde por agressão, violência vicária reconhecida na Lei Maria da Penha, atendimento à mulher indígena na delegacia e um sistema nacional com recursos garantidos. Nada disso cria crime novo, apenas muda a chance de a proteção chegar antes do pior.
-Para quem defende, o período mais perigoso é logo após a denúncia; para quem critica, a lei deveria valer igual para qualquer agressor, sem medida extra por gênero.'
+ WHEN 'Combate à violência contra a mulher' THEN 'A maior parte da violência contra a mulher acontece dentro de casa, e o agressor quase sempre é conhecido. Estas votações tratam do que o Estado faz depois da denúncia: tornozeleira e arma proibida para quem responde por agressão, violência vicária na Lei Maria da Penha, atendimento à mulher indígena na delegacia e um sistema nacional com recursos. Nada cria crime novo: muda a chance de a proteção chegar antes do pior.
+Para quem defende, o período mais perigoso é logo após a denúncia; para quem critica, a lei deveria valer igual para qualquer agressor.'
  WHEN 'Redução das emissões de carbono' THEN 'Toda atividade que queima combustível ou derruba floresta solta gás de efeito estufa, e estas votações decidem se isso passa a ter preço.
 O mecanismo principal é o mercado de carbono: quem emite acima de um limite compra crédito de quem emite menos, e poluir vira custo, que pode chegar ao preço final. O outro pacote trata de combustível: diesel verde, aviação e captura de carbono.
 Para quem defende, poluir de graça sai caro para todo mundo: o risco é mais seca, enchente e mudança do clima; para quem critica, esse custo cai no preço do combustível, da energia e do frete.'
