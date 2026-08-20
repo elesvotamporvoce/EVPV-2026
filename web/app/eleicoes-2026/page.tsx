@@ -79,6 +79,12 @@ export default async function Eleicoes2026Page({
   }
   const candBy = new Map(candRows.map((c) => [c.person_id, c]));
 
+  // Candidatos sem historico no Congresso: o botao so aparece quando a
+  // ingestao do TSE ja tiver populado a tabela.
+  const { count: nNovos } = await supabase
+    .from("candidato_novo_2026")
+    .select("sq_candidato", { count: "exact", head: true });
+
   // Opcoes dos filtros vem da lista COMPLETA (antes de filtrar), para o
   // usuario poder trocar de partido sem precisar limpar o filtro atual.
   const ufsDisponiveis = [...new Set(candRows.map((c) => c.uf).filter(Boolean))].sort();
@@ -126,17 +132,6 @@ export default async function Eleicoes2026Page({
         </p>
       </div>
 
-      {procurados.length > 0 && (
-        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
-          <p className="mb-3 font-semibold text-slate-800">Mais procurados que vão concorrer</p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {procurados.slice(0, 6).map((p) => (
-              <PersonCard key={p.id} p={p} candidato />
-            ))}
-          </div>
-        </div>
-      )}
-
       <form method="GET" className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm">
         <input name="q" defaultValue={q ?? ""} placeholder="Nome"
           className="w-40 rounded-md border border-slate-300 px-3 py-2" />
@@ -173,14 +168,14 @@ export default async function Eleicoes2026Page({
           </p>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
           {people.map((p) => {
             const c = candBy.get(p.id);
             return (
               <div key={p.id} className="space-y-1">
                 <PersonCard p={p} candidato />
                 {c && (
-                  <p className="px-1 text-xs text-slate-500">
+                  <p className="px-1 text-center text-xs text-slate-500">
                     {c.cargo ? `${CARGO_2026[c.cargo] ?? c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
                     {SITUACAO_LABEL[c.situacao ?? ""] ?? "Situação não informada"}
                     {c.patrimonio_total != null && (
@@ -194,6 +189,38 @@ export default async function Eleicoes2026Page({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {(nNovos ?? 0) > 0 && (
+        <Link
+          href="/eleicoes-2026/novos"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-light bg-violet-50 p-4 hover:border-brand hover:shadow-sm"
+        >
+          <span>
+            <span className="block font-semibold text-slate-800">
+              E quem nunca votou no Congresso?
+            </span>
+            <span className="mt-0.5 block text-sm leading-relaxed text-slate-600">
+              {(nNovos ?? 0).toLocaleString("pt-BR")} candidatos a presidente,
+              senador e deputado federal sem histórico de votação. Sem voto para
+              mostrar, mostramos como o partido deles vota.
+            </span>
+          </span>
+          <span className="shrink-0 rounded-lg bg-brand px-4 py-2.5 font-semibold text-white">
+            Ver a lista
+          </span>
+        </Link>
+      )}
+
+      {procurados.length > 0 && (
+        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
+          <p className="mb-3 font-semibold text-slate-800">Mais procurados que vão concorrer</p>
+          <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
+            {procurados.slice(0, 6).map((p) => (
+              <PersonCard key={p.id} p={p} candidato />
+            ))}
+          </div>
         </div>
       )}
 

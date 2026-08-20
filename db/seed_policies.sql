@@ -647,7 +647,7 @@ UPDATE policy SET side_a_note = CASE name
  ELSE side_a_note END;
 
 UPDATE policy SET side_b_title = CASE name
- WHEN 'Combate à violência contra a mulher' THEN 'Qualquer violência deve ser combatida, independente de gênero'
+ WHEN 'Combate à violência contra a mulher' THEN 'Toda violência deve ser combatida'
  WHEN 'Redução das emissões de carbono' THEN 'A conta chega no consumidor'
  WHEN 'Investimento na educação pública' THEN 'Gasto protegido por lei aperta todo o resto'
  WHEN 'Igualdade de gênero no trabalho' THEN 'Deixar para a negociação'

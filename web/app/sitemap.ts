@@ -17,11 +17,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [{ data: pols }, { data: pes }, { data: parts }] = await Promise.all([
-      supabase.from("policy").select("id"),
-      supabase.from("person_directory").select("id"),
-      supabase.from("party").select("id"),
-    ]);
+    const [{ data: pols }, { data: pes }, { data: parts }, { count: nNovos }] =
+      await Promise.all([
+        supabase.from("policy").select("id"),
+        supabase.from("person_directory").select("id"),
+        supabase.from("party").select("id"),
+        supabase
+          .from("candidato_novo_2026")
+          .select("sq_candidato", { count: "exact", head: true }),
+      ]);
+    // so entra no sitemap depois que a ingestao do TSE popular a lista
+    if ((nNovos ?? 0) > 0) {
+      fixas.push({
+        url: `${BASE}/eleicoes-2026/novos`,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
+    }
     const politicas = (pols ?? []).map((p) => ({
       url: `${BASE}/politicas/${p.id}`,
       changeFrequency: "weekly" as const,

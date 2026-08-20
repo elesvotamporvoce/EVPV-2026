@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import PositionBar from "@/components/PositionBar";
 import VoteChip from "@/components/VoteChip";
+import SeloCandidato from "@/components/SeloCandidato";
 import { CARGO_LABEL, HOUSE_LABEL, MANDATE_CLASS, MANDATE_LABEL, categoryLabel, featuredRank, fmtDate, scoreColor, supportTip } from "@/lib/format";
 import type { PersonDir, ScoreNamed, PersonVote, Participation } from "@/lib/types";
 
@@ -135,6 +136,27 @@ export default async function PersonPage({
   const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
   const anoFim = part?.last_vote ? new Date(part.last_vote).getFullYear() : null;
 
+  // Presenca nas votacoes: calculada aqui porque agora mora dentro do
+  // "Mais informacoes" do cabecalho, e nao mais numa secao no fim da pagina.
+  const presenca =
+    part && part.eligible >= 10 && part.n_votes > 0
+      ? (() => {
+          const faltas = Math.max(0, part.eligible - part.n_votes);
+          const ausPct = Math.round((100 * faltas) / part.eligible);
+          return {
+            faltas,
+            ausPct,
+            muito: ausPct > 50,
+            sufixo:
+              dir.mandate_status === "fora"
+                ? ", no período em que exerceu o mandato"
+                : dir.mandate_status === "licenciado"
+                  ? ", contando até sair de licença"
+                  : "",
+          };
+        })()
+      : null;
+
   // Média do partido por política (contexto quando faltam votos individuais)
   let partyAvg = new Map<number, number>();
   if (dir.party_id) {
@@ -216,7 +238,20 @@ export default async function PersonPage({
       {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
           nas bordas da caixa durante o scroll) */}
       <div className="sticky top-[58px] z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
-      <div className="flex flex-col items-center gap-4 rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
+      <div className="relative flex flex-col items-center gap-4 rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
+        {cand && (
+          <Link
+            href="/eleicoes-2026"
+            className="absolute -right-3 -top-3"
+            title={
+              cand.cargo
+                ? `Candidatura registrada: ${cand.cargo}`
+                : "Candidatura registrada para 2026"
+            }
+          >
+            <SeloCandidato />
+          </Link>
+        )}
         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100">
           {dir.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -227,54 +262,106 @@ export default async function PersonPage({
             </div>
           )}
         </div>
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
-            {cand && (
-              <Link
-                href="/eleicoes-2026"
-                className="rounded-full bg-brand px-3 py-1 text-xs font-bold text-white hover:bg-brand-dark"
-                title={
-                  cand.cargo
-                    ? `Candidatura registrada: ${cand.cargo}`
-                    : "Candidatura registrada para 2026"
-                }
-              >
-                Candidato 2026
-              </Link>
+        <div className="w-full flex-1">
+          <h1 className="text-2xl font-bold text-slate-800">{dir.name}</h1>
+          {/* Visivel sempre: quem e, de onde e, e se esta no exercicio do
+              mandato. Tudo o mais fica atras de "Mais informacoes" — o
+              cabecalho e sticky, entao quanto menor, mais politica cabe na
+              tela. */}
+          <div className="mt-1.5 space-y-1.5">
+            <p className="text-slate-500">
+              {dir.party_sigla ?? "sem partido"}
+              {dir.uf ? ` · ${dir.uf}` : ""} · {CARGO_LABEL[dir.house]}
+            </p>
+            {dir.mandate_status && (
+              <p className="text-sm">
+                <span className={`font-semibold ${MANDATE_CLASS[dir.mandate_status] ?? "text-slate-500"}`}>
+                  Mandato: {MANDATE_LABEL[dir.mandate_status] ?? dir.mandate_status}
+                </span>
+                {dir.mandate_detail && (
+                  <span className="text-slate-500"> · {dir.mandate_detail}</span>
+                )}
+              </p>
             )}
           </div>
-          <div className="mt-1.5 space-y-1.5">
-          <p className="text-slate-500">
-            {dir.party_sigla ?? "sem partido"}
-            {dir.uf ? ` · ${dir.uf}` : ""} · {CARGO_LABEL[dir.house]}
-          </p>
-          {anoInicio && (
-            <p className="text-sm text-slate-500">
-              {dir.mandate_status === "fora" && anoFim
-                ? `No cargo de ${anoInicio} até ${anoFim}`
-                : `No cargo desde ${anoInicio} (${anos} ${anos === 1 ? "ano" : "anos"})`}
-            </p>
+
+          {(anoInicio || (cand && cand.patrimonio_total != null) || presenca) && (
+            <details className="group mt-3 border-t border-slate-100 pt-2.5 text-left">
+              <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
+                Mais informações
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </summary>
+              <div className="mt-2.5 space-y-1.5 text-center">
+                {anoInicio && (
+                  <p className="text-sm text-slate-500">
+                    {dir.mandate_status === "fora" && anoFim
+                      ? `No cargo de ${anoInicio} até ${anoFim}`
+                      : `No cargo desde ${anoInicio} (${anos} ${anos === 1 ? "ano" : "anos"})`}
+                  </p>
+                )}
+                {cand && cand.patrimonio_total != null && (
+                  <p className="text-sm text-slate-500">
+                    Patrimônio declarado (candidatura 2026):{" "}
+                    <span className="font-semibold text-slate-700">
+                      {brl(cand.patrimonio_total)}
+                    </span>
+                  </p>
+                )}
+                {presenca && (
+                  <div
+                    className={`mt-2 rounded-lg border p-3 text-left ${
+                      presenca.muito
+                        ? "border-amber-300 bg-amber-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-slate-800">
+                      Presença nas votações
+                    </p>
+                    <p className="mt-1 text-sm text-slate-700">
+                      Faltou em{" "}
+                      <span
+                        className={
+                          presenca.muito ? "font-bold text-amber-700" : "font-semibold"
+                        }
+                      >
+                        {presenca.faltas.toLocaleString("pt-BR")} de{" "}
+                        {part!.eligible.toLocaleString("pt-BR")} sessões
+                      </span>{" "}
+                      ({presenca.ausPct}% de ausência
+                      {presenca.sufixo}).
+                    </p>
+                    {presenca.muito && (
+                      <p className="mt-1 text-sm text-amber-800">
+                        Faltou à maioria das votações. O papel de quem foi
+                        eleito é votar.
+                      </p>
+                    )}
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      Considera as votações nominais da casa durante o mandato;
+                      votos secretos contam como participação. Critério completo
+                      em{" "}
+                      <Link href="/sobre" className="text-brand hover:underline">
+                        Como funciona
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                )}
+              </div>
+            </details>
           )}
-          {dir.mandate_status && (
-            <p className="text-sm">
-              <span className={`font-semibold ${MANDATE_CLASS[dir.mandate_status] ?? "text-slate-500"}`}>
-                Mandato: {MANDATE_LABEL[dir.mandate_status] ?? dir.mandate_status}
-              </span>
-              {dir.mandate_detail && (
-                <span className="text-slate-500"> · {dir.mandate_detail}</span>
-              )}
-            </p>
-          )}
-          {cand && cand.patrimonio_total != null && (
-            <p className="text-sm text-slate-500">
-              Patrimônio declarado (candidatura 2026):{" "}
-              <span className="font-semibold text-slate-700">
-                {brl(cand.patrimonio_total)}
-              </span>
-            </p>
-          )}
-          </div>
         </div>
       </div>
       </div>
@@ -390,61 +477,6 @@ export default async function PersonPage({
           </div>
         )}
       </section>
-
-      {/* Presença nas votações */}
-      {part &&
-        part.eligible >= 10 &&
-        part.n_votes > 0 &&
-        (() => {
-          const faltas = Math.max(0, part.eligible - part.n_votes);
-          const ausPct = Math.round((100 * faltas) / part.eligible);
-          const muito = ausPct > 50;
-          const fora = dir.mandate_status === "fora";
-          const licenca = dir.mandate_status === "licenciado";
-          return (
-            <section>
-              <div
-                className={`rounded-lg border p-5 ${
-                  muito
-                    ? "border-amber-300 bg-amber-50"
-                    : "border-slate-200 bg-white"
-                }`}
-              >
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Presença nas votações
-                </h2>
-                <p className="mt-1.5 text-slate-700">
-                  Faltou em{" "}
-                  <span className={muito ? "font-bold text-amber-700" : "font-semibold"}>
-                    {faltas.toLocaleString("pt-BR")} de{" "}
-                    {part.eligible.toLocaleString("pt-BR")} sessões
-                  </span>{" "}
-                  ({ausPct}% de ausência
-                  {fora
-                    ? ", no período em que exerceu o mandato"
-                    : licenca
-                      ? ", contando até sair de licença"
-                      : ""}
-                  ).
-                </p>
-                {muito && (
-                  <p className="mt-1.5 text-sm text-amber-800">
-                    Faltou à maioria das votações. O papel de quem foi eleito é
-                    votar.
-                  </p>
-                )}
-                <p className="mt-2 text-xs text-slate-400">
-                  Considera as votações nominais da casa durante o mandato; votos
-                  secretos contam como participação. Critério completo em{" "}
-                  <Link href="/sobre" className="text-brand hover:underline">
-                    Como funciona
-                  </Link>
-                  .
-                </p>
-              </div>
-            </section>
-          );
-        })()}
 
       {/* Votos recentes */}
       <section>

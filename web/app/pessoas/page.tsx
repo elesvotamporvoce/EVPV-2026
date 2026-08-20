@@ -130,7 +130,7 @@ export default async function PessoasPage({
       {destaque.length > 0 && (
         <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
           <p className="mb-3 font-semibold text-slate-800">Mais procurados</p>
-          <FeaturedRotator className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <FeaturedRotator className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
             {destaque.map((p) => (
               <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
             ))}
@@ -143,7 +143,7 @@ export default async function PessoasPage({
           Nenhum parlamentar encontrado com esses filtros.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
           {people.map((p) => (
             <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
           ))}

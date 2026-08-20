@@ -370,20 +370,38 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             ?
           </h2>
         </div>
+
+        {/* "Por que isso importa" acompanha a pergunta no topo fixo: so o
+            titulo aparece; o texto abre na setinha. key={current.id} fecha
+            de novo a cada tema novo. */}
+        {current.quiz_hook && (
+          <details
+            key={current.id}
+            className="group mt-1 rounded-md border-l-4 border-amber-500 bg-amber-100 px-4 py-2 shadow-sm"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-sm font-semibold text-amber-900 [&::-webkit-details-marker]:hidden">
+              Por que isso importa
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </summary>
+            <p className="mt-1.5 text-center text-[15px] leading-relaxed text-amber-900/90">
+              {current.quiz_hook}
+            </p>
+          </details>
+        )}
       </div>
 
-      {current.quiz_hook && (
-        <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-4 text-center">
-          <p className="text-sm font-semibold text-amber-900">
-            Por que isso importa
-          </p>
-          <p className="mt-1.5 text-[15px] leading-relaxed text-amber-900/90">
-            {current.quiz_hook}
-          </p>
-        </div>
-      )}
-
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6">
         <p className="text-center text-[19px] font-semibold leading-snug text-slate-900">
           Marque seu voto
         </p>
@@ -401,17 +419,21 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
                 type="button"
                 aria-pressed={a?.value === lado.v}
                 onClick={() => escolher(lado.v)}
-                className={`rounded-lg border-2 bg-violet-100 px-4 py-3 text-center transition ${
+                className={`rounded-lg border-2 bg-violet-100 px-2.5 py-3 text-center transition sm:px-4 ${
                   a?.value === lado.v
                     ? "border-brand ring-2 ring-brand/30"
                     : "border-violet-200 hover:border-brand-light"
                 }`}
               >
-                <span className="block font-semibold text-slate-800">
+                {/* O titulo do lado acompanha a largura da tela (clamp) para
+                    caber em UMA linha no celular; a nota vem embaixo, entre
+                    parenteses. text-balance evita quebra feia se algum titulo
+                    longo ainda passar de uma linha. */}
+                <span className="block text-balance font-semibold leading-snug text-slate-800 text-[clamp(0.72rem,3.1vw,1.0625rem)]">
                   {lado.titulo}
                 </span>
                 {lado.nota && (
-                  <span className="mt-0.5 block text-sm leading-snug text-slate-600">
+                  <span className="mt-1 block text-balance leading-snug text-slate-600 text-[clamp(0.66rem,2.7vw,0.875rem)]">
                     ({lado.nota})
                   </span>
                 )}

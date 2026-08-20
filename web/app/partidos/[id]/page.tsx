@@ -96,7 +96,7 @@ export default async function PartyPage({
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Membros</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
           {members.map((p) => (
             <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
           ))}

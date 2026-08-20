@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import HomeSearch from "@/components/HomeSearch";
 import BigNumbers from "@/components/BigNumbers";
 import FeaturedRotator from "@/components/FeaturedRotator";
+import SeloCandidato from "@/components/SeloCandidato";
 import { CARGO_LABEL, FEATURED_POLICIES, featuredRank, scoreColor } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
@@ -27,20 +28,6 @@ async function getData() {
     const pols = ((policies ?? []) as Policy[]).sort(
       (a, b) => featuredRank(a.name) - featuredRank(b.name) || a.name.localeCompare(b.name)
     );
-
-    // Principais politicas: as 4 com mais parlamentares com posicao atribuida
-    const { data: partic } = await supabase
-      .from("policy_participation")
-      .select("policy_id, n_scored");
-    const partBy = new Map(
-      ((partic ?? []) as { policy_id: number; n_scored: number }[]).map((r) => [
-        r.policy_id,
-        r.n_scored,
-      ])
-    );
-    const principais = [...pols]
-      .sort((a, b) => (partBy.get(b.id) ?? 0) - (partBy.get(a.id) ?? 0))
-      .slice(0, 4);
 
     // Assuntos em alta: as 3 primeiras em destaque, com o retrato por partido
     const hot = pols.filter((p) => FEATURED_POLICIES.includes(p.name)).slice(0, 3);
@@ -142,11 +129,10 @@ async function getData() {
       });
     }
 
-    return { policies: pols, principais, trends, recordistas, procurados, candSet, people: people ?? 0, divisions: divisions ?? 0 };
+    return { policies: pols, trends, recordistas, procurados, candSet, people: people ?? 0, divisions: divisions ?? 0 };
   } catch {
     return {
       policies: [] as Policy[],
-      principais: [] as Policy[],
       trends: [] as Trend[],
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
       procurados: [] as { person: PersonDir; nVotes: number | null; eligible: number | null }[],
@@ -158,7 +144,7 @@ async function getData() {
 }
 
 export default async function Home() {
-  const { policies, principais, trends, recordistas, procurados, candSet, people, divisions } = await getData();
+  const { policies, trends, recordistas, procurados, candSet, people, divisions } = await getData();
 
   return (
     <div className="space-y-12">
@@ -204,7 +190,7 @@ export default async function Home() {
           href="/eleicoes-2026"
           className="rounded-xl bg-brand px-8 py-4 text-center text-lg font-semibold text-white shadow-lg shadow-brand/25 hover:bg-brand-dark"
         >
-          Eleições 2026: Veja quem está concorrendo!
+          Eleições 2026: Veja quem são os candidatos!
         </Link>
       </div>
 
@@ -213,13 +199,16 @@ export default async function Home() {
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
             Políticos mais procurados
           </h2>
-          <FeaturedRotator size={4} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <FeaturedRotator size={4} className="grid grid-cols-2 gap-3 pt-3 lg:grid-cols-4">
             {procurados.map(({ person, nVotes, eligible }) => (
               <Link
                 key={person.id}
                 href={`/pessoas/${person.id}`}
-                className="rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-brand-light hover:shadow-sm"
+                className="relative rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-brand-light hover:shadow-sm"
               >
+                {candSet.has(person.id) && (
+                  <SeloCandidato size="sm" className="absolute -right-2.5 -top-2.5" />
+                )}
                 <span className="mx-auto block h-16 w-16 overflow-hidden rounded-full bg-slate-100">
                   {person.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -234,11 +223,6 @@ export default async function Home() {
                 <p className="mt-2.5 text-[15px] font-semibold leading-snug text-slate-800">
                   {person.name}
                 </p>
-                {candSet.has(person.id) && (
-                  <span className="mt-1 inline-block rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                    Candidato 2026
-                  </span>
-                )}
                 <p className="mt-0.5 text-xs text-slate-500">
                   {person.party_sigla ?? "sem partido"}
                   {person.uf ? ` · ${person.uf}` : ""} · {CARGO_LABEL[person.house]}
@@ -301,6 +285,14 @@ export default async function Home() {
               </Link>
             ))}
           </div>
+          <div className="mt-6 text-center">
+            <Link
+              href="/politicas"
+              className="inline-block rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark"
+            >
+              Ver todas as {policies.length} políticas
+            </Link>
+          </div>
         </section>
       )}
 
@@ -309,13 +301,16 @@ export default async function Home() {
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
             Recordistas do plenário
           </h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 pt-3 sm:grid-cols-3">
             {recordistas.map((r) => (
               <Link
                 key={r.label}
                 href={`/pessoas/${r.person.id}`}
-                className="rounded-xl border border-slate-200 bg-white p-5 text-center hover:border-brand-light hover:shadow-sm"
+                className="relative rounded-xl border border-slate-200 bg-white p-5 text-center hover:border-brand-light hover:shadow-sm"
               >
+                {candSet.has(r.person.id) && (
+                  <SeloCandidato size="sm" className="absolute -right-2.5 -top-2.5" />
+                )}
                 <p className="text-4xl font-bold leading-none text-slate-900">
                   {r.value}
                 </p>
@@ -335,15 +330,8 @@ export default async function Home() {
                     ) : null}
                   </span>
                   <span className="text-left">
-                    <span className="flex items-center gap-1.5">
-                      <span className="block text-sm font-medium text-slate-700">
-                        {r.person.name}
-                      </span>
-                      {candSet.has(r.person.id) && (
-                        <span className="inline-block rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                          Candidato 2026
-                        </span>
-                      )}
+                    <span className="block text-sm font-medium text-slate-700">
+                      {r.person.name}
                     </span>
                     <span className="text-xs text-slate-400">
                       {r.person.party_sigla ?? ""}
@@ -368,40 +356,16 @@ export default async function Home() {
         />
       </section>
 
-      <section>
-        <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-xl font-semibold text-slate-800">
-            Principais políticas
-          </h2>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {principais.map((pol) => (
-            <Link
-              key={pol.id}
-              href={`/politicas/${pol.id}`}
-              className="rounded-lg border border-slate-200 bg-white p-4 hover:border-brand-light hover:shadow-sm"
-            >
-              <p className="text-center font-medium text-slate-800">{pol.name}</p>
-              {(pol.quiz_hook ?? pol.description) && (
-                <p className="mt-1 line-clamp-3 text-center text-sm text-slate-500">
-                  {pol.quiz_hook ?? pol.description}
-                </p>
-              )}
-            </Link>
-          ))}
-        </div>
-        {policies.length === 0 && (
-          <p className="text-sm text-slate-500">Nenhuma política publicada ainda.</p>
-        )}
-        <div className="mt-6 text-center">
+      {trends.length === 0 && policies.length > 0 && (
+        <section className="text-center">
           <Link
             href="/politicas"
             className="inline-block rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark"
           >
             Ver todas as {policies.length} políticas
           </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="rounded-lg border border-slate-200 bg-white p-6">
         <h2 className="text-lg font-semibold text-slate-800">Como funciona</h2>
