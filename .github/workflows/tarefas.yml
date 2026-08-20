@@ -1,0 +1,91 @@
+name: Rodar tarefa (sob demanda)
+
+# Painel único para rodar qualquer script do projeto SEM precisar do seu
+# computador: Actions > "Rodar tarefa" > Run workflow > escolha na lista.
+on:
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: "O que rodar"
+        required: true
+        type: choice
+        default: licencas
+        options:
+          - licencas                 # períodos de licença (conserta a ausência)
+          - candidatos_novos_rapido  # TSE: candidatos sem histórico (sem patrimônio)
+          - candidatos_novos_completo
+          - tse_parlamentares        # atualiza candidatura dos parlamentares atuais
+          - scores                   # recalcula os agreement scores
+          - integridade              # checagem de integridade dos dados
+      dry_run:
+        description: "Só simular, sem gravar (vale para licenças)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: tarefa-sob-demanda
+  cancel-in-progress: false
+
+jobs:
+  rodar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      - name: Conferir o banco antes de comecar
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::error::DATABASE_URL vazio. Rode o workflow 'Diagnóstico da conexão com o banco' para descobrir o motivo."
+            exit 1
+          fi
+          python -c "import os,psycopg2; c=psycopg2.connect(os.environ['DATABASE_URL'],connect_timeout=15); print('conexao ok'); c.close()"
+
+      - name: Rodar
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TAREFA: ${{ github.event.inputs.tarefa }}
+          DRY: ${{ github.event.inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          case "$TAREFA" in
+            licencas)
+              if [ "$DRY" = "true" ]; then
+                python scripts/update_afastamentos.py --dry-run
+              else
+                python scripts/update_afastamentos.py
+              fi ;;
+            candidatos_novos_rapido)
+              python scripts/ingest_candidatos_novos.py --sem-bens ;;
+            candidatos_novos_completo)
+              python scripts/ingest_candidatos_novos.py ;;
+            tse_parlamentares)
+              python scripts/ingest_tse_2026.py ;;
+            scores)
+              python scoring/score.py ;;
+            integridade)
+              python scripts/check_integrity.py ;;
+            *) echo "::error::tarefa desconhecida: $TAREFA"; exit 1 ;;
+          esac
+
+      - name: Derrubar o cache do site
+        if: success()
+        env:
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+        run: |
+          if [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "::warning::REVALIDATE_SECRET nao configurado; o cache das paginas estaticas expira sozinho em ate 15 min."
+            exit 0
+          fi
+          curl -fsS "https://www.elesvotamporvoce.org/api/revalidate?secret=${REVALIDATE_SECRET}" \
+            && echo "" && echo "Cache revalidado."

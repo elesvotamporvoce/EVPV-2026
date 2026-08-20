@@ -1,0 +1,112 @@
+name: Diagnóstico da conexão com o banco
+
+# Workflow de DIAGNÓSTICO. Não escreve nada no banco: só descobre POR QUE os
+# outros workflows falham. Não imprime a senha nem a URL — apenas o formato.
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install psycopg2-binary
+
+      - name: 1) O secret chegou até aqui?
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::error::O secret DATABASE_URL chegou VAZIO."
+            echo "Causa quase certa: ele foi salvo no lugar errado."
+            echo "Tem que estar em: Settings > Secrets and variables > Actions"
+            echo "                  > aba 'Secrets' > 'Repository secrets'."
+            echo "NAO vale: aba 'Variables', nem 'Environment secrets',"
+            echo "          nem secret de organizacao sem acesso a este repo."
+            exit 1
+          fi
+          echo "OK: o secret chegou, com ${#DATABASE_URL} caracteres."
+
+      - name: 2) O formato da URL está válido?
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python - <<'PY'
+          import os, sys
+          from urllib.parse import urlparse, unquote
+          u = os.environ["DATABASE_URL"].strip()
+          if u != os.environ["DATABASE_URL"]:
+              print("AVISO: a URL tem espaco/quebra de linha nas pontas. "
+                    "Reescreva o secret sem espacos e sem aspas.")
+          if u.startswith(("'", '"')) or u.endswith(("'", '"')):
+              print("::error::A URL esta entre ASPAS. O GitHub nao remove aspas: "
+                    "salve o secret sem elas.")
+              sys.exit(1)
+          p = urlparse(u)
+          print(f"esquema  : {p.scheme}")
+          print(f"host     : {p.hostname}")
+          print(f"porta    : {p.port}")
+          print(f"usuario  : {p.username}")
+          print(f"banco    : {(p.path or '')[1:]}")
+          print(f"senha    : {'presente' if p.password else 'AUSENTE'} "
+                f"({len(p.password or '')} caracteres)")
+          if not p.hostname:
+              print("::error::Host vazio. Quase sempre isso e senha com caractere "
+                    "especial NAO codificado: um '@' na senha parte a URL no lugar "
+                    "errado. Troque @ por %40, # por %23, ? por %3F, / por %2F, "
+                    ": por %3A.")
+              sys.exit(1)
+          if p.hostname.startswith("db.") and "supabase.co" in p.hostname:
+              print("::error::Esta e a conexao DIRETA do Supabase, que so atende em "
+                    "IPv6. Os runners do GitHub sao IPv4 e nunca vao conseguir "
+                    "conectar. Use a string do 'Session pooler' (o host tem "
+                    "'pooler.supabase.com').")
+              sys.exit(1)
+          if "pooler.supabase.com" in (p.hostname or ""):
+              print("OK: esta usando o pooler (IPv4), que e o correto aqui.")
+          raw = p.password or ""
+          if raw != unquote(raw):
+              print("nota: a senha esta percent-encoded — isso e o esperado.")
+          PY
+
+      - name: 3) Conecta mesmo?
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python - <<'PY'
+          import os, sys, psycopg2
+          try:
+              c = psycopg2.connect(os.environ["DATABASE_URL"], connect_timeout=15)
+          except Exception as e:
+              print(f"::error::Nao conectou: {type(e).__name__}: {e}")
+              print("Se a mensagem fala em autenticacao/password, a senha esta "
+                    "errada ou mal codificada. Se fala em host/timeout, e a "
+                    "string errada (use o Session pooler).")
+              sys.exit(1)
+          k = c.cursor()
+          k.execute("""select current_database(), current_user,
+                              (select count(*) from person),
+                              (select count(*) from division where is_nominal),
+                              (select count(*) from afastamento),
+                              (select count(*) from candidato_novo_2026)""")
+          banco, usuario, pessoas, votacoes, afast, cand = k.fetchone()
+          print("CONECTOU.")
+          print(f"  banco ............... {banco}")
+          print(f"  usuario ............. {usuario}")
+          print(f"  parlamentares ....... {pessoas}")
+          print(f"  votacoes nominais ... {votacoes}")
+          print(f"  afastamentos ........ {afast}")
+          print(f"  candidatos novos .... {cand}")
+          if pessoas < 900:
+              print("::warning::Poucos parlamentares: pode ser OUTRO banco.")
+          k.execute("select has_table_privilege(current_user,'afastamento','INSERT')")
+          print(f"  pode gravar? ........ {k.fetchone()[0]}")
+          c.close()
+          PY
+
+      - name: Resumo
+        if: always()
+        run: echo "Veja acima qual dos 3 passos falhou — ele diz o que corrigir."

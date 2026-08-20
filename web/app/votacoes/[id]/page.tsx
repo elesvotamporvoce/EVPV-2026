@@ -7,6 +7,12 @@ import VoteChip from "@/components/VoteChip";
 import type { DivisionVote } from "@/lib/types";
 
 export const revalidate = 3600;
+// Esta pagina e dinamica (le params/searchParams), entao nao fica no
+// cache de pagina. Sem a linha abaixo, as consultas ao Supabase caem no
+// Data Cache do Next, que sobrevive a deploy e nao e limpo pelo
+// revalidatePath de rota dinamica — foi assim que o placar da P15 ficou
+// horas mostrando o numero antigo. Com no-store, sempre le o banco.
+export const fetchCache = "default-no-store";
 
 type Prop = { sigla: string; numero: string; ano: string; ementa: string | null };
 

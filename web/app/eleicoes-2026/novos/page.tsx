@@ -5,6 +5,12 @@ import ScoreBadge from "@/components/ScoreBadge";
 import { UFS } from "@/lib/format";
 
 export const revalidate = 3600;
+// Esta pagina e dinamica (le params/searchParams), entao nao fica no
+// cache de pagina. Sem a linha abaixo, as consultas ao Supabase caem no
+// Data Cache do Next, que sobrevive a deploy e nao e limpo pelo
+// revalidatePath de rota dinamica — foi assim que o placar da P15 ficou
+// horas mostrando o numero antigo. Com no-store, sempre le o banco.
+export const fetchCache = "default-no-store";
 export const metadata = {
   title: "Candidatos sem histórico no Congresso",
   description:
