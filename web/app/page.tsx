@@ -4,7 +4,7 @@ import HomeSearch from "@/components/HomeSearch";
 import BigNumbers from "@/components/BigNumbers";
 import FeaturedRotator from "@/components/FeaturedRotator";
 import SeloCandidato from "@/components/SeloCandidato";
-import { CARGO_LABEL, FEATURED_POLICIES, featuredRank, scoreColor } from "@/lib/format";
+import { CARGO_LABEL, FEATURED_POLICIES, featuredRank, scoreColor, candidaturaSets } from "@/lib/format";
 import type { PartyPolicyAgreement, PersonDir, Policy } from "@/lib/types";
 
 export const revalidate = 900;
@@ -98,9 +98,9 @@ async function getData() {
     // Quem e candidato em 2026 (para o selo nos cards)
     const { data: candIds } = await supabase
       .from("candidatura_2026")
-      .select("person_id");
-    const candSet = new Set(
-      ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+      .select("person_id, sexo");
+    const { cand: candSet, fem: femSet } = candidaturaSets(
+      candIds as { person_id: number; sexo: string | null }[] | null
     );
 
     // Mais procurados (curadoria na tabela home_featured; futuramente analytics)
@@ -133,7 +133,7 @@ async function getData() {
       });
     }
 
-    return { policies: pols, trends, recordistas, procurados, candSet, people: people ?? 0, divisions: divisions ?? 0 };
+    return { policies: pols, trends, recordistas, procurados, candSet, femSet, people: people ?? 0, divisions: divisions ?? 0 };
   } catch {
     return {
       policies: [] as Policy[],
@@ -141,6 +141,7 @@ async function getData() {
       recordistas: [] as { label: string; value: string; person: PersonDir }[],
       procurados: [] as { person: PersonDir; nVotes: number | null; eligible: number | null }[],
       candSet: new Set<number>(),
+      femSet: new Set<number>(),
       people: 0,
       divisions: 0,
     };
@@ -148,7 +149,8 @@ async function getData() {
 }
 
 export default async function Home() {
-  const { policies, trends, recordistas, procurados, candSet, people, divisions } = await getData();
+  const { policies, trends, recordistas, procurados, candSet, femSet, people, divisions } =
+    await getData();
 
   return (
     <div className="space-y-12">
@@ -211,7 +213,11 @@ export default async function Home() {
                 className="relative rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-brand-light hover:shadow-sm"
               >
                 {candSet.has(person.id) && (
-                  <SeloCandidato size="sm" className="absolute -right-2.5 -top-2.5" />
+                  <SeloCandidato
+                    size="sm"
+                    feminino={femSet.has(person.id)}
+                    className="absolute -right-2.5 -top-2.5"
+                  />
                 )}
                 <span className="mx-auto block h-16 w-16 overflow-hidden rounded-full bg-slate-100">
                   {person.photo_url ? (
@@ -313,7 +319,11 @@ export default async function Home() {
                 className="relative rounded-xl border border-slate-200 bg-white p-5 text-center hover:border-brand-light hover:shadow-sm"
               >
                 {candSet.has(r.person.id) && (
-                  <SeloCandidato size="sm" className="absolute -right-2.5 -top-2.5" />
+                  <SeloCandidato
+                    size="sm"
+                    feminino={femSet.has(r.person.id)}
+                    className="absolute -right-2.5 -top-2.5"
+                  />
                 )}
                 <p className="text-4xl font-bold leading-none text-slate-900">
                   {r.value}

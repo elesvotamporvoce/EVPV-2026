@@ -52,6 +52,17 @@ def norm(s):
     # ex.: "ENFERMEIRA  ANA PAULA" — sem isso o casamento falha)
     return re.sub(r" +", " ", s).strip()
 
+def sexo_tse(det):
+    """'FEM.' / 'MASC.' do TSE -> 'F' / 'M'. Desconhecido vira None."""
+    d = (det or {}).get("descricaoSexo") or ""
+    d = d.strip().upper()
+    if d.startswith("FEM"):
+        return "F"
+    if d.startswith("MASC"):
+        return "M"
+    return None
+
+
 def eleicao_id():
     for e in get(f"{BASE}/eleicao/ordinarias"):
         if str(e.get("ano")) == str(ANO):
@@ -96,11 +107,13 @@ def main():
                 sit = SITUACAO.get((det.get("descricaoSituacao") or "").upper().strip(),
                                    "pendente")
                 bens = det.get("totalDeBens")
+                sexo = sexo_tse(det)
                 cur.execute("""
                     INSERT INTO candidatura_2026
                       (person_id, cargo, uf, situacao, fonte, atualizado_em,
-                       patrimonio_total, nome_urna, partido_sigla, sq_candidato)
-                    VALUES (%s,%s,%s,%s,'TSE DivulgaCandContas', now(),%s,%s,%s,%s)
+                       patrimonio_total, nome_urna, partido_sigla, sq_candidato,
+                       sexo)
+                    VALUES (%s,%s,%s,%s,'TSE DivulgaCandContas', now(),%s,%s,%s,%s,%s)
                     ON CONFLICT (person_id) DO UPDATE SET
                       cargo=EXCLUDED.cargo, uf=EXCLUDED.uf,
                       situacao=EXCLUDED.situacao, fonte=EXCLUDED.fonte,
@@ -108,10 +121,11 @@ def main():
                       patrimonio_total=EXCLUDED.patrimonio_total,
                       nome_urna=EXCLUDED.nome_urna,
                       partido_sigla=EXCLUDED.partido_sigla,
-                      sq_candidato=EXCLUDED.sq_candidato
+                      sq_candidato=EXCLUDED.sq_candidato,
+                      sexo=COALESCE(EXCLUDED.sexo, candidatura_2026.sexo)
                 """, (pid, rotulo, uf, sit, bens,
                       c.get("nomeUrna"), (c.get("partido") or {}).get("sigla"),
-                      str(c.get("id"))))
+                      str(c.get("id")), sexo))
                 achados += 1
             con.commit()
             print(f"  {uf} {rotulo}: ok (acumulado {achados})")

@@ -14,8 +14,13 @@ export default function ScoreBadge({
   const tip = cat === "not_enough" ? null : supportTip(score);
   return (
     <span
-      className={`group/sb relative inline-flex items-center justify-center rounded-full text-center font-medium text-white ${
-        small ? "px-2 py-0.5 text-[13px]" : "px-3 py-1 text-[15px]"
+      // Largura FIXA no modo small: "Sempre a favor" (100px) e "Quase sempre
+      // a favor" (144px) tinham tamanhos diferentes e as listas ficavam
+      // desalinhadas. Agora toda caixinha ocupa o mesmo espaco.
+      className={`group/sb relative inline-flex shrink-0 items-center justify-center rounded-full text-center font-medium text-white ${
+        small
+          ? "w-[136px] whitespace-nowrap px-1 py-0.5 text-[10.5px] sm:w-[158px] sm:text-[13px]"
+          : "px-3 py-1 text-[15px]"
       }`}
       style={{ backgroundColor: color }}
     >

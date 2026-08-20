@@ -58,7 +58,7 @@ export default async function Eleicoes2026Page({
   const { data: cand } = await supabase
     .from("candidatura_2026")
     .select(
-      "person_id, cargo, uf, situacao, fonte, atualizado_em, patrimonio_total, nome_urna, partido_sigla"
+      "person_id, cargo, uf, situacao, fonte, atualizado_em, patrimonio_total, nome_urna, partido_sigla, sexo"
     )
     .order("situacao")
     .limit(2000);
@@ -71,6 +71,7 @@ export default async function Eleicoes2026Page({
     patrimonio_total: number | null;
     nome_urna: string | null;
     partido_sigla: string | null;
+    sexo: string | null;
   }[];
 
   let people: PersonDir[] = [];
@@ -141,7 +142,7 @@ export default async function Eleicoes2026Page({
         const c = candBy.get(p.id);
         return (
           <div key={p.id} className="space-y-1">
-            <PersonCard p={p} candidato />
+            <PersonCard p={p} candidato feminino={candBy.get(p.id)?.sexo === "F"} />
             {c && (
               <p className="px-1 text-center text-xs text-slate-500">
                 {c.cargo ? `${CARGO_2026[c.cargo] ?? c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
@@ -283,7 +284,12 @@ export default async function Eleicoes2026Page({
           </p>
           <FeaturedRotator>
             {procurados.map((p) => (
-              <PersonCard key={p.id} p={p} candidato />
+              <PersonCard
+                key={p.id}
+                p={p}
+                candidato
+                feminino={candBy.get(p.id)?.sexo === "F"}
+              />
             ))}
           </FeaturedRotator>
         </div>

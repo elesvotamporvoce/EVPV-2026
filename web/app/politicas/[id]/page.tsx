@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Voltar from "@/components/Voltar";
 import ScoreBadge from "@/components/ScoreBadge";
+import SeloCandidato from "@/components/SeloCandidato";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
 import VoteChip from "@/components/VoteChip";
 import InfoQuaseUnanime from "@/components/InfoQuaseUnanime";
-import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor } from "@/lib/format";
+import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor, nomeCurto, candidaturaSets } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
 export const revalidate = 900;
@@ -113,9 +114,11 @@ export default async function PolicyPage({
   const { pol, parties, top, bottom, divs } = await getPolicy(id);
   if (!pol) notFound();
 
-  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
-  const candSet = new Set(
-    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  const { data: candIds } = await supabase
+    .from("candidatura_2026")
+    .select("person_id, sexo");
+  const { cand: candSet, fem: femSet } = candidaturaSets(
+    candIds as { person_id: number; sexo: string | null }[] | null
   );
 
   // Se veio do perfil de um parlamentar, mostra como ELE votou nesta política
@@ -217,8 +220,18 @@ export default async function PolicyPage({
 
       {/* Mais a favor / mais contra */}
       <section className="grid gap-6 lg:grid-cols-2">
-        <RankList title="Top 10 que mais votaram a favor" rows={top} candSet={candSet} />
-        <RankList title="Top 10 que mais votaram contra" rows={bottom} candSet={candSet} />
+        <RankList
+          title="Top 10 que mais votaram a favor"
+          rows={top}
+          candSet={candSet}
+          femSet={femSet}
+        />
+        <RankList
+          title="Top 10 que mais votaram contra"
+          rows={bottom}
+          candSet={candSet}
+          femSet={femSet}
+        />
       </section>
 
       {/* Resumo das votações que compõem a política */}
@@ -310,10 +323,12 @@ function RankList({
   title,
   rows,
   candSet,
+  femSet,
 }: {
   title: string;
   rows: ScoreNamed[];
   candSet: Set<number>;
+  femSet: Set<number>;
 }) {
   return (
     <div>
@@ -323,9 +338,9 @@ function RankList({
           <Link
             key={r.person_id}
             href={`/pessoas/${r.person_id}`}
-            className="flex items-center justify-between gap-3 p-3 hover:bg-slate-50"
+            className="flex items-center justify-between gap-2 p-3 hover:bg-slate-50 sm:gap-3"
           >
-            <span className="flex min-w-0 items-center gap-3">
+            <span className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
               <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-100">
                 {r.photo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -341,18 +356,19 @@ function RankList({
                   </span>
                 )}
               </span>
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-1.5">
+                  {/* nomeCurto mantem todas as linhas com a mesma cara: nome
+                      grande vira "Primeiro Segundo.." em vez de espremer a
+                      caixinha de posicao ao lado. */}
                   <span className="truncate text-sm font-medium text-slate-700">
-                    {r.person_name}
+                    {nomeCurto(r.person_name)}
                   </span>
                   {candSet.has(r.person_id) && (
-                    <span className="shrink-0 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                      Candidato 2026
-                    </span>
+                    <SeloCandidato size="xs" feminino={femSet.has(r.person_id)} />
                   )}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="block truncate text-xs text-slate-400">
                   {r.party_sigla ?? "-"}
                   {r.uf ? ` · ${r.uf}` : ""}
                 </span>

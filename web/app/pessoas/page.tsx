@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { candidaturaSets } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import SearchFilters from "@/components/SearchFilters";
 import PersonCard from "@/components/PersonCard";
@@ -78,9 +79,11 @@ export default async function PessoasPage({
   const showFeatured =
     !sp.q && !sp.house && !sp.uf && !sp.party && !sp.mandato && page === 1;
 
-  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
-  const candSet = new Set(
-    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  const { data: candIds } = await supabase
+    .from("candidatura_2026")
+    .select("person_id, sexo");
+  const { cand: candSet, fem: femSet } = candidaturaSets(
+    candIds as { person_id: number; sexo: string | null }[] | null
   );
   const [{ data, count }, parties, { count: emEx }] = await Promise.all([
     query,
@@ -138,7 +141,12 @@ export default async function PessoasPage({
           <p className="mb-3 font-semibold text-slate-800">Mais procurados</p>
           <FeaturedRotator>
             {destaque.map((p) => (
-              <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
+              <PersonCard
+                key={p.id}
+                p={p}
+                candidato={candSet.has(p.id)}
+                feminino={femSet.has(p.id)}
+              />
             ))}
           </FeaturedRotator>
         </div>
@@ -151,7 +159,12 @@ export default async function PessoasPage({
       ) : (
         <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
           {people.map((p) => (
-            <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
+            <PersonCard
+                key={p.id}
+                p={p}
+                candidato={candSet.has(p.id)}
+                feminino={femSet.has(p.id)}
+              />
           ))}
         </div>
       )}

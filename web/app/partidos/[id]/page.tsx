@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { candidaturaSets } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Voltar from "@/components/Voltar";
@@ -60,9 +61,11 @@ export default async function PartyPage({
   const { party, agr, members } = await getParty(id);
   if (!party) notFound();
 
-  const { data: candIds } = await supabase.from("candidatura_2026").select("person_id");
-  const candSet = new Set(
-    ((candIds ?? []) as { person_id: number }[]).map((c) => c.person_id)
+  const { data: candIds } = await supabase
+    .from("candidatura_2026")
+    .select("person_id, sexo");
+  const { cand: candSet, fem: femSet } = candidaturaSets(
+    candIds as { person_id: number; sexo: string | null }[] | null
   );
 
   return (
@@ -103,7 +106,12 @@ export default async function PartyPage({
         <h2 className="mb-3 text-lg font-semibold text-slate-800">Membros</h2>
         <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
           {members.map((p) => (
-            <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
+            <PersonCard
+              key={p.id}
+              p={p}
+              candidato={candSet.has(p.id)}
+              feminino={femSet.has(p.id)}
+            />
           ))}
         </div>
       </section>

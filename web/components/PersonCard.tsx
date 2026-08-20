@@ -6,16 +6,21 @@ import type { PersonDir } from "@/lib/types";
 export default function PersonCard({
   p,
   candidato = false,
+  feminino = false,
 }: {
   p: PersonDir;
   candidato?: boolean;
+  /** vem do sexo registrado no TSE: muda o selo para "Candidata" */
+  feminino?: boolean;
 }) {
   return (
     <Link
       href={`/pessoas/${p.id}`}
       className="relative flex flex-col items-center rounded-lg border border-slate-200 bg-white p-4 text-center hover:border-brand-light hover:shadow-sm"
     >
-      {candidato && <SeloCandidato className="absolute -right-2.5 -top-2.5" />}
+      {candidato && (
+        <SeloCandidato feminino={feminino} className="absolute -right-2.5 -top-2.5" />
+      )}
       <span className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100">
         {p.photo_url ? (
           // eslint-disable-next-line @next/next/no-img-element

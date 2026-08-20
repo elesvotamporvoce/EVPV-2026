@@ -73,6 +73,17 @@ def norm(s):
     return re.sub(r" +", " ", s).strip()
 
 
+def sexo_tse(det):
+    """'FEM.' / 'MASC.' do TSE -> 'F' / 'M'. Desconhecido vira None."""
+    d = (det or {}).get("descricaoSexo") or ""
+    d = d.strip().upper()
+    if d.startswith("FEM"):
+        return "F"
+    if d.startswith("MASC"):
+        return "M"
+    return None
+
+
 def eleicao_id():
     for e in get(f"{BASE}/eleicao/ordinarias"):
         if str(e.get("ano")) == str(ANO):
@@ -138,17 +149,20 @@ def main():
                     continue
                 vistos.add(sq)
                 sigla = (c.get("partido") or {}).get("sigla")
-                sit, bens = None, None
+                sit, bens, sexo = None, None, None
                 if not args.sem_bens:
                     try:
                         det = get(f"{BASE}/candidatura/buscar/{ANO}/{uf}/{eid}/candidato/{sq}")
                         sit = SITUACAO.get(
                             (det.get("descricaoSituacao") or "").upper().strip(), "pendente")
                         bens = det.get("totalDeBens")
+                        # ATENCAO: o sexo so vem no DETALHE. Com --sem-bens ele
+                        # fica nulo e o selo cai no masculino como neutro.
+                        sexo = sexo_tse(det)
                     except Exception:
                         sit = "pendente"
                 linhas.append((sq, urna, completo, rotulo, uf, sigla,
-                               party_id(sigla), sit, bens))
+                               party_id(sigla), sit, bens, sexo))
             print(f"  {uf} {rotulo}: acumulado {len(linhas)} novos "
                   f"({pulados} já são nossos)")
             time.sleep(0.4)  # gentileza com a API
@@ -156,13 +170,14 @@ def main():
     execute_values(cur, """
         INSERT INTO candidato_novo_2026
           (sq_candidato, nome_urna, nome_completo, cargo, uf, partido_sigla,
-           party_id, situacao, patrimonio_total)
+           party_id, situacao, patrimonio_total, sexo)
         VALUES %s
         ON CONFLICT (sq_candidato) DO UPDATE SET
           nome_urna=EXCLUDED.nome_urna, nome_completo=EXCLUDED.nome_completo,
           cargo=EXCLUDED.cargo, uf=EXCLUDED.uf,
           partido_sigla=EXCLUDED.partido_sigla, party_id=EXCLUDED.party_id,
           situacao=EXCLUDED.situacao, patrimonio_total=EXCLUDED.patrimonio_total,
+          sexo=COALESCE(EXCLUDED.sexo, candidato_novo_2026.sexo),
           atualizado_em=now()
     """, linhas, page_size=500)
     con.commit()
