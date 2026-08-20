@@ -54,9 +54,13 @@ async function getData() {
     let recordistas: Rec[] = [];
     const { data: partRows } = await supabase
       .from("person_participation")
-      .select("person_id, n_votes, eligible");
-    const rows = (partRows ?? []) as { person_id: number; n_votes: number; eligible: number }[];
-    const qual = rows.filter((r) => r.eligible >= 200);
+      .select("person_id, n_votes, eligible, confiavel");
+    const rows = (partRows ?? []) as {
+      person_id: number; n_votes: number; eligible: number; confiavel: boolean | null;
+    }[];
+    // So entra no ranking quem tem denominador confiavel: sem isso o recorde de
+    // "maior ausencia" cairia num ministro licenciado, que nao faltou a nada.
+    const qual = rows.filter((r) => r.eligible >= 200 && r.confiavel !== false);
     if (qual.length) {
       const maisVotos = [...rows].sort((a, b) => b.n_votes - a.n_votes)[0];
       const maisPresente = [...qual].sort(

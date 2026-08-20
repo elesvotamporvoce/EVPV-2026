@@ -140,7 +140,7 @@ export default async function PersonPage({
   // Presenca nas votacoes: calculada aqui porque agora mora dentro do
   // "Mais informacoes" do cabecalho, e nao mais numa secao no fim da pagina.
   const presenca =
-    part && part.eligible >= 10 && part.n_votes > 0
+    part && part.eligible >= 10 && part.n_votes > 0 && part.confiavel !== false
       ? (() => {
           const faltas = Math.max(0, part.eligible - part.n_votes);
           const ausPct = Math.round((100 * faltas) / part.eligible);
@@ -317,6 +317,20 @@ export default async function PersonPage({
                       {brl(cand.patrimonio_total)}
                     </span>
                   </p>
+                )}
+                {part && part.confiavel === false && (
+                  <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left">
+                    <p className="text-sm font-semibold text-slate-800">
+                      Presença nas votações
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Não publicamos o percentual aqui. Há um período longo sem
+                      votos que os registros oficiais de licença não explicam —
+                      pode ter sido licença não registrada, missão ou afastamento
+                      para outro cargo. Sem essa certeza, um número de ausência
+                      seria injusto.
+                    </p>
+                  </div>
                 )}
                 {presenca && (
                   <div

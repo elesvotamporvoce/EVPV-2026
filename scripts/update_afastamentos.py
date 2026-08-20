@@ -197,12 +197,23 @@ def main():
     """, linhas, page_size=500)
     con.commit()
 
+    # A presenca vive numa tabela calculada: sem isto, o site continuaria
+    # mostrando o numero antigo mesmo com as licencas ja gravadas.
+    print("\nRecalculando a presenca...")
+    cur.execute("SELECT recalcular_participacao()")
+    print(f"  {cur.fetchone()[0]} parlamentares recalculados")
+    cur.execute("SELECT marcar_confiabilidade()")
+    cur.execute("SELECT count(*) FROM participacao_calc WHERE NOT confiavel")
+    print(f"  {cur.fetchone()[0]} com dado NAO confiavel (o site esconde o %)")
+    con.commit()
+
     # Conferência: quem continua com muita ausência DEPOIS do desconto?
     cur.execute("""
         SELECT pd.name, pd.house, pp.n_votes, pp.eligible, pp.votacoes_afastado
           FROM person_participation pp
           JOIN person_directory pd ON pd.id = pp.person_id
          WHERE pp.eligible >= 200
+           AND pp.confiavel
            AND (pp.eligible - pp.n_votes)::numeric / pp.eligible > 0.5
          ORDER BY (pp.eligible - pp.n_votes)::numeric / pp.eligible DESC
          LIMIT 20""")

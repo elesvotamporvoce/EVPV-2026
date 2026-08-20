@@ -20,3 +20,9 @@ WHERE v.party_id IS NOT NULL
 ORDER BY v.person_id, d.occurred_at DESC NULLS LAST;
 
 COMMIT;
+
+-- Presenca nas votacoes: recalcula a tabela participacao_calc e remarca quem
+-- tem buraco longo sem licenca que explique (nesses casos o site esconde o
+-- percentual em vez de acusar alguem que estava legalmente afastado).
+SELECT recalcular_participacao();
+SELECT marcar_confiabilidade();
