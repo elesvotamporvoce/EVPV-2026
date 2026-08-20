@@ -230,7 +230,7 @@ export default async function Home() {
                 {nVotes !== null && eligible !== null && eligible > 0 && (
                   <p className="mt-2 text-[11px] leading-snug text-slate-400">
                     Votou em {nVotes.toLocaleString("pt-BR")} de{" "}
-                    {eligible.toLocaleString("pt-BR")} sessões
+                    {eligible.toLocaleString("pt-BR")} votações
                   </p>
                 )}
               </Link>
@@ -350,7 +350,7 @@ export default async function Home() {
         <BigNumbers
           items={[
             { value: people, label: "parlamentares analisados" },
-            { value: divisions, label: "sessões de votação" },
+            { value: divisions, label: "votações nominais" },
             { value: policies.length, label: "temas políticos" },
           ]}
         />
@@ -387,9 +387,10 @@ export default async function Home() {
           <div>
             <p className="font-medium text-slate-800">3. Calculamos a média</p>
             <p className="mt-1">
-              Para cada parlamentar, o quanto ele apoia ou rejeita cada política.{" "}
+              Para cada parlamentar, o quanto ele apoia ou rejeita cada política.
+              O cálculo está em{" "}
               <Link href="/sobre" className="text-brand hover:underline">
-                Veja como funciona
+                Sobre o site
               </Link>
               .
             </p>

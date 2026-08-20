@@ -287,9 +287,9 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
             Isto compara as suas respostas com o histórico de votos de cada
             parlamentar nos temas que você respondeu. Não é recomendação de voto:
             um mesmo parlamentar pode concordar com você em um tema e discordar
-            em outro. Veja{" "}
+            em outro. A metodologia está em{" "}
             <Link href="/sobre" className="text-brand hover:underline">
-              como funciona
+              Sobre o site
             </Link>
             .
           </div>

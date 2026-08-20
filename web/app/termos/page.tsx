@@ -6,7 +6,7 @@ export default function TermosPage() {
       <h1 className="text-2xl font-bold text-brand">
         Termos de uso e privacidade
       </h1>
-      <p className="text-sm text-slate-400">Última atualização: julho de 2026</p>
+      <p className="text-sm text-slate-400">Última atualização: agosto de 2026</p>
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold text-slate-800">O que este site é</h2>

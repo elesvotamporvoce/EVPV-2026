@@ -96,6 +96,11 @@ export type Participation = {
   house: House;
   first_vote: string | null;
   n_votes: number;
+  /** votações que a pessoa PODIA ter votado, já sem os períodos de licença */
   eligible: number;
   last_vote: string | null;
+  /** o mesmo número antes de descontar licença (explica a diferença) */
+  eligible_bruto?: number;
+  /** quantas votações saíram da conta por licença/afastamento */
+  votacoes_afastado?: number;
 };

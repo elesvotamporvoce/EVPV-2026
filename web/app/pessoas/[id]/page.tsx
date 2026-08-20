@@ -131,12 +131,6 @@ export default async function PersonPage({
       ? Math.round((100 * part.n_votes) / part.eligible)
       : null;
 
-  const anoInicio = part?.first_vote
-    ? new Date(part.first_vote).getFullYear()
-    : null;
-  const anos = anoInicio ? new Date().getFullYear() - anoInicio : null;
-  const anoFim = part?.last_vote ? new Date(part.last_vote).getFullYear() : null;
-
   // Presenca nas votacoes: calculada aqui porque agora mora dentro do
   // "Mais informacoes" do cabecalho, e nao mais numa secao no fim da pagina.
   const presenca =
@@ -144,10 +138,18 @@ export default async function PersonPage({
       ? (() => {
           const faltas = Math.max(0, part.eligible - part.n_votes);
           const ausPct = Math.round((100 * faltas) / part.eligible);
+          // Votações que caíram dentro de uma licença (ministério, saúde,
+          // maternidade, missão oficial) já saíram do denominador na view.
+          const afastado = part.votacoes_afastado ?? 0;
           return {
             faltas,
             ausPct,
-            muito: ausPct > 50,
+            afastado,
+            // O aviso duro só aparece quando a ausência é do parlamentar em
+            // exercício. Enquanto a tabela de licenças não estiver carregada
+            // (afastado === 0 para todo mundo), preferimos NÃO acusar: já
+            // erramos ao chamar de faltoso quem estava licenciado.
+            muito: ausPct > 50 && afastado > 0,
             sufixo:
               dir.mandate_status === "fora"
                 ? ", no período em que exerceu o mandato"
@@ -284,7 +286,7 @@ export default async function PersonPage({
             )}
           </div>
 
-          {(anoInicio || (cand && cand.patrimonio_total != null) || presenca) && (
+          {((cand && cand.patrimonio_total != null) || presenca) && (
             <details className="group mt-3 border-t border-slate-100 pt-2.5 text-left">
               <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
                 Mais informações
@@ -302,13 +304,6 @@ export default async function PersonPage({
                 </svg>
               </summary>
               <div className="mt-2.5 space-y-1.5 text-center">
-                {anoInicio && (
-                  <p className="text-sm text-slate-500">
-                    {dir.mandate_status === "fora" && anoFim
-                      ? `No cargo de ${anoInicio} até ${anoFim}`
-                      : `No cargo desde ${anoInicio} (${anos} ${anos === 1 ? "ano" : "anos"})`}
-                  </p>
-                )}
                 {cand && cand.patrimonio_total != null && (
                   <p className="text-sm text-slate-500">
                     Patrimônio declarado (candidatura 2026):{" "}
@@ -336,7 +331,7 @@ export default async function PersonPage({
                         }
                       >
                         {presenca.faltas.toLocaleString("pt-BR")} de{" "}
-                        {part!.eligible.toLocaleString("pt-BR")} sessões
+                        {part!.eligible.toLocaleString("pt-BR")} votações
                       </span>{" "}
                       ({presenca.ausPct}% de ausência
                       {presenca.sufixo}).
@@ -347,12 +342,24 @@ export default async function PersonPage({
                         eleito é votar.
                       </p>
                     )}
+                    {presenca.afastado > 0 && (
+                      <p className="mt-1.5 text-sm text-slate-600">
+                        Outras{" "}
+                        <span className="font-semibold">
+                          {presenca.afastado.toLocaleString("pt-BR")} votações
+                        </span>{" "}
+                        aconteceram enquanto estava licenciado do mandato e{" "}
+                        <span className="font-semibold">não entram na conta</span>.
+                      </p>
+                    )}
                     <p className="mt-1.5 text-xs text-slate-400">
-                      Considera as votações nominais da casa durante o mandato;
-                      votos secretos contam como participação. Critério completo
-                      em{" "}
+                      Conta as votações nominais da casa no período em que a
+                      pessoa estava em exercício; votos secretos contam como
+                      participação. Uma sessão costuma ter várias votações, então
+                      este número é bem maior que o de dias de trabalho. Critério
+                      completo em{" "}
                       <Link href="/sobre" className="text-brand hover:underline">
-                        Como funciona
+                        Sobre o site
                       </Link>
                       .
                     </p>
@@ -373,7 +380,7 @@ export default async function PersonPage({
             Quase metade das votações do Senado é secreta. O painel registra
             que o senador votou, mas <strong>não revela o voto</strong>. Sem o
             voto de cada senador, não há como saber a posição individual e
-            incluir essas sessões nas políticas. Por isso, senadores costumam
+            incluir essas votações nas políticas. Por isso, senadores costumam
             ter menos políticas com posição do que deputados.
           </div>
         )}
