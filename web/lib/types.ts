@@ -103,4 +103,8 @@ export type Participation = {
   eligible_bruto?: number;
   /** quantas votações saíram da conta por licença/afastamento */
   votacoes_afastado?: number;
+  /** false quando ha um buraco longo sem votar que nenhuma licenca explica:
+   *  nesses casos o denominador nao e confiavel e NAO exibimos a ausencia */
+  confiavel?: boolean;
+  maior_buraco_dias?: number;
 };
