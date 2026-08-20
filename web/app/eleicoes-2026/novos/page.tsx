@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import Voltar from "@/components/Voltar";
 import ScoreBadge from "@/components/ScoreBadge";
 import { UFS } from "@/lib/format";
 
@@ -135,9 +136,7 @@ export default async function CandidatosNovosPage({
 
   return (
     <div className="space-y-6">
-      <Link href="/eleicoes-2026" className="text-sm text-brand hover:underline">
-        ← Eleições 2026
-      </Link>
+<Voltar fallback="/eleicoes-2026" />
 
       <div className="space-y-3">
         <h1 className="text-2xl font-bold text-brand">

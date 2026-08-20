@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -26,6 +27,11 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        {/* Medicao de audiencia da Vercel: sem cookies e sem identificar
+            ninguem — so conta quantas visitas cada pagina recebeu. Usamos isso
+            para saber quais parlamentares o povo mais procura. Descrito na
+            pagina de Termos e privacidade. */}
+        <Analytics />
       </body>
     </html>
   );

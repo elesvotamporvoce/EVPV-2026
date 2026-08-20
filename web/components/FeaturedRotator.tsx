@@ -4,21 +4,40 @@ import { Children, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 /**
- * Mostra os itens em grupos de `size`. A navegação é manual: setas nas laterais
- * e bolinhas embaixo. Sem movimento automático.
+ * Mostra os itens em grupos, com setas nas laterais e bolinhas embaixo.
+ * Sem movimento automático.
+ *
+ * Quantos cards aparecem por vez depende do TAMANHO DA TELA: 2 no celular,
+ * 3 no tablet, 4 no computador (ajustável em `sizes`). A primeira renderização
+ * usa o valor de desktop nos dois lados — servidor e cliente — para não dar
+ * hydration mismatch; o efeito logo corrige para a largura real.
  */
 export default function FeaturedRotator({
   children,
-  size = 3,
-  className = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
+  sizes = { base: 2, sm: 3, lg: 4 },
+  className = "grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4",
 }: {
   children: ReactNode;
-  size?: number;
+  /** quantos cards por vez em cada faixa de largura */
+  sizes?: { base: number; sm: number; lg: number };
   className?: string;
 }) {
   const items = Children.toArray(children);
-  const pages = Math.max(1, Math.ceil(items.length / size));
+  const [size, setSize] = useState(sizes.lg);
   const [page, setPage] = useState(0);
+
+  const { base: sBase, sm: sSm, lg: sLg } = sizes;
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      setSize(w >= 1024 ? sLg : w >= 640 ? sSm : sBase);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, [sBase, sSm, sLg]);
+
+  const pages = Math.max(1, Math.ceil(items.length / size));
 
   useEffect(() => {
     if (page >= pages) setPage(0);

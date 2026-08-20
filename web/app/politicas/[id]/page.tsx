@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Voltar from "@/components/Voltar";
 import ScoreBadge from "@/components/ScoreBadge";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
@@ -141,9 +142,7 @@ export default async function PolicyPage({
   return (
     <div className="space-y-8">
       <p className="text-sm">
-        <Link href="/politicas" className="text-brand hover:underline">
-          ← Todas as políticas
-        </Link>
+<Voltar fallback="/politicas" />
         {person && (
           <>
             {" "}<span className="text-slate-400">/</span>{" "}

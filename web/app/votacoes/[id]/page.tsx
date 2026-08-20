@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Voltar from "@/components/Voltar";
 import { HOUSE_LABEL, VOTE_LABEL, fmtDate } from "@/lib/format";
 import VoteChip from "@/components/VoteChip";
 import type { DivisionVote } from "@/lib/types";
@@ -56,9 +57,7 @@ export default async function DivisionPage({
 
   return (
     <div className="space-y-8">
-      <Link href="/politicas" className="text-sm text-brand hover:underline">
-        &larr; Políticas
-      </Link>
+<Voltar fallback="/politicas" />
 
       <div>
         {prop && (

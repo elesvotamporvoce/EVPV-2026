@@ -46,6 +46,14 @@ export default function TermosPage() {
           para segurança e funcionamento, prática padrão prevista no Marco Civil
           da Internet. Não vendemos nem compartilhamos dados de visitantes.
         </p>
+        <p className="text-slate-600">
+          Usamos a medição de audiência da Vercel, empresa que hospeda o site.
+          Ela conta quantas visitas cada página recebeu, de qual estado e por
+          qual tipo de aparelho, <strong>sem cookies</strong> e sem montar um
+          perfil de quem você é: não existe identificador ligando uma visita à
+          outra nem à sua pessoa. Usamos isso para uma coisa só — saber quais
+          parlamentares o público mais procura, e destacá-los nas listas.
+        </p>
       </section>
 
       <section className="space-y-2">

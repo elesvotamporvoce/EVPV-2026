@@ -197,9 +197,9 @@ export default async function Home() {
       {procurados.length > 0 && (
         <section>
           <h2 className="mb-4 text-xl font-semibold text-slate-800">
-            Políticos mais procurados
+            Mais procurados
           </h2>
-          <FeaturedRotator size={4} className="grid grid-cols-2 gap-3 pt-3 lg:grid-cols-4">
+          <FeaturedRotator>
             {procurados.map(({ person, nVotes, eligible }) => (
               <Link
                 key={person.id}

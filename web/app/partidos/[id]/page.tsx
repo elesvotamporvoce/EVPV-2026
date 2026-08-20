@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Voltar from "@/components/Voltar";
 import ScoreBadge from "@/components/ScoreBadge";
 import PersonCard from "@/components/PersonCard";
 import type { PartyPolicyAgreement, PersonDir } from "@/lib/types";
@@ -60,9 +61,7 @@ export default async function PartyPage({
 
   return (
     <div className="space-y-8">
-      <Link href="/pessoas" className="text-sm text-brand hover:underline">
-        ← Parlamentares
-      </Link>
+<Voltar fallback="/pessoas" />
 
       <div>
         <h1 className="text-2xl font-bold text-slate-800">{party.sigla}</h1>

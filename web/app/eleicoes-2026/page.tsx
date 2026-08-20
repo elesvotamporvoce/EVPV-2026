@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import PersonCard from "@/components/PersonCard";
+import FeaturedRotator from "@/components/FeaturedRotator";
 import Link from "next/link";
+import { UFS } from "@/lib/format";
 import type { PersonDir } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -41,12 +43,12 @@ export default async function Eleicoes2026Page({
   searchParams: Promise<{
     q?: string | string[];
     uf?: string | string[];
-    casa?: string | string[];
+    cargo?: string | string[];
     partido?: string | string[];
   }>;
 }) {
   const sp = await searchParams;
-  const q = one(sp.q), uf = one(sp.uf), casa = one(sp.casa), partido = one(sp.partido);
+  const q = one(sp.q), uf = one(sp.uf), cargo = one(sp.cargo), partido = one(sp.partido);
   const { data: cand } = await supabase
     .from("candidatura_2026")
     .select(
@@ -87,18 +89,23 @@ export default async function Eleicoes2026Page({
 
   // Opcoes dos filtros vem da lista COMPLETA (antes de filtrar), para o
   // usuario poder trocar de partido sem precisar limpar o filtro atual.
-  const ufsDisponiveis = [...new Set(candRows.map((c) => c.uf).filter(Boolean))].sort();
+  const ufsDisponiveis = new Set(candRows.map((c) => c.uf).filter(Boolean) as string[]);
   const partidos = [...new Set(people.map((p) => p.party_sigla).filter(Boolean))].sort();
+  const cargosDisponiveis = [
+    ...new Set(candRows.map((c) => c.cargo).filter(Boolean) as string[]),
+  ].sort((a, b) => (CARGO_2026[a] ?? a).localeCompare(CARGO_2026[b] ?? b));
 
   // Filtros (aplicados em memoria: a lista e pequena)
   people = people.filter((p) => {
     const c = candBy.get(p.id);
     if (q && !norm(p.name).includes(norm(q))) return false;
     if (uf && c?.uf !== uf) return false;
-    if (casa && p.house !== casa) return false;
+    if (cargo && c?.cargo !== cargo) return false;
     if (partido && p.party_sigla !== partido) return false;
     return true;
   });
+  // Com filtro ativo: mostramos os resultados e escondemos a lista completa.
+  const temFiltro = Boolean(q || uf || cargo || partido);
 
   // Mais procurados que concorrem
   const { data: hf } = await supabase
@@ -111,6 +118,41 @@ export default async function Eleicoes2026Page({
   const procurados = procuradosIds
     .map((id) => ((procData ?? []) as PersonDir[]).find((p) => p.id === id))
     .filter(Boolean) as PersonDir[];
+
+  // Monta a URL preservando os outros filtros (usado nos botoes de estado).
+  const href = (troca: Record<string, string | undefined>) => {
+    const u = new URLSearchParams();
+    for (const [k, v] of Object.entries({ q, uf, cargo, partido, ...troca })) {
+      if (v) u.set(k, v);
+    }
+    const s = u.toString();
+    return s ? `/eleicoes-2026?${s}` : "/eleicoes-2026";
+  };
+
+  const listaCards = (
+    <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
+      {people.map((p) => {
+        const c = candBy.get(p.id);
+        return (
+          <div key={p.id} className="space-y-1">
+            <PersonCard p={p} candidato />
+            {c && (
+              <p className="px-1 text-center text-xs text-slate-500">
+                {c.cargo ? `${CARGO_2026[c.cargo] ?? c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
+                {SITUACAO_LABEL[c.situacao ?? ""] ?? "Situação não informada"}
+                {c.patrimonio_total != null && (
+                  <>
+                    {" · patrimônio declarado: "}
+                    {brl(c.patrimonio_total)}
+                  </>
+                )}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -126,71 +168,147 @@ export default async function Eleicoes2026Page({
             exibido é o declarado pelo próprio candidato ao TSE.
           </p>
         </div>
-        <p className="text-slate-600">
-          Deputados e senadores em exercício que já se movimentaram para 2026.
-          Clique em qualquer um para ver como votou durante o mandato.
-        </p>
       </div>
 
-      <form method="GET" className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm">
-        <input name="q" defaultValue={q ?? ""} placeholder="Nome"
-          className="w-40 rounded-md border border-slate-300 px-3 py-2" />
-        <select name="uf" defaultValue={uf ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
-          <option value="">Estado</option>
-          {ufsDisponiveis.map((u) => (<option key={u} value={u!}>{u}</option>))}
-        </select>
-        <select name="casa" defaultValue={casa ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
-          <option value="">Deputado e senador</option>
-          <option value="camara">Deputado federal</option>
-          <option value="senado">Senador</option>
-        </select>
-        <select name="partido" defaultValue={partido ?? ""} className="rounded-md border border-slate-300 px-2 py-2">
-          <option value="">Partido</option>
-          {partidos.map((pt) => (<option key={pt} value={pt!}>{pt}</option>))}
-        </select>
-        <button type="submit" className="rounded-md bg-brand px-4 py-2 font-semibold text-white">Filtrar</button>
-        <Link href="/eleicoes-2026" className="px-2 py-2 text-brand hover:underline">Limpar</Link>
-      </form>
+      {/* BUSCA — em cima de tudo e centralizada. O estado sai numa caixa de
+          botoes (igual a do fim do quiz); nome, cargo e partido vem abaixo. */}
+      <div className="rounded-xl border border-brand-light bg-violet-50 p-4 text-center sm:p-6">
+        <p className="text-lg font-semibold text-slate-800">
+          Procure um candidato
+        </p>
 
-      {people.length === 0 ? (
-        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
-          <p className="font-semibold text-slate-700">
-            Ainda não há pré-candidaturas ou candidaturas na nossa base.
-          </p>
-          <p className="mx-auto mt-2 max-w-xl text-slate-500">
-            O registro no TSE encerrou em 15 de agosto e estamos importando os
-            dados oficiais. Assim que a importação terminar, os nomes aparecem
-            aqui. Enquanto isso, veja{" "}
-            <Link href="/pessoas" className="text-brand hover:underline">
-              todos os parlamentares
-            </Link>{" "}
-            e como cada um vota.
-          </p>
+        <p className="mt-3 text-sm font-medium text-slate-600">Estado</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+          <Link
+            href={href({ uf: undefined })}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
+              !uf
+                ? "border-brand bg-brand text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand"
+            }`}
+          >
+            Todos
+          </Link>
+          {UFS.filter((u) => ufsDisponiveis.has(u)).map((u) => (
+            <Link
+              key={u}
+              href={href({ uf: u })}
+              className={`rounded-lg border px-3 py-2 text-sm font-semibold ${
+                uf === u
+                  ? "border-brand bg-brand text-white"
+                  : "border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand"
+              }`}
+            >
+              {u}
+            </Link>
+          ))}
         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
-          {people.map((p) => {
-            const c = candBy.get(p.id);
-            return (
-              <div key={p.id} className="space-y-1">
-                <PersonCard p={p} candidato />
-                {c && (
-                  <p className="px-1 text-center text-xs text-slate-500">
-                    {c.cargo ? `${CARGO_2026[c.cargo] ?? c.cargo}${c.uf ? ` · ${c.uf}` : ""} · ` : ""}
-                    {SITUACAO_LABEL[c.situacao ?? ""] ?? "Situação não informada"}
-                    {c.patrimonio_total != null && (
-                      <>
-                        {" · patrimônio declarado: "}
-                        {brl(c.patrimonio_total)}
-                      </>
-                    )}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+
+        <form
+          method="GET"
+          className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center"
+        >
+          {uf && <input type="hidden" name="uf" value={uf} />}
+          <input
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Nome"
+            aria-label="Nome do candidato"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-center text-sm sm:w-44 sm:text-left"
+          />
+          <select
+            name="cargo"
+            defaultValue={cargo ?? ""}
+            aria-label="Cargo em 2026"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm sm:w-auto"
+          >
+            <option value="">Todos os cargos</option>
+            {cargosDisponiveis.map((cg) => (
+              <option key={cg} value={cg}>
+                {CARGO_2026[cg] ?? cg}
+              </option>
+            ))}
+          </select>
+          <select
+            name="partido"
+            defaultValue={partido ?? ""}
+            aria-label="Partido"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm sm:w-auto"
+          >
+            <option value="">Todos os partidos</option>
+            {partidos.map((pt) => (
+              <option key={pt} value={pt!}>
+                {pt}
+              </option>
+            ))}
+          </select>
+          <div className="mt-1 flex items-center gap-3 sm:mt-0">
+            <button
+              type="submit"
+              className="rounded-md bg-brand px-5 py-2 font-semibold text-white hover:bg-brand-dark"
+            >
+              Procurar
+            </button>
+            {temFiltro && (
+              <Link href="/eleicoes-2026" className="text-sm text-brand hover:underline">
+                Limpar
+              </Link>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* RESULTADOS — so aparecem depois de procurar, logo abaixo da busca. */}
+      {temFiltro && (
+        <section>
+          <p className="text-center text-sm text-slate-500">
+            {people.length === 0
+              ? "Nenhum candidato com esses filtros."
+              : `${people.length} ${people.length === 1 ? "resultado" : "resultados"}`}
+          </p>
+          {people.length > 0 && listaCards}
+        </section>
+      )}
+
+      {procurados.length > 0 && (
+        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
+          <p className="mb-1 text-center font-semibold text-slate-800">
+            Mais procurados
+          </p>
+          <FeaturedRotator>
+            {procurados.map((p) => (
+              <PersonCard key={p.id} p={p} candidato />
+            ))}
+          </FeaturedRotator>
         </div>
       )}
+
+      {/* LISTA COMPLETA — em ordem alfabetica; some quando ha filtro. */}
+      {!temFiltro &&
+        (people.length === 0 ? (
+          <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+            <p className="font-semibold text-slate-700">
+              Ainda não há pré-candidaturas ou candidaturas na nossa base.
+            </p>
+            <p className="mx-auto mt-2 max-w-xl text-slate-500">
+              O registro no TSE encerrou em 15 de agosto e estamos importando os
+              dados oficiais. Assim que a importação terminar, os nomes aparecem
+              aqui. Enquanto isso, veja{" "}
+              <Link href="/pessoas" className="text-brand hover:underline">
+                todos os parlamentares
+              </Link>{" "}
+              e como cada um vota.
+            </p>
+          </div>
+        ) : (
+          <section>
+            <p className="text-center text-sm text-slate-500">
+              {people.length.toLocaleString("pt-BR")} candidatos, em ordem
+              alfabética
+            </p>
+            {listaCards}
+          </section>
+        ))}
 
       {(nNovos ?? 0) > 0 && (
         <Link
@@ -211,17 +329,6 @@ export default async function Eleicoes2026Page({
             Ver a lista
           </span>
         </Link>
-      )}
-
-      {procurados.length > 0 && (
-        <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
-          <p className="mb-3 font-semibold text-slate-800">Mais procurados que vão concorrer</p>
-          <div className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
-            {procurados.slice(0, 6).map((p) => (
-              <PersonCard key={p.id} p={p} candidato />
-            ))}
-          </div>
-        </div>
       )}
 
       <section className="rounded-lg border border-slate-200 bg-white p-5">

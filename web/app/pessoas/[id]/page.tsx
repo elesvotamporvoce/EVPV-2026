@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Voltar from "@/components/Voltar";
 import PositionBar from "@/components/PositionBar";
 import VoteChip from "@/components/VoteChip";
 import SeloCandidato from "@/components/SeloCandidato";
@@ -231,9 +232,7 @@ export default async function PersonPage({
 
   return (
     <div className="space-y-8">
-      <Link href="/pessoas" className="text-sm text-brand hover:underline">
-        ← Todos os parlamentares
-      </Link>
+<Voltar fallback="/pessoas" />
 
       {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
           nas bordas da caixa durante o scroll) */}

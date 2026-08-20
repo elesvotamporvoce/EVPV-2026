@@ -130,7 +130,7 @@ export default async function PessoasPage({
       {destaque.length > 0 && (
         <div className="rounded-xl border border-brand-light bg-violet-50/60 p-4">
           <p className="mb-3 font-semibold text-slate-800">Mais procurados</p>
-          <FeaturedRotator className="grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3 lg:grid-cols-4">
+          <FeaturedRotator>
             {destaque.map((p) => (
               <PersonCard key={p.id} p={p} candidato={candSet.has(p.id)} />
             ))}
