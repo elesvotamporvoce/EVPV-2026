@@ -17,6 +17,7 @@ on:
           - tse_parlamentares        # atualiza candidatura dos parlamentares atuais
           - scores                   # recalcula os agreement scores
           - integridade              # checagem de integridade dos dados
+          - testar_tse               # so diagnostico: por que o TSE responde 403
       dry_run:
         description: "Só simular, sem gravar (vale para licenças)"
         required: false
@@ -137,6 +138,8 @@ jobs:
               python scoring/score.py ;;
             integridade)
               python scripts/check_integrity.py ;;
+            testar_tse)
+              python scripts/testar_tse.py ;;
             *) echo "::error::tarefa desconhecida: $TAREFA"; exit 1 ;;
           esac
 

@@ -36,49 +36,11 @@ SITUACAO = {  # descrição do TSE -> nosso vocabulário
 UFS = ("AC AL AM AP BA CE DF ES GO MA MG MS MT PA PB PE PI PR RJ RN RO RR RS "
        "SC SE SP TO").split()
 
-# ---------------------------------------------------------------- HTTP no TSE
-# O DivulgaCandContas passou a responder 403 para cliente que nao parece
-# navegador (o "EVPV/1.0" que usavamos aqui deixou de passar em 21/08/2026).
-# Mandamos os mesmos cabecalhos de um navegador; se ainda vier 403, trocamos o
-# conjunto uma vez antes de desistir — repetir o mesmo 403 nao adianta.
-_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-           "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-_CABECALHOS = [
-    {"User-Agent": _CHROME,
-     "Accept": "application/json, text/plain, */*",
-     "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-     "Referer": "https://divulgacandcontas.tse.jus.br/divulga/"},
-    {"User-Agent": _CHROME, "Accept": "*/*"},
-]
-
-def get(url, tries=3):
-    ultimo = None
-    for cab in _CABECALHOS:
-        for i in range(tries):
-            try:
-                req = urllib.request.Request(url, headers=cab)
-                with urllib.request.urlopen(req, timeout=40) as r:
-                    return json.load(r)
-            except urllib.error.HTTPError as e:
-                ultimo = e
-                if e.code == 403:
-                    break  # nao melhora repetindo: tenta o outro cabecalho
-                if e.code in (429, 500, 502, 503, 504) and i < tries - 1:
-                    time.sleep(3 * (i + 1))
-                    continue
-                raise
-            except Exception as e:
-                ultimo = e
-                if i == tries - 1:
-                    break
-                time.sleep(2 * (i + 1))
-    if isinstance(ultimo, urllib.error.HTTPError) and ultimo.code == 403:
-        raise SystemExit(
-            "\nO TSE respondeu 403 (Forbidden) em:\n  " + url +
-            "\nIsso e bloqueio do lado deles, nao erro do script."
-            "\nRode 'python scripts/testar_tse.py' para descobrir se e cabecalho,"
-            "\nVPN/proxy, bloqueio por IP ou o site fora do ar.\n")
-    raise ultimo
+# O cliente HTTP mora em scripts/tse_http.py, compartilhado com os outros
+# scripts do TSE: em 21/08/2026 o DivulgaCandContas passou a devolver 403
+# para pedido de programa, e a solucao (sessao aquecida na home antes de
+# chamar a API) precisa valer para todos igual.
+from tse_http import get  # noqa: E402
 
 def norm(s):
     s = unicodedata.normalize("NFD", s or "")
