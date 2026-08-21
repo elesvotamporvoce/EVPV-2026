@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { featuredRank } from "@/lib/format";
+import { comNegrito } from "@/lib/texto";
 import type { Policy } from "@/lib/types";
 
 export const revalidate = 900;
@@ -54,7 +55,7 @@ export default async function PoliticasPage() {
             </div>
             {(pol.quiz_hook ?? pol.description) && (
               <p className="mt-3 text-center text-base leading-relaxed text-slate-600">
-                {pol.quiz_hook ?? pol.description}
+                {comNegrito(pol.quiz_hook ?? pol.description ?? "")}
               </p>
             )}
           </Link>

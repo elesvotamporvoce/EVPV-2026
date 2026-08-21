@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { UFS, CARGO_LABEL } from "@/lib/format";
+import { UFS, CARGO_LABEL, QUIZ_CURTO_POLICIES } from "@/lib/format";
+import { comNegrito } from "@/lib/texto";
 
 export type QuizPolicy = {
   id: number;
@@ -33,7 +34,28 @@ type PersonResult = {
 
 type PartyResult = { sigla: string; match: number; n: number };
 
-const QUIZ_CURTO = 10; // temas do quiz rapido: os 10 com mais parlamentares posicionados
+const QUIZ_CURTO = QUIZ_CURTO_POLICIES.length; // 10 temas curados (ver lib/format.ts)
+
+/**
+ * Monta a lista do quiz rapido na ordem curada de QUIZ_CURTO_POLICIES.
+ * Nome que nao existir mais no banco nao deixa buraco: a vaga vai para a
+ * proxima politica de fora da lista (as `policies` ja chegam ordenadas por
+ * numero de parlamentares posicionados).
+ */
+function montarQuizCurto(policies: QuizPolicy[]): QuizPolicy[] {
+  const porNome = new Map(policies.map((p) => [p.name, p]));
+  const escolhidas = QUIZ_CURTO_POLICIES.map((n) => porNome.get(n)).filter(
+    Boolean
+  ) as QuizPolicy[];
+  if (escolhidas.length < Math.min(QUIZ_CURTO, policies.length)) {
+    const jaTem = new Set(escolhidas.map((p) => p.id));
+    for (const p of policies) {
+      if (escolhidas.length >= QUIZ_CURTO) break;
+      if (!jaTem.has(p.id)) escolhidas.push(p);
+    }
+  }
+  return escolhidas;
+}
 
 export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const [started, setStarted] = useState(false);
@@ -44,6 +66,8 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
   const [loading, setLoading] = useState(false);
   const [people, setPeople] = useState<PersonResult[] | null>(null);
   const [parties, setParties] = useState<PartyResult[] | null>(null);
+
+  const listaCurta = useMemo(() => montarQuizCurto(policies), [policies]);
 
   const current = list[step];
   const done = step >= list.length;
@@ -177,13 +201,13 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           <button
             type="button"
             onClick={() => {
-              setList(policies.slice(0, QUIZ_CURTO));
+              setList(listaCurta);
               setStep(0);
               setStarted(true);
             }}
             className="rounded-lg bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark"
           >
-            Quiz rápido · {Math.min(QUIZ_CURTO, policies.length)} temas
+            Quiz rápido · {listaCurta.length} temas
           </button>
           <button
             type="button"
@@ -198,8 +222,8 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
           </button>
         </div>
         <p className="mt-2 text-xs text-slate-500">
-          O rápido usa os {Math.min(QUIZ_CURTO, policies.length)} temas em que
-          mais parlamentares têm posição. Dá para fazer o completo depois.
+          O rápido usa {listaCurta.length} temas variados, com bastante voto
+          registrado no Congresso. Dá para fazer o completo depois.
         </p>
         <p className="mt-3 text-xs text-slate-500">
           Suas respostas ficam no seu navegador. Não pedimos cadastro nem
@@ -395,7 +419,7 @@ export default function QuizPerfil({ policies }: { policies: QuizPolicy[] }) {
               </svg>
             </summary>
             <p className="mt-1.5 text-center text-[15px] leading-relaxed text-amber-900/90">
-              {current.quiz_hook}
+              {comNegrito(current.quiz_hook)}
             </p>
           </details>
         )}

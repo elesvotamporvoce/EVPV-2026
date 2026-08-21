@@ -8,8 +8,13 @@ export const metadata = {
     "Responda como você votaria nos temas que o Congresso decidiu e descubra quais partidos e parlamentares mais votam como você.",
 };
 
-// Ordem: as políticas com mais parlamentares com posição vêm primeiro,
-// porque separam melhor quem vota de um jeito e quem vota de outro.
+// Ordem do quiz COMPLETO: as políticas com mais parlamentares com posição vêm
+// primeiro, porque separam melhor quem vota de um jeito e quem vota de outro.
+// O desempate por id não é decoração: sem ele, duas políticas empatadas em
+// n_scored trocavam de lugar entre um carregamento e outro (o Postgres não
+// garante ordem sem ORDER BY), e a lista mudava sozinha.
+// O quiz RÁPIDO não usa esta ordem — ele tem lista própria e curada, em
+// QUIZ_CURTO_POLICIES (lib/format.ts).
 async function getPolicies() {
   const [{ data: pols }, { data: part }] = await Promise.all([
     supabase
@@ -26,7 +31,7 @@ async function getPolicies() {
     ])
   );
   return ((pols ?? []) as QuizPolicy[]).sort(
-    (a, b) => (n.get(b.id) ?? 0) - (n.get(a.id) ?? 0)
+    (a, b) => (n.get(b.id) ?? 0) - (n.get(a.id) ?? 0) || a.id - b.id
   );
 }
 

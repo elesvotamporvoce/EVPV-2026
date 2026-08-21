@@ -66,9 +66,12 @@ export const UFS = [
 ];
 
 // Políticas em destaque no site (aparecem primeiro, com selo)
+// ATENCAO: estes nomes precisam bater LETRA POR LETRA com policy.name no banco.
+// Nome que nao existir mais (politica renomeada) some silenciosamente daqui —
+// nao quebra nada, so deixa de aparecer. Se renomear no banco, renomeie aqui.
 export const FEATURED_POLICIES = [
   "Combate à violência contra a mulher",
-  "Proteção dos direitos trabalhistas",
+  "Valorização dos trabalhadores",
   "Conservação da biodiversidade",
   "Investimento na educação pública",
 ];
@@ -77,6 +80,27 @@ export function featuredRank(name: string): number {
   const i = FEATURED_POLICIES.indexOf(name);
   return i === -1 ? 99 : i;
 }
+
+/**
+ * Temas do QUIZ RAPIDO, nesta ordem. Lista curada, nao automatica: antes o
+ * quiz pegava os 10 primeiros por numero de parlamentares posicionados, o que
+ * (a) deixava a ordem instavel quando duas politicas empatavam e (b) escolhia
+ * os temas por cobertura de voto, nao por relevancia para quem responde.
+ * Se um nome aqui nao existir mais no banco (renomeado), a vaga e preenchida
+ * pela politica mais votada que ainda nao esta na lista — o quiz nunca encolhe.
+ */
+export const QUIZ_CURTO_POLICIES = [
+  "Investimento na educação pública",
+  "Simplificação de impostos",
+  "Combate à violência contra a mulher",
+  "Valorização dos trabalhadores",
+  "Conservação da biodiversidade",
+  "Políticas de igualdade racial",
+  "Direito à saúde integral",
+  "Blindagem de parlamentares (PEC da Blindagem)",
+  "Redução das emissões de carbono",
+  "Legalização dos jogos de azar",
+];
 
 export function categoryFromScore(score: number | null): string {
   if (score === null) return "not_enough";
