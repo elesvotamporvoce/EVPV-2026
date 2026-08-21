@@ -128,6 +128,62 @@ def main():
             print(f"  {uf} {rotulo}: ok (acumulado {achados})")
             time.sleep(0.4)  # gentileza com a API
 
+    # ------------------------------------------------------------------
+    # Segunda passada: quem ficou para tras na varredura.
+    #
+    # O casamento acima e por (nome, UF do MANDATO). Quem concorre em OUTRO
+    # estado nunca casa: o Tiririca e deputado por SP e se candidatou pelo CE,
+    # a Rosangela Moro e deputada por SP e se candidatou pelo PR, a Simone
+    # Tebet e senadora por MS e se candidatou por SP. Essas linhas ja existem
+    # na tabela (entraram em varreduras anteriores) e ficariam congeladas para
+    # sempre — foi assim que 5 candidaturas ficaram sem o campo sexo.
+    #
+    # Aqui nao adivinhamos nada: usamos o sq_candidato ja gravado, que e o id
+    # do proprio TSE, e pedimos o detalhe na UF em que a pessoa registrou.
+    # A fonte continua sendo o TSE.
+    cur.execute("""
+        SELECT person_id, uf, sq_candidato
+          FROM candidatura_2026
+         WHERE sq_candidato IS NOT NULL
+           AND atualizado_em < now() - interval '30 minutes'
+    """)
+    pendentes = cur.fetchall()
+    if pendentes:
+        print(f"\nSegunda passada: {len(pendentes)} candidatura(s) nao vista(s) "
+              f"na varredura; atualizando pelo id do TSE...")
+    recuperados, falharam = 0, []
+    for pid, uf_cand, sq in pendentes:
+        try:
+            det = get(f"{BASE}/candidatura/buscar/{ANO}/{uf_cand}/{eid}/candidato/{sq}")
+        except SystemExit:
+            raise
+        except Exception as e:
+            falharam.append((pid, sq, str(e)[:60]))
+            continue
+        sexo = sexo_tse(det)
+        sit = SITUACAO.get((det.get("descricaoSituacao") or "").upper().strip(),
+                           "pendente")
+        cur.execute("""
+            UPDATE candidatura_2026
+               SET sexo = COALESCE(%s, sexo),
+                   situacao = %s,
+                   patrimonio_total = COALESCE(%s, patrimonio_total),
+                   atualizado_em = now()
+             WHERE person_id = %s
+        """, (sexo, sit, det.get("totalDeBens"), pid))
+        recuperados += 1
+        time.sleep(0.3)
+    if pendentes:
+        con.commit()
+        print(f"  atualizadas {recuperados}; falharam {len(falharam)}")
+        for pid, sq, err in falharam[:10]:
+            print(f"    person_id={pid} sq={sq}: {err}")
+
+    cur.execute("SELECT count(*) FILTER (WHERE sexo IS NULL), count(*) "
+                "FROM candidatura_2026")
+    sem_sexo, total_cand = cur.fetchone()
+    print(f"\ncandidaturas na tabela: {total_cand}; ainda sem sexo: {sem_sexo}")
+
     with open("nao_casados_tse.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["uf","cargo","nome_completo","nome_urna","id_tse"])
         w.writerows(nao_casados)
