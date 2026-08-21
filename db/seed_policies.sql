@@ -386,7 +386,7 @@ JOIN (VALUES
 JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 
 -- ---------------------------------------------------------------------------
---  Segurança jurídica no campo (ex-"Distribuição e acesso à terra")
+--  Novas regras de desapropriação rural (ex-"Distribuição e acesso à terra")
 --
 --  19/08/2026: DES-INVERTIDA e renomeada (era a ultima politica invertida do
 --  site). Mesma regra da P5/P6: nomear pelo que o Congresso de fato votou;
@@ -395,12 +395,12 @@ JOIN division d ON d.house='camara' AND d.external_id = v.ext;
 --  nos meritos; PL/NOVO/Oposicao Sim). Destaques nominais das mesmas
 --  proposicoes NAO entraram (decisao D6: empilhamento; reavaliar depois).
 -- ---------------------------------------------------------------------------
-DELETE FROM policy WHERE name = 'Segurança jurídica no campo';
+DELETE FROM policy WHERE name = 'Novas regras de desapropriação rural';
 DELETE FROM policy WHERE name = 'Distribuição e acesso à terra';  -- nome antigo
 WITH p AS (
   INSERT INTO policy (name, description, provisional) VALUES (
-    'Segurança jurídica no campo',
-    'Segurança jurídica no campo: A FAVOR de proibir a desapropriação do imóvel produtivo (PL 4357/2023), de punir ocupações de terra (PL 709/2023) e de validar registros antigos em faixa de fronteira (PL 4497/2024, o "PL da Grilagem"). Votar SIM apoia a política.',
+    'Novas regras de desapropriação rural',
+    'Novas regras de desapropriação rural: A FAVOR de proibir a desapropriação do imóvel produtivo (PL 4357/2023), de punir ocupações de terra (PL 709/2023) e de validar registros antigos em faixa de fronteira (PL 4497/2024, o "PL da Grilagem"). Votar SIM apoia a política.',
     false) RETURNING id
 )
 INSERT INTO policy_division (policy_id, division_id, stance, strength)
@@ -596,7 +596,7 @@ UPDATE policy SET quiz_hook = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'Define o quanto o poder público age para reduzir a desigualdade racial: punição por racismo, cota em concurso e partido obrigado a bancar candidatura negra.'
  WHEN 'Valorização dos trabalhadores' THEN 'Mexe no tempo livre e no bolso de quem tem carteira assinada: quantas horas se trabalha por semana, por exemplo a **escala 6x1**, e quanto entra no seu FGTS e no INSS.'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Trata do tamanho da pena de quem invadiu e depredou o Congresso, o Planalto e o STF em 8 de janeiro de 2023.'
- WHEN 'Segurança jurídica no campo' THEN 'Trata de uma disputa antiga no campo: se um pedaço enorme de terra não serve para nada, o dono tem o direito de segurá-lo, ou o governo deve loteá-lo para o pequeno agricultor?'
+ WHEN 'Novas regras de desapropriação rural' THEN 'Trata de uma disputa antiga no campo: se um pedaço enorme de terra não serve para nada, o dono tem o direito de segurá-lo, ou o governo deve loteá-lo para o pequeno agricultor?'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Define se deputado e senador respondem a processo criminal como qualquer cidadão, ou se dependem da autorização dos colegas para serem julgados.'
  WHEN 'Política nacional de cultura' THEN 'Decide se shows, cinema, teatro e ponto de cultura da sua cidade têm verba previsível, e se o streaming paga uma contribuição que financia produção brasileira.'
  WHEN 'Isenção de impostos para igrejas' THEN 'Igreja já não paga imposto sobre templo, patrimônio e renda. A proposta estende a isenção para tudo que ela compra.'
@@ -616,7 +616,7 @@ UPDATE policy SET side_a_title = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve corrigir a desigualdade'
  WHEN 'Valorização dos trabalhadores' THEN 'Direito mínimo não se negocia para baixo'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'Corrigir penas desproporcionais'
- WHEN 'Segurança jurídica no campo' THEN 'A propriedade privada deve ser intocável'
+ WHEN 'Novas regras de desapropriação rural' THEN 'A propriedade privada deve ser intocável'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político também é perseguido'
  WHEN 'Política nacional de cultura' THEN 'Sem verba fixa, a cultura some do interior'
  WHEN 'Isenção de impostos para igrejas' THEN 'Menos imposto, mais ação social'
@@ -636,7 +636,7 @@ UPDATE policy SET side_a_note = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'acredito que séculos de desigualdade não acabam sozinhos; é preciso política que equilibre e abra caminho'
  WHEN 'Valorização dos trabalhadores' THEN 'acredito que jornada e aposentadoria são garantias mínimas, não moeda de troca'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que mais de quinze anos para quem entrou na multidão sem liderar nem financiar é punição excessiva'
- WHEN 'Segurança jurídica no campo' THEN 'o dono é o dono; acho que o governo não pode forçar a venda em nome da reforma agrária'
+ WHEN 'Novas regras de desapropriação rural' THEN 'o dono é o dono; acho que o governo não pode forçar a venda em nome da reforma agrária'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'acho que o processo pode ser usado só para tirar do caminho quem incomoda'
  WHEN 'Política nacional de cultura' THEN 'acredito que sem repasse garantido só os grandes centros continuam tendo cultura'
  WHEN 'Isenção de impostos para igrejas' THEN 'acho que cada real que a igreja não paga em imposto vira atendimento a quem precisa'
@@ -656,7 +656,7 @@ UPDATE policy SET side_b_title = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'A lei deve ser igual para todos'
  WHEN 'Valorização dos trabalhadores' THEN 'Deixar empresa e trabalhador negociarem'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'O recado importa mais que o desconto'
- WHEN 'Segurança jurídica no campo' THEN 'Terra tem que cumprir função social'
+ WHEN 'Novas regras de desapropriação rural' THEN 'Terra tem que cumprir função social'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Político não pode ter regra própria'
  WHEN 'Política nacional de cultura' THEN 'Cultura se financia com público'
  WHEN 'Isenção de impostos para igrejas' THEN 'Quem não paga joga a conta no resto'
@@ -676,7 +676,7 @@ UPDATE policy SET side_b_note = CASE name
  WHEN 'Políticas de igualdade racial' THEN 'acho que política que classifica por raça oficializa uma divisão que não deveria existir'
  WHEN 'Valorização dos trabalhadores' THEN 'acredito que patrão e empregado devem poder fazer o acordo que cabe no setor deles, sem uma regra única para todo mundo'
  WHEN 'Redução de penas do 8 de Janeiro' THEN 'acho que reduzir pena de ataque às instituições sinaliza que agir contra a democracia sai barato'
- WHEN 'Segurança jurídica no campo' THEN 'acho que fazenda que não gera alimento, desmata ou usa trabalho escravo deveria virar assentamento'
+ WHEN 'Novas regras de desapropriação rural' THEN 'acho que fazenda que não gera alimento, desmata ou usa trabalho escravo deveria virar assentamento'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'acredito que quem cometeu crime deve responder como qualquer pessoa'
  WHEN 'Política nacional de cultura' THEN 'acho que show, filme e festival devem viver de ingresso pago e patrocínio, não de imposto'
  WHEN 'Isenção de impostos para igrejas' THEN 'acredito que o imposto que a igreja deixa de pagar aparece no preço que todo mundo paga'
@@ -707,7 +707,7 @@ Para quem defende, sem mínimo em lei a negociação vira imposição; para quem
 Para quem defende, mais de quinze anos para quem só entrou na multidão é excessivo; para quem critica, reduzir pena de ataque às instituições sinaliza que atentar contra a democracia sai barato.'
  WHEN 'Política nacional de cultura' THEN 'Os shows da sua cidade, o cinema nacional e os festivais do seu bairro dependem de verba pública para existir. Parte das votações tornou permanente o repasse federal da cultura a estados e municípios; parte obrigou o streaming a contribuir para o cinema brasileiro.
 Quem defende diz que verba previsível leva cultura para além dos grandes centros; quem critica diz que despesa fixada em lei tira espaço de outras prioridades.'
- WHEN 'Segurança jurídica no campo' THEN 'Pela Constituição, terra mal usada pode ser desapropriada para reforma agrária. O Congresso apertou essa porta: se a fazenda produz, ninguém tira; se tem crime ambiental ou trabalho escravo, só vale depois de condenação final na Justiça; quem ocupa terra perde direitos; e registros antigos de terra pública ficam valendo.
+ WHEN 'Novas regras de desapropriação rural' THEN 'Pela Constituição, terra mal usada pode ser desapropriada para reforma agrária. O Congresso apertou essa porta: se a fazenda produz, ninguém tira; se tem crime ambiental ou trabalho escravo, só vale depois de condenação final na Justiça; quem ocupa terra perde direitos; e registros antigos de terra pública ficam valendo.
 Um lado diz que quem produz não pode viver com medo de perder a terra; o outro, que a reforma agrária ficou sem caminho e a grilagem foi premiada.'
  WHEN 'Blindagem de parlamentares (PEC da Blindagem)' THEN 'Hoje é o Supremo que decide se abre processo criminal contra deputado ou senador, sem pedir licença a ninguém. A PEC 3/2021 mudava isso: o processo só começaria se a própria Câmara ou o próprio Senado autorizasse, em votação secreta. A Câmara aprovou em setembro de 2025; depois de protestos pelo país, o Senado rejeitou.
 Para quem defende, o processo pode ser usado para tirar do caminho quem incomoda; para quem critica, quem cometeu crime responde como qualquer pessoa.'
@@ -785,7 +785,7 @@ Nenhuma das cinco votações foi quase unânime: as maiorias ficaram entre 62% e
 Duas são do PL 363/2025, que torna permanente o repasse da Política Nacional Aldir Blanc de Fomento à Cultura a estados e municípios: a aprovação do substitutivo, por 278 a 111, que é a votação decisiva desta política, e o destaque que manteve o texto contra uma supressão pedida pelo NOVO, por 266 a 113.
 As outras duas são do PL 8889/2017, que regulamenta o streaming e cria a contribuição destinada ao financiamento do audiovisual brasileiro: a aprovação da subemenda substitutiva, por 330 a 118, e a emenda aglutinativa que fechou o texto, por 325 a 94.
 Nenhuma das quatro foi quase unânime.'
- WHEN 'Segurança jurídica no campo' THEN 'São quatro votações, todas na Câmara. Votar SIM apoia a política.
+ WHEN 'Novas regras de desapropriação rural' THEN 'São quatro votações, todas na Câmara. Votar SIM apoia a política.
 O PL 4357/2023 é a votação de maior peso: proíbe desapropriar o imóvel produtivo para reforma agrária e exige condenação criminal definitiva nos casos de crime ambiental ou trabalhista. Foi aprovado em novembro de 2025, por 287 a 113.
 O PL 709/2023 pune quem ocupa ou invade propriedades: quem participa de ocupação fica impedido de ser beneficiário da reforma agrária. Foi aprovado em maio de 2024, por 336 a 120.
 O PL 4497/2024, que ficou conhecido como PL da Grilagem, valida registros antigos sobre terras públicas em faixa de fronteira, os 150 quilômetros ao longo das fronteiras do país. Aparece duas vezes: na aprovação pela Câmara, em junho de 2025, por 328 a 100, e na aprovação do texto que voltou do Senado, em dezembro de 2025, por 310 a 115.
