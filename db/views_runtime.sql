@@ -51,40 +51,34 @@ SELECT p.id,
   LEFT JOIN party_membership pm ON pm.person_id = p.id AND pm.end_date IS NULL
   LEFT JOIN party pa ON pa.id = pm.party_id;
 
--- Participação: votos dados vs sessões em que PODIA votar. O CASE alinha o
--- início do mandato ao começo da legislatura (fev/2019 e fev/2023), para não
--- contar contra o parlamentar as sessões anteriores à posse; licenciados e
--- ex-mandatos param de contar depois do último voto.
+-- Participação: votos dados vs votações em que PODIA votar, já descontando os
+-- períodos de licença.
+--
+-- ATENÇÃO — esta view NÃO calcula mais nada. A conta antiga vivia aqui dentro
+-- (um cross join de 1.063 pessoas × 2.287 votações) e estourava o timeout de
+-- 60s do Supabase. Hoje ela só lê participacao_calc, que é preenchida pela
+-- função recalcular_participacao() e marcada por marcar_confiabilidade() —
+-- ambas rodam no fim de db/derive_memberships.sql e no
+-- scripts/update_afastamentos.py.
+--
+-- A tabela participacao_calc, a tabela afastamento e as duas funções foram
+-- criadas por migrations no Supabase (afastamentos_e_presenca_justa_v2,
+-- participacao_precalculada, marca_presenca_nao_confiavel,
+-- endurecimento_funcoes_participacao). Elas não estão neste arquivo: se um dia
+-- for preciso recriar o banco do zero, aplique as migrations antes deste .sql,
+-- senão o CREATE VIEW abaixo falha por falta da tabela.
 CREATE OR REPLACE VIEW person_participation WITH (security_invoker = true) AS
-SELECT p.id AS person_id,
-       p.house,
-       s.first_vote,
-       s.n_votes,
-       ( SELECT count(*) AS count
-           FROM division d2
-          WHERE d2.is_nominal AND d2.house = p.house AND d2.occurred_at >=
-                CASE
-                    WHEN s.first_vote >= '2019-02-01 00:00:00+00'::timestamptz
-                         AND s.first_vote < '2019-05-01 00:00:00+00'::timestamptz
-                      THEN '2019-02-01 00:00:00+00'::timestamptz
-                    WHEN s.first_vote >= '2023-02-01 00:00:00+00'::timestamptz
-                         AND s.first_vote < '2023-05-01 00:00:00+00'::timestamptz
-                      THEN '2023-02-01 00:00:00+00'::timestamptz
-                    ELSE s.first_vote::timestamptz
-                END
-            AND ((COALESCE(p.mandate_status, '') <> ALL (ARRAY['fora'::text, 'licenciado'::text]))
-                 OR d2.occurred_at <= s.last_vote)
-       ) AS eligible,
-       s.last_vote
-  FROM person p
-  CROSS JOIN LATERAL (
-        SELECT min(d.occurred_at) AS first_vote,
-               max(d.occurred_at) AS last_vote,
-               count(*) FILTER (WHERE v.option <> 'ausente') AS n_votes
-          FROM vote v
-          JOIN division d ON d.id = v.division_id AND d.is_nominal
-         WHERE v.person_id = p.id
-  ) s;
+SELECT person_id,
+       house,
+       first_vote,
+       n_votes,
+       eligible,
+       last_vote,
+       eligible_bruto,
+       votacoes_afastado,
+       confiavel,
+       maior_buraco_dias
+  FROM participacao_calc;
 
 -- Score por (pessoa, política) com o nome da política.
 CREATE OR REPLACE VIEW person_policy_score WITH (security_invoker = true) AS

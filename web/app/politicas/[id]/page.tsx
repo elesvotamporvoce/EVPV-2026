@@ -2,13 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Voltar from "@/components/Voltar";
-import ScoreBadge from "@/components/ScoreBadge";
-import SeloCandidato from "@/components/SeloCandidato";
+import RankList from "@/components/RankList";
 import PositionBar from "@/components/PositionBar";
 import PartyTable from "@/components/PartyTable";
 import VoteChip from "@/components/VoteChip";
 import InfoQuaseUnanime from "@/components/InfoQuaseUnanime";
-import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor, nomeCurto, candidaturaSets } from "@/lib/format";
+import { HOUSE_LABEL, categoryLabel, fmtDate, scoreColor, candidaturaSets } from "@/lib/format";
 import type { Policy, PartyPolicyAgreement, ScoreNamed, PersonDir } from "@/lib/types";
 
 export const revalidate = 900;
@@ -210,7 +209,11 @@ export default async function PolicyPage({
       <h1 className="text-3xl font-bold leading-tight text-slate-800">{pol.name}</h1>
 
       {pol.impact && (
-        <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-5">
+        /* Esta caixa e o PADRAO visual da pagina: quadrada, faixa colorida de
+           4px a esquerda, p-5 e shadow-sm. Todas as secoes abaixo (Top 10,
+           Resumo, Votacoes consideradas, Posicao por partido) repetem isso —
+           mude aqui e mude la tambem. */
+        <div className="rounded-none border-l-4 border-amber-500 bg-amber-100 p-5 shadow-sm">
           <p className="font-semibold text-amber-900">Por que isso importa para você?</p>
           <p className="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-amber-900/90">
             {pol.impact}
@@ -218,42 +221,46 @@ export default async function PolicyPage({
         </div>
       )}
 
-      {/* Mais a favor / mais contra */}
+      {/* Mais a favor / mais contra.
+          Uma coluna so ate lg: no celular "a favor" fica em cima e "contra"
+          embaixo, cada um ocupando a mesma largura da caixa amarela. */}
       <section className="grid gap-6 lg:grid-cols-2">
         <RankList
           title="Top 10 que mais votaram a favor"
           rows={top}
           candSet={candSet}
           femSet={femSet}
+          accent="border-green-600"
         />
         <RankList
           title="Top 10 que mais votaram contra"
           rows={bottom}
           candSet={candSet}
           femSet={femSet}
+          accent="border-red-600"
         />
       </section>
 
       {/* Resumo das votações que compõem a política */}
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
+      <div className="border-l-4 border-slate-300 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-800">
           Resumo das votações
         </h2>
         {pol.description && (
-          <p className="mt-2 max-w-3xl whitespace-pre-line text-lg leading-relaxed text-slate-600">
+          <p className="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-slate-600">
             {pol.description}
           </p>
         )}
       </div>
 
       {/* Votações que compõem a política */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-800">
+      <section className="border-l-4 border-slate-300 bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold text-slate-800">
           Votações consideradas ({divs.length})
         </h2>
-        <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+        <div className="divide-y divide-slate-100">
           {divs.map((d) => (
-            <div key={d.division_id} className="flex items-start justify-between gap-4 p-4">
+            <div key={d.division_id} className="flex items-start justify-between gap-4 py-3">
               <div className="min-w-0 flex-1">
                 {d.prop_sigla && (
                   <p className="text-sm font-semibold text-brand">
@@ -309,78 +316,12 @@ export default async function PolicyPage({
       </section>
 
       {/* Ranking por partido */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-800">
+      <section className="border-l-4 border-slate-300 bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold text-slate-800">
           Posição por partido
         </h2>
         <PartyTable parties={parties} />
       </section>
-    </div>
-  );
-}
-
-function RankList({
-  title,
-  rows,
-  candSet,
-  femSet,
-}: {
-  title: string;
-  rows: ScoreNamed[];
-  candSet: Set<number>;
-  femSet: Set<number>;
-}) {
-  return (
-    <div>
-      <h3 className="mb-2 font-semibold text-slate-700">{title}</h3>
-      <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
-        {rows.map((r) => (
-          <Link
-            key={r.person_id}
-            href={`/pessoas/${r.person_id}`}
-            className="flex items-center justify-between gap-2 p-3 hover:bg-slate-50 sm:gap-3"
-          >
-            <span className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-              <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-100">
-                {r.photo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={r.photo_url}
-                    alt={r.person_name}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-sm text-slate-400">
-                    {r.person_name?.[0]}
-                  </span>
-                )}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-1.5">
-                  {/* nomeCurto mantem todas as linhas com a mesma cara: nome
-                      grande vira "Primeiro Segundo.." em vez de espremer a
-                      caixinha de posicao ao lado. */}
-                  <span className="truncate text-sm font-medium text-slate-700">
-                    {nomeCurto(r.person_name)}
-                  </span>
-                  {candSet.has(r.person_id) && (
-                    <SeloCandidato size="xs" feminino={femSet.has(r.person_id)} />
-                  )}
-                </span>
-                <span className="block truncate text-xs text-slate-400">
-                  {r.party_sigla ?? "-"}
-                  {r.uf ? ` · ${r.uf}` : ""}
-                </span>
-              </span>
-            </span>
-            <ScoreBadge score={r.score} category={r.category} small />
-          </Link>
-        ))}
-        {rows.length === 0 && (
-          <p className="p-3 text-sm text-slate-500">Sem dados.</p>
-        )}
-      </div>
     </div>
   );
 }

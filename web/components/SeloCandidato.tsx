@@ -11,6 +11,9 @@
  * altura onde a palavra fica, e 44,9px. Mexer na fonte sem mexer no diametro
  * corta a palavra. Por isso o tamanho `xs`, usado em listas densas, mostra so
  * o ano — a palavra nao caberia legivel — e o significado fica no title.
+ * O `xs` tem 34px e nao pode encolher: "2026" em 11px mede 31px, e a corda util
+ * de um circulo de 30px (menos o aro de 2px) e so 26px — testado, corta o ano.
+ * Para diminuir o selo e preciso diminuir a fonte do ano junto.
  */
 export default function SeloCandidato({
   size = "md",

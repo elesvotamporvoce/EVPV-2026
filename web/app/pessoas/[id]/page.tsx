@@ -246,7 +246,10 @@ export default async function PersonPage({
       {/* Cabeçalho (o wrapper cria um fundo cheio para o conteúdo não aparecer
           nas bordas da caixa durante o scroll) */}
       <div className="sticky top-[58px] z-20 -mx-4 bg-slate-50 px-4 pb-2 pt-3">
-      <div className="relative rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      {/* pb menor que o resto do padding: fechado, o "Mais informações" fica
+          colado no fim da caixa (o respiro que sobra vem do proprio details).
+          Aberto, quem devolve o espaco e o pb-3 do conteudo la embaixo. */}
+      <div className="relative rounded-lg border border-slate-200 bg-white px-5 pb-2 pt-5 shadow-sm">
         {cand && (
           <Link
             href="/eleicoes-2026"
@@ -313,7 +316,7 @@ export default async function PersonPage({
                   />
                 </svg>
               </summary>
-              <div className="mt-1.5 space-y-1.5 text-center">
+              <div className="mt-1.5 space-y-1.5 pb-3 text-center">
                 {cand && cand.patrimonio_total != null && (
                   <p className="text-sm text-slate-500">
                     Patrimônio declarado (candidatura 2026):{" "}

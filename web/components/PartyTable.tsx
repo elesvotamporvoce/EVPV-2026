@@ -9,8 +9,10 @@ export default function PartyTable({ parties }: { parties: PartyPolicyAgreement[
   const [all, setAll] = useState(false);
   const rows = all ? parties : parties.slice(0, 10);
   return (
-    <div className="max-w-3xl">
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+    // sem max-w: a tabela acompanha a largura da caixa que a envolve, igual as
+    // outras secoes da pagina da politica
+    <div>
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
