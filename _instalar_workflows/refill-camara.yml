@@ -1,0 +1,45 @@
+name: Reingerir Camara 2020-2022 (conserto do buraco)
+
+# Re-baixa os arquivos anuais da Camara e reingere as votacoes nominais
+# faltantes de 2020-2022 (o backfill original ficou pela metade nesse periodo).
+# Idempotente: so adiciona o que falta. Depois liga assunto e tema aos votos novos.
+on:
+  workflow_dispatch:
+    inputs:
+      anos:
+        description: "Anos a reingerir (separados por espaco)"
+        required: true
+        default: "2020 2021 2022"
+
+concurrency:
+  group: ingest-congresso
+  cancel-in-progress: false
+
+jobs:
+  refill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      - name: Reingerir votacoes da Camara
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ingest/ingest_camara_bulk.py --years ${{ github.event.inputs.anos }}
+
+      - name: Ligar assunto (proposicao) aos votos novos
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ingest/enrich_propositions.py
+
+      - name: Ligar tema aos projetos novos
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ingest/enrich_themes.py

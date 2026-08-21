@@ -1,0 +1,59 @@
+name: Backfill em massa (Camara + Senado)
+
+# Carga historica das duas casas a partir de 2019:
+#  - Camara: arquivos anuais em massa (rapido/confiavel)
+#  - Senado: endpoint /votacao (agora em lote), por periodo
+# Depois: filiacoes + scores. Roda sob demanda.
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Camara: anos separados por espaco"
+        required: false
+        default: "2019 2020 2021 2022 2023 2024 2025 2026"
+      senado_start:
+        description: "Senado: data inicial AAAA-MM-DD"
+        required: false
+        default: "2019-01-01"
+
+concurrency:
+  group: ingest-congresso
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90          # falha rapido em vez de queimar 6h
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      - name: Garantir schema (idempotente)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/apply_sql.py db/schema.sql db/views_agreement.sql db/views_policy_detail.sql
+
+      - name: Backfill Camara + Senado + filiacoes + scores
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          IN_YEARS: ${{ github.event.inputs.years }}
+          IN_SENADO_START: ${{ github.event.inputs.senado_start }}
+        run: |
+          set -euo pipefail
+          YEARS="${IN_YEARS:-2019 2020 2021 2022 2023 2024 2025 2026}"
+          SENADO_START="${IN_SENADO_START:-2019-01-01}"
+          HOJE="$(date -u +%F)"
+          echo "== Camara (arquivos anuais): $YEARS =="
+          python ingest/ingest_camara_bulk.py --years $YEARS
+          echo "== Senado ($SENADO_START .. $HOJE) =="
+          python ingest/ingest_senado.py --start "$SENADO_START" --end "$HOJE"
+          echo "== Derivar filiacoes =="
+          python scripts/apply_sql.py db/derive_memberships.sql
+          echo "== Recalcular scores =="
+          python scoring/score.py

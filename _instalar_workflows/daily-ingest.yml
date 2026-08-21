@@ -1,0 +1,77 @@
+name: Ingestão diária — Câmara + Senado
+
+# Cria/garante o schema, carrega as duas casas, deriva filiações e recalcula os
+# scores. Roda diariamente e também sob demanda (com datas opcionais).
+on:
+  schedule:
+    # 14:00 UTC ~ 11:00 no horário de Brasília. Cron do GitHub é sempre em UTC.
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Data inicial AAAA-MM-DD (opcional)"
+        required: false
+      end:
+        description: "Data final AAAA-MM-DD (opcional)"
+        required: false
+      plen_only:
+        description: "Camara: so Plenario? (true/false)"
+        required: false
+        default: "false"
+
+concurrency:
+  group: ingest-congresso
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r ingest/requirements.txt
+
+      - name: Garantir schema (idempotente)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/apply_sql.py db/schema.sql db/views_agreement.sql db/views_policy_detail.sql
+
+      - name: Ingestao + filiacoes + scores
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          IN_START: ${{ github.event.inputs.start }}
+          IN_END: ${{ github.event.inputs.end }}
+          IN_PLEN: ${{ github.event.inputs.plen_only }}
+        run: |
+          set -euo pipefail
+          START="$IN_START"
+          END="$IN_END"
+          # Sem datas (execucao agendada): pega os ultimos 3 dias ate hoje.
+          if [ -z "$START" ]; then START=$(date -u -d '3 days ago' +%F); fi
+          if [ -z "$END" ]; then END=$(date -u +%F); fi
+          FLAGS=""
+          if [ "$IN_PLEN" = "true" ]; then FLAGS="--plen-only"; fi
+          echo "== Camara: $START .. $END $FLAGS =="
+          python ingest/ingest_camara.py --start "$START" --end "$END" $FLAGS
+          echo "== Senado: $START .. $END =="
+          python ingest/ingest_senado.py --start "$START" --end "$END"
+          echo "== Derivar filiacoes =="
+          python scripts/apply_sql.py db/derive_memberships.sql
+          echo "== Recalcular agreement scores =="
+          python scoring/score.py
+
+      - name: Revalidar cache do site
+        env:
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+        run: |
+          if [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "::warning::REVALIDATE_SECRET nao configurado; cache expira sozinho em ate 15 min nas paginas principais."
+            exit 0
+          fi
+          curl -fsS "https://www.elesvotamporvoce.org/api/revalidate?secret=${REVALIDATE_SECRET}" \
+            && echo "" && echo "Cache revalidado."

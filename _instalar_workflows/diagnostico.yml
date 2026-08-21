@@ -1,0 +1,145 @@
+name: Diagnóstico da conexão com o banco
+
+# Roda sozinho, não grava nada e nunca imprime o secret.
+# Actions > "Diagnóstico da conexão com o banco" > Run workflow.
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Instalar psycopg2
+        run: pip install "psycopg2-binary>=2.9"
+
+      - name: Checar a DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python - <<'PY'
+          import os, sys
+
+          dsn = os.environ.get("DATABASE_URL", "")
+
+          def erro(titulo, *linhas):
+              print("::error::" + titulo)
+              for l in linhas:
+                  print("        " + l)
+              sys.exit(1)
+
+          print("=" * 62)
+          print(" 1) O secret chegou ate aqui?")
+          print("=" * 62)
+          if not dsn.strip():
+              erro("O secret DATABASE_URL nao existe, esta vazio, ou o nome esta diferente.",
+                   "Va em Settings > Secrets and variables > Actions.",
+                   "O nome tem que ser exatamente DATABASE_URL (maiusculas, com underline).",
+                   "Se o repositorio usa Environments, confira se o secret esta no lugar certo.")
+          print("   chegou, com %d caracteres." % len(dsn))
+
+          print()
+          print("=" * 62)
+          print(" 2) O formato esta valido?")
+          print("=" * 62)
+
+          if "[YOUR-PASSWORD]" in dsn:
+              erro("A string ainda tem o marcador [YOUR-PASSWORD].",
+                   "Voce copiou o modelo do painel sem trocar pela senha real.")
+
+          if not dsn.startswith(("postgresql://", "postgres://")):
+              erro("A string nao comeca com postgresql://",
+                   "Provavelmente foi colada so a senha, ou so o endereco.",
+                   "Pegue a URI inteira em Supabase > Connect.")
+
+          # Usamos o parse do proprio libpq (o mesmo que o driver faz na hora de
+          # conectar). O urlparse do Python NAO serve aqui: ele corta o userinfo
+          # no ULTIMO @ e o libpq corta no PRIMEIRO, entao uma senha com @ passa
+          # no urlparse e quebra na conexao real.
+          from psycopg2.extensions import parse_dsn
+          try:
+              p = parse_dsn(dsn)
+          except Exception as e:
+              linha = str(e).strip().splitlines()[0]
+              if "percent-encoded" in linha:
+                  erro("A senha tem um % solto.",
+                       "Dentro de uma URL, % precisa virar %25.",
+                       linha)
+              erro("Nao consegui interpretar a string.", linha)
+
+          host = p.get("host", "")
+          usuario = p.get("user", "")
+          porta = p.get("port", 5432)
+
+          if not host:
+              erro("Nao ha endereco de banco depois do @.",
+                   "Formato: postgresql://USUARIO:SENHA@HOST:5432/postgres")
+
+          if "@" in host:
+              erro("A SENHA tem um @ sem escapar.",
+                   "O driver corta a senha no primeiro @ e o resto vira endereco.",
+                   "Ele leu o host como: " + host,
+                   "Troque o @ da senha por %40 — ou, mais simples, gere uma senha",
+                   "nova sem caractere especial em Supabase > Settings > Database.")
+
+          if "." not in host:
+              erro("O host ficou '" + host + "', que nao parece endereco do Supabase.",
+                   "Se a senha tem / ou :, ela precisa ser codificada (/ vira %2F).")
+
+          # host, porta e usuario nao sao segredo; a senha nunca e impressa.
+          print("   host    : %s" % host)
+          print("   porta   : %s" % porta)
+          print("   usuario : %s" % usuario)
+          print("   formato ok.")
+
+          print()
+          print("=" * 62)
+          print(" 3) Conecta mesmo?")
+          print("=" * 62)
+          import psycopg2
+          try:
+              c = psycopg2.connect(dsn, connect_timeout=20)
+          except Exception as e:
+              linha = str(e).strip().splitlines()[0]
+              if "Network is unreachable" in linha or "could not translate host name" in linha:
+                  erro("A string esta certa, mas o runner nao alcanca esse endereco.",
+                       linha,
+                       "A conexao DIRETA do Supabase (db.<ref>.supabase.co) responde em IPv6,",
+                       "e o runner do GitHub so tem IPv4. Volte em Supabase > Connect e copie",
+                       "a URI do 'Session pooler' em vez da 'Direct connection'.")
+              if "password authentication failed" in linha:
+                  erro("Endereco certo, senha errada.",
+                       linha,
+                       "Gere uma senha nova em Supabase > Settings > Database > Reset database password",
+                       "e refaca o secret.")
+              erro("A string esta bem formada mas a conexao falhou.", linha)
+
+          cur = c.cursor()
+          cur.execute("select count(*) from person")
+          pessoas = cur.fetchone()[0]
+          cur.execute("select count(*) from division")
+          votacoes = cur.fetchone()[0]
+          cur.execute("select coalesce(max(occurred_at)::text, 'nenhuma') from division")
+          ultima = cur.fetchone()[0]
+          cur.execute("select count(sexo), count(*) from candidatura_2026")
+          com_sexo, total_cand = cur.fetchone()
+          c.close()
+
+          print("   conectou.")
+          print()
+          print("=" * 62)
+          print(" Resumo do banco")
+          print("=" * 62)
+          print("   parlamentares          : %d" % pessoas)
+          print("   votacoes               : %d" % votacoes)
+          print("   ultima votacao         : %s" % ultima)
+          print("   candidaturas com sexo  : %d de %d" % (com_sexo, total_cand))
+          print()
+          print("   Tudo certo. Pode usar Actions > 'Rodar tarefa'.")
+          PY
