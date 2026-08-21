@@ -19,6 +19,11 @@ try:
 except ImportError:
     requests = None
 
+try:
+    from curl_cffi import requests as curl_requests
+except ImportError:
+    curl_requests = None
+
 BASE = "https://divulgacandcontas.tse.jus.br/divulga/rest/v1"
 URL = f"{BASE}/eleicao/ordinarias"
 SITE = "https://divulgacandcontas.tse.jus.br/divulga/"
@@ -79,6 +84,32 @@ def por_requests(cabecalhos, aquecer):
         return False, f"{type(e).__name__}: {e}"
 
 
+def por_curl_cffi(aquecer):
+    """curl_cffi reproduz o aperto de mao TLS do Chrome. E o unico caminho que
+    passa por bloqueio feito pela assinatura do cliente (JA3)."""
+    if curl_requests is None:
+        return False, "curl_cffi nao instalado (pip install curl_cffi)"
+    try:
+        s = curl_requests.Session(impersonate="chrome")
+        s.headers.update(NAVEGADOR)
+        aviso = ""
+        if aquecer:
+            try:
+                h = s.get(SITE, timeout=30)
+                aviso = f" [home {h.status_code}, {len(s.cookies)} cookie(s)]"
+            except Exception as e:
+                aviso = f" [home falhou: {type(e).__name__}]"
+        r = s.get(URL, timeout=30)
+        if r.status_code == 200:
+            try:
+                return True, f"HTTP 200 — {resumo(r.json())}{aviso}"
+            except Exception:
+                return False, f"HTTP 200 mas nao veio JSON{aviso}"
+        return False, f"HTTP {r.status_code}{aviso}"
+    except Exception as e:
+        return False, f"{type(e).__name__}: {e}"
+
+
 VARIANTES = [
     ("1. urllib, User-Agent EVPV/1.0 (como era antes)",
      lambda: por_urllib({"User-Agent": "EVPV/1.0"})),
@@ -88,8 +119,12 @@ VARIANTES = [
      lambda: por_urllib(NAVEGADOR)),
     ("4. requests, cabecalho de navegador",
      lambda: por_requests(NAVEGADOR, aquecer=False)),
-    ("5. requests, sessao aquecida na home (e o que o ingest usa)",
+    ("5. requests, sessao aquecida na home",
      lambda: por_requests(NAVEGADOR, aquecer=True)),
+    ("6. curl_cffi com TLS de Chrome",
+     lambda: por_curl_cffi(aquecer=False)),
+    ("7. curl_cffi com TLS de Chrome + sessao aquecida (e o que o ingest usa)",
+     lambda: por_curl_cffi(aquecer=True)),
 ]
 
 
@@ -109,7 +144,7 @@ def main():
         print("Passaram:")
         for p in passou:
             print("   " + p)
-        if any(p.startswith(("4.", "5.")) for p in passou):
+        if any(p.startswith(("4.", "5.", "6.", "7.")) for p in passou):
             print("\nO ingest ja usa esse caminho. Pode rodar:")
             print("   python scripts/ingest_tse_2026.py")
         else:
@@ -117,15 +152,17 @@ def main():
             print("tenta requests primeiro e cai no urllib depois; deve funcionar.")
         return 0
 
-    print("TODAS falharam. Na ordem, o que verificar:")
-    print("  1. Abra no navegador:")
+    print("TODAS falharam, inclusive as com TLS de Chrome (6 e 7).")
+    print("Isso descarta cabecalho, cookie e assinatura de TLS: sobra o ENDERECO")
+    print("de onde o pedido sai. O que verificar, na ordem:")
+    print("  1. Abra no navegador, nesta mesma maquina:")
     print("     " + URL)
-    print("     Se ABRIR e mostrar JSON, o TSE esta bloqueando cliente automatizado")
-    print("     (fingerprint de TLS). Nesse caso nao ha ajuste de cabecalho que")
-    print("     resolva; costuma passar sozinho depois de algumas horas.")
-    print("  2. Se NAO abrir nem no navegador, o problema e a sua rede ou o TSE.")
-    print("     Desligue VPN/proxy e teste de outra conexao.")
-    print("  3. Rode este mesmo teste pelo GitHub Actions para comparar de outro IP.")
+    print("     Se ABRIR e mostrar JSON, o bloqueio e so contra programa.")
+    print("     Se NAO abrir, a rede inteira esta barrada (VPN/proxy? desligue).")
+    print("  2. Compare de outro lugar: rode este teste pelo GitHub Actions e na")
+    print("     sua maquina. Se so um dos dois passa, e bloqueio por IP.")
+    print("  3. Plano B sem API: o TSE publica os candidatos em arquivo aberto,")
+    print("     em outro endereco. Fale comigo que eu monto a ingestao por ali.")
     return 1
 
 

@@ -8,14 +8,22 @@ da maquina de casa quanto do runner do GitHub, enquanto a mesma URL aberta por
 um navegador devolvia JSON normal. Ou seja, o bloqueio nao e por IP nem por
 endpoint — e pelo formato do pedido.
 
-A estrategia aqui, em ordem:
+Em 21/08 o diagnostico mostrou que ate a HOME em HTML (/divulga/) volta 403
+para o runner — 0 cookies. Nao e filtro de cabecalho nem de cookie: o host
+recusa o cliente inteiro. Cabecalho de navegador com biblioteca Python nao
+resolve porque o aperto de mao TLS do OpenSSL tem uma assinatura (JA3)
+diferente da de um Chrome de verdade, e da para bloquear so por isso.
 
-  1. requests com SESSAO AQUECIDA. Antes de chamar a API, abrimos a pagina
-     normal do site (/divulga/). Se houver um WAF que so libera quem ja passou
-     pela pagina e carrega o cookie dele, esse passo resolve — e um navegador
-     faz exatamente isso sem ninguem perceber.
+Por isso a primeira estrategia usa curl_cffi, que reproduz o handshake do
+Chrome. As outras ficam como reserva, para o caso de o bloqueio mudar.
+
+Ordem das tentativas:
+
+  0. curl_cffi com impersonate="chrome" (assinatura TLS de Chrome real).
+  1. requests com SESSAO AQUECIDA: abre a home antes, para carregar o cookie
+     que um WAF costuma exigir.
   2. requests sem aquecer, so com cabecalho de navegador.
-  3. urllib com cabecalho de navegador (nao usa cookie; ultimo recurso).
+  3. urllib com cabecalho de navegador (ultimo recurso, sem cookie).
 
 Se nada passar, levanta SystemExit com uma explicacao em portugues em vez de
 despejar traceback.
@@ -29,6 +37,11 @@ try:
     import requests
 except ImportError:  # o requirements ja pede requests, mas nao custa
     requests = None
+
+try:
+    from curl_cffi import requests as curl_requests
+except ImportError:
+    curl_requests = None
 
 SITE = "https://divulgacandcontas.tse.jus.br/divulga/"
 
@@ -63,6 +76,43 @@ def sessao(aquecer=True):
         except Exception:
             pass  # se a home falhar, ainda tentamos a API
     return _sessao
+
+
+_sessao_curl = None
+
+
+def _via_curl_cffi(url, tries):
+    """Chrome de verdade no aperto de mao TLS. E o unico caminho que resolve
+    bloqueio por assinatura de cliente."""
+    global _sessao_curl
+    if curl_requests is None:
+        return None, "curl_cffi nao instalado (pip install curl_cffi)"
+    if _sessao_curl is None:
+        try:
+            _sessao_curl = curl_requests.Session(impersonate="chrome")
+            _sessao_curl.headers.update(CABECALHOS)
+            try:
+                _sessao_curl.get(SITE, timeout=30)  # aquece: pega cookie do WAF
+            except Exception:
+                pass
+        except Exception as e:
+            return None, f"nao abriu sessao: {type(e).__name__}: {e}"
+    for i in range(tries):
+        try:
+            r = _sessao_curl.get(url, timeout=40)
+            if r.status_code == 200:
+                return r.json(), None
+            if r.status_code == 403:
+                return None, "HTTP 403"
+            if r.status_code in (429, 500, 502, 503, 504) and i < tries - 1:
+                time.sleep(3 * (i + 1))
+                continue
+            return None, f"HTTP {r.status_code}"
+        except Exception as e:
+            if i == tries - 1:
+                return None, f"{type(e).__name__}: {e}"
+            time.sleep(2 * (i + 1))
+    return None, "sem resposta"
 
 
 def _via_requests(url, tries, aquecer):
@@ -110,6 +160,7 @@ def _via_urllib(url, tries):
 def get(url, tries=3):
     motivos = []
     for rotulo, fn in (
+        ("curl_cffi (TLS de Chrome)", lambda: _via_curl_cffi(url, tries)),
         ("requests com sessao aquecida", lambda: _via_requests(url, tries, True)),
         ("requests sem aquecer", lambda: _via_requests(url, tries, False)),
         ("urllib", lambda: _via_urllib(url, tries)),
@@ -123,7 +174,6 @@ def get(url, tries=3):
         "\nNao consegui falar com o TSE. O que cada tentativa devolveu:\n  " +
         "\n  ".join(motivos) +
         "\n\nURL: " + url +
-        "\n\nSe todas deram 403, o bloqueio e do WAF do TSE e nao adianta repetir."
-        "\nRode 'python scripts/testar_tse.py' — ele testa mais variacoes e diz"
-        "\nqual (se alguma) passa. Se nenhuma passar, so resta esperar: a API"
-        "\ncostuma voltar a aceitar cliente automatizado depois de um tempo.\n")
+        "\n\nSe todas deram 403, inclusive a do curl_cffi, o bloqueio nao e de"
+        "\ncabecalho nem de TLS — e do endereco de onde o pedido sai."
+        "\nRode 'python scripts/testar_tse.py' para o quadro completo.\n")
