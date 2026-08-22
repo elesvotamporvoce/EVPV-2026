@@ -4,14 +4,39 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// O `title` abaixo e o do NAVEGADOR e do Google: comeca pelo nome do site,
+// que e o que ajuda na busca. Ja o bloco openGraph e o que aparece quando
+// alguem cola o link no WhatsApp — e ali usamos a MESMA frase da capa, senao
+// quem clica chega numa pagina que fala outra coisa. Foi o que aconteceu:
+// o card dizia "Como seu deputado e senador votam de verdade?" e a home
+// dizia "Voce sabia que seu politico vota por voce?".
+// Se mudar a chamada da home (app/page.tsx), mude CHAMADA aqui tambem.
+const CHAMADA = "Você sabia que seu político vota por você?";
+const RESUMO =
+  "Você elege um deputado e um senador, eles votam sim ou não em projetos de " +
+  "lei, e o que passa vira regra para todo mundo. Veja como cada um votou, " +
+  "política por política, com dados oficiais da Câmara e do Senado.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.elesvotamporvoce.org"),
   title: {
     default: "Eles Votam por Você: como seu deputado e senador votam",
     template: "%s · Eles Votam por Você",
   },
-  description:
-    "Promessa não vira lei. Voto sim. Veja como cada deputado e senador vota no Congresso, política por política, com dados oficiais da Câmara e do Senado.",
+  description: RESUMO,
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "Eles Votam por Você",
+    url: "https://www.elesvotamporvoce.org",
+    title: CHAMADA,
+    description: RESUMO,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: CHAMADA,
+    description: RESUMO,
+  },
 };
 
 export default function RootLayout({
