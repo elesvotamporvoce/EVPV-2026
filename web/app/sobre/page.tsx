@@ -236,13 +236,19 @@ export default function SobrePage() {
           Como calculamos a presença?
         </h2>
         <p className="text-slate-600">
-          A presença mostra de quantas votações nominais da casa o parlamentar
-          participou durante o mandato. Para quem estreou junto com a
-          legislatura, contamos desde o primeiro dia dela; para quem chegou
-          depois (suplentes, por exemplo), desde o primeiro registro; para quem
-          já deixou o cargo ou está de licença, a contagem para no último
-          registro. Acima de 50% de ausência, o dado ganha destaque no perfil: o
-          papel de quem foi eleito é votar.
+          A presença mostra de quantas votações nominais do <strong>plenário</strong>{" "}
+          o parlamentar participou durante o mandato. Votação de comissão não
+          entra na conta: quem não é membro daquela comissão não podia votar
+          ali, e cobrar isso como falta seria injusto. Para quem estreou junto
+          com a legislatura, contamos desde o primeiro dia dela; para quem
+          chegou depois (suplentes, por exemplo), desde o primeiro registro;
+          para quem já deixou o cargo ou está de licença, a contagem para no
+          último registro. Votações que caíram dentro de uma licença registrada
+          saem do denominador. Quando há um período longo sem votos que nenhuma
+          licença explica, e esse período concentra muitas votações, preferimos
+          não publicar percentual nenhum a publicar um número injusto. Acima de
+          50% de ausência, o dado ganha destaque no perfil: o papel de quem foi
+          eleito é votar.
         </p>
       </section>
 

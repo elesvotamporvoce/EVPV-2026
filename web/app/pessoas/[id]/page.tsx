@@ -133,11 +133,6 @@ export default async function PersonPage({
       featuredRank(a.policy_name) - featuredRank(b.policy_name) ||
       b.score - a.score
   );
-  const presPct =
-    part && part.eligible > 0
-      ? Math.round((100 * part.n_votes) / part.eligible)
-      : null;
-
   // Presenca nas votacoes: calculada aqui porque agora mora dentro do
   // "Mais informacoes" do cabecalho, e nao mais numa secao no fim da pagina.
   const presenca =
@@ -277,7 +272,9 @@ export default async function PersonPage({
               </span>
             )}
           </span>
-          <div className="min-w-0">
+          {/* text-center: nome, cargo, partido e mandato ficam um embaixo do
+              outro e centralizados entre si, em vez de alinhados a esquerda */}
+          <div className="min-w-0 text-center">
             <h1 className="text-xl font-bold leading-tight text-slate-800 sm:text-2xl">
               {dir.name}
             </h1>
@@ -300,7 +297,7 @@ export default async function PersonPage({
         </div>
 
           {((cand && cand.patrimonio_total != null) || presenca) && (
-            <details className="group mt-2 border-t border-slate-100 pt-1.5 text-left">
+            <details className="group mt-2 border-t border-slate-100 pt-1.5">
               <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
                 Mais informações
                 <svg
@@ -326,7 +323,7 @@ export default async function PersonPage({
                   </p>
                 )}
                 {part && part.confiavel === false && (
-                  <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left">
+                  <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
                     <p className="text-sm font-semibold text-slate-800">
                       Presença nas votações
                     </p>
@@ -341,7 +338,7 @@ export default async function PersonPage({
                 )}
                 {presenca && (
                   <div
-                    className={`mt-2 rounded-lg border p-3 text-left ${
+                    className={`mt-2 rounded-lg border p-3 text-center ${
                       presenca.muito
                         ? "border-amber-300 bg-amber-50"
                         : "border-slate-200 bg-slate-50"
@@ -380,8 +377,9 @@ export default async function PersonPage({
                       </p>
                     )}
                     <p className="mt-1.5 text-xs text-slate-400">
-                      Conta as votações nominais da casa no período em que a
-                      pessoa estava em exercício; votos secretos contam como
+                      Conta as votações nominais do PLENÁRIO no período em que
+                      a pessoa estava em exercício (votação de comissão não
+                      entra: quem não é membro não podia votar lá); votos secretos contam como
                       participação. Uma sessão costuma ter várias votações, então
                       este número é bem maior que o de dias de trabalho. Critério
                       completo em{" "}

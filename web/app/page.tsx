@@ -125,10 +125,15 @@ async function getData() {
         const person = fById.get(h.person_id);
         if (!person) return [];
         const pr = fPart.get(h.person_id);
+        // MESMA regra da pagina do parlamentar: quando ha um buraco longo sem
+        // votar que nenhuma licenca explica, o denominador nao e confiavel e o
+        // numero NAO aparece. Sem esta linha o card dizia "votou em 1.079 de
+        // 1.594" para quem o perfil, dois cliques depois, dizia nao ter dado.
+        const mostrar = pr != null && pr.confiavel !== false && pr.eligible >= 10;
         return [{
           person,
-          nVotes: pr ? pr.n_votes : null,
-          eligible: pr ? pr.eligible : null,
+          nVotes: mostrar ? pr!.n_votes : null,
+          eligible: mostrar ? pr!.eligible : null,
         }];
       });
     }
